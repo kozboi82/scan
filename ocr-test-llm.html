@@ -224,7 +224,13 @@
                             },
                             {
                                 type: 'text',
-                                text: 'Extract the serial number (S/N) from this image. Return ONLY the serial number, nothing else. If there are multiple serial numbers, return the main product serial number.'
+                                text: `Analyze this image and extract serial number information. Check for:
+1. QR Code - if visible, read the text printed near/below it (you cannot decode QR pattern itself)
+2. Barcode - if visible, read the text printed below it
+3. Text S/N - look for "S/N", "Serial", "SN:" labels and the value next to them
+
+Respond in this exact JSON format only:
+{"qr_text":"value or null","barcode_text":"value or null","sn_text":"value or null","final_serial":"your best guess","match":true or false,"notes":"brief explanation"}`
                             }
                         ]
                     }]
@@ -257,7 +263,13 @@
                             },
                             {
                                 type: 'text',
-                                text: 'Extract the serial number (S/N) from this image. Return ONLY the serial number, nothing else. If there are multiple serial numbers, return the main product serial number.'
+                                text: `Analyze this image and extract serial number information. Check for:
+1. QR Code - if visible, read the text printed near/below it (you cannot decode QR pattern itself)
+2. Barcode - if visible, read the text printed below it
+3. Text S/N - look for "S/N", "Serial", "SN:" labels and the value next to them
+
+Respond in this exact JSON format only:
+{"qr_text":"value or null","barcode_text":"value or null","sn_text":"value or null","final_serial":"your best guess","match":true or false,"notes":"brief explanation"}`
                             }
                         ]
                     }]
@@ -295,10 +307,39 @@
 
                 const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
 
-                // LLM은 시리얼만 반환하도록 프롬프트 했으므로 그대로 사용
-                const serial = text.trim().replace(/[^A-Z0-9\-]/gi, '');
-                serialEl.textContent = serial || '(Not found)';
-                rawResultEl.textContent = text || '(No response)';
+                // JSON 파싱 시도
+                let parsed = null;
+                try {
+                    // JSON 부분만 추출
+                    const jsonMatch = text.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        parsed = JSON.parse(jsonMatch[0]);
+                    }
+                } catch (e) {
+                    console.log('JSON parse failed:', e);
+                }
+
+                if (parsed) {
+                    serialEl.textContent = parsed.final_serial || '(Not found)';
+
+                    // Raw 결과에 각각의 값 표시
+                    let rawOutput = '=== Detection Results ===\n\n';
+                    rawOutput += `[QR Text]     ${parsed.qr_text || '(없음)'}\n`;
+                    rawOutput += `[Barcode]     ${parsed.barcode_text || '(없음)'}\n`;
+                    rawOutput += `[S/N Text]    ${parsed.sn_text || '(없음)'}\n`;
+                    rawOutput += `\n=== Final Result ===\n`;
+                    rawOutput += `Serial: ${parsed.final_serial || '(없음)'}\n`;
+                    rawOutput += `Match: ${parsed.match ? '✓ 일치' : '✗ 불일치'}\n`;
+                    rawOutput += `Notes: ${parsed.notes || ''}\n`;
+                    rawOutput += `\n=== Raw Response ===\n${text}`;
+
+                    rawResultEl.textContent = rawOutput;
+                } else {
+                    // JSON 파싱 실패시 원본 표시
+                    serialEl.textContent = text.trim().replace(/[^A-Z0-9\-]/gi, '') || '(Not found)';
+                    rawResultEl.textContent = text || '(No response)';
+                }
+
                 status.textContent = 'Done!';
                 timeEl.textContent = `Time: ${elapsed}s`;
 
