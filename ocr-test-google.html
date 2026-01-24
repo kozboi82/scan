@@ -27,6 +27,7 @@
         .time { font-size: 12px; color: #888; margin-top: 10px; }
         .note { font-size: 11px; color: #888; margin-top: 10px; }
         .toggle-btn { float: right; font-size: 11px; background: #3d3d5c; border: none; color: #888; padding: 2px 8px; border-radius: 4px; cursor: pointer; }
+        .size-info { font-size: 11px; color: #4ecca3; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -42,6 +43,7 @@
         <label class="upload-area" for="fileInput">
             <div>Click or Drag Image</div>
             <img id="preview" alt="preview">
+            <div class="size-info" id="sizeInfo"></div>
         </label>
         <input type="file" id="fileInput" accept="image/*" capture="environment">
 
@@ -72,11 +74,58 @@
         const status = document.getElementById('status');
         const timeEl = document.getElementById('time');
         const apiKeyInput = document.getElementById('apiKey');
+        const sizeInfo = document.getElementById('sizeInfo');
 
         let imageBase64 = null;
 
         function toggleRaw() {
             rawResultEl.style.display = rawResultEl.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // 이미지 리사이즈 함수
+        function resizeImage(file, maxWidth = 1280) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        // 리사이즈 필요 여부 확인
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // JPEG로 압축 (품질 0.8)
+                        const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        const base64 = resizedDataUrl.split(',')[1];
+
+                        // 크기 계산
+                        const originalSize = (file.size / 1024).toFixed(1);
+                        const newSize = (base64.length * 0.75 / 1024).toFixed(1);
+
+                        resolve({
+                            dataUrl: resizedDataUrl,
+                            base64: base64,
+                            originalSize: originalSize,
+                            newSize: newSize,
+                            width: width,
+                            height: height
+                        });
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
         }
 
         // 시리얼 번호 추출 함수
@@ -86,18 +135,15 @@
             const lines = text.split('\n').map(l => l.trim()).filter(l => l);
             let candidates = [];
 
-            // 1. "SN", "S/N", "Serial" 라벨 뒤의 값 찾기
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i];
                 const lineUpper = line.toUpperCase();
 
-                // 같은 줄에 SN: 값 형태
                 const snMatch = line.match(/(?:S\/N|SN|Serial(?:\s*No)?)[:\s]+([A-Z0-9\-]{6,})/i);
                 if (snMatch) {
                     candidates.push({ value: snMatch[1], priority: 1 });
                 }
 
-                // "SN" 만 있는 줄이면 다음 줄이 시리얼
                 if (/^(SN|S\/N|Serial)$/i.test(lineUpper) && i + 1 < lines.length) {
                     const nextLine = lines[i + 1].trim();
                     if (/^[A-Z0-9\-]{8,}$/i.test(nextLine)) {
@@ -106,17 +152,11 @@
                 }
             }
 
-            // 2. 제조사별 패턴
             const patterns = [
-                // LG: 숫자+LG+영문숫자 (예: 40LGD5K202209000098)
                 /\b(\d{2,3}LG[A-Z0-9]{10,})\b/gi,
-                // Samsung: 시리얼 패턴
                 /\b([A-Z]{2,4}[0-9]{2}[A-Z0-9]{8,})\b/gi,
-                // Dell: 서비스태그 7자리
                 /\b([A-Z0-9]{7})\b/g,
-                // HP: 3글자+숫자+영숫자
                 /\b([A-Z]{3}[0-9][A-Z0-9]{6,})\b/gi,
-                // 일반: 영문+숫자 혼합 10자리 이상
                 /\b([A-Z]+[0-9]+[A-Z0-9]{8,})\b/gi,
                 /\b([0-9]+[A-Z]+[A-Z0-9]{8,})\b/gi,
             ];
@@ -132,7 +172,6 @@
                 }
             }
 
-            // 3. 가장 긴 영숫자 조합 (fallback) - 영문+숫자 혼합만
             const allAlphaNum = text.match(/[A-Z0-9]{10,}/gi);
             if (allAlphaNum) {
                 for (const m of allAlphaNum) {
@@ -144,7 +183,6 @@
 
             if (candidates.length === 0) return null;
 
-            // 우선순위 정렬 (낮은 priority 우선, 같으면 긴 것 우선)
             candidates.sort((a, b) => {
                 if (a.priority !== b.priority) return a.priority - b.priority;
                 return b.value.length - a.value.length;
@@ -160,26 +198,26 @@
             localStorage.setItem('google_vision_api_key', apiKeyInput.value);
         });
 
-        fileInput.addEventListener('change', (e) => {
+        fileInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const dataUrl = e.target.result;
-                imageBase64 = dataUrl.split(',')[1];
-                preview.src = dataUrl;
-                preview.style.display = 'block';
-                scanBtn.disabled = false;
-                serialEl.textContent = '-';
-                rawResultEl.textContent = 'Ready to scan...';
-                status.textContent = '';
-                timeEl.textContent = '';
+            status.textContent = 'Resizing image...';
 
-                // 자동 스캔 시작
-                setTimeout(() => scanBtn.click(), 100);
-            };
-            reader.readAsDataURL(file);
+            const resized = await resizeImage(file, 1280);
+
+            imageBase64 = resized.base64;
+            preview.src = resized.dataUrl;
+            preview.style.display = 'block';
+            sizeInfo.textContent = `${resized.originalSize}KB → ${resized.newSize}KB (${resized.width}x${resized.height})`;
+            scanBtn.disabled = false;
+            serialEl.textContent = '-';
+            rawResultEl.textContent = 'Ready to scan...';
+            status.textContent = '';
+            timeEl.textContent = '';
+
+            // 자동 스캔 시작
+            setTimeout(() => scanBtn.click(), 100);
         });
 
         scanBtn.addEventListener('click', async () => {
