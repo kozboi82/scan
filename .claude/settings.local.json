@@ -3,7 +3,10 @@
     "allow": [
       "WebFetch(domain:scanapp.org)",
       "Bash(git checkout:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git rm:*)"
     ]
   }
 }
