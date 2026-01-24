@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:scanapp.org)"
+      "WebFetch(domain:scanapp.org)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)"
     ]
   }
 }
