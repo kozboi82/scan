@@ -157,6 +157,9 @@
                 rawResultEl.textContent = 'Ready to scan...';
                 status.textContent = '';
                 timeEl.textContent = '';
+
+                // 자동 스캔 시작
+                setTimeout(() => scanBtn.click(), 100);
             };
             reader.readAsDataURL(file);
         });
