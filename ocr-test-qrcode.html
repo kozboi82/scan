@@ -125,26 +125,50 @@
             stopCameraScanner();
         });
 
-        // File input handler (문서 예제 그대로)
-        fileInput.addEventListener('change', e => {
+        // HEIC 등 모든 이미지를 JPEG로 변환
+        function convertToJpeg(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+
+                        canvas.toBlob(blob => {
+                            const jpegFile = new File([blob], 'converted.jpg', { type: 'image/jpeg' });
+                            resolve({ file: jpegFile, dataUrl: canvas.toDataURL('image/jpeg', 0.9) });
+                        }, 'image/jpeg', 0.9);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // File input handler
+        fileInput.addEventListener('change', async e => {
             if (e.target.files.length == 0) return;
 
-            const imageFile = e.target.files[0];
+            const originalFile = e.target.files[0];
+            statusEl.textContent = 'Converting image...';
+            resultEl.textContent = '...';
+
+            // 이미지 변환 (HEIC 포함 모든 포맷 → JPEG)
+            const { file: jpegFile, dataUrl } = await convertToJpeg(originalFile);
 
             // Show preview
-            const reader = new FileReader();
-            reader.onload = evt => {
-                filePreview.src = evt.target.result;
-                filePreview.style.display = 'block';
-            };
-            reader.readAsDataURL(imageFile);
+            filePreview.src = dataUrl;
+            filePreview.style.display = 'block';
 
             // Scan
             statusEl.textContent = 'Scanning...';
-            resultEl.textContent = '...';
 
             html5QrCode = new Html5Qrcode("file-section");
-            html5QrCode.scanFile(imageFile, true)
+            html5QrCode.scanFile(jpegFile, false)
                 .then(decodedText => {
                     resultEl.textContent = decodedText;
                     statusEl.textContent = 'Scan successful!';
