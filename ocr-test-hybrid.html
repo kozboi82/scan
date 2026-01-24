@@ -60,7 +60,7 @@
         <h1><span class="method-badge">Hybrid</span> QR + Barcode + OCR</h1>
 
         <div class="priority-info">
-            <strong>병렬 처리:</strong> QR/바코드 (html5-qrcode, 로컬) + OCR (Google Vision API)
+            <strong>병렬 처리:</strong> QR (html5-qrcode, 로컬) + OCR (Google Vision API)
         </div>
 
         <div class="api-key-section">
@@ -82,7 +82,7 @@
 
         <div id="status"></div>
         <div class="processing-info" id="processingInfo" style="display:none; text-align:center; margin-bottom:15px;">
-            <span id="qrStatus">QR/Barcode: 처리중...</span>
+            <span id="qrStatus">QR: 처리중...</span>
             <span id="ocrStatus">OCR: 처리중...</span>
         </div>
         <button class="btn" id="scanBtn" disabled>Scan</button>
@@ -188,19 +188,15 @@
             });
         }
 
-        // html5-qrcode로 QR/바코드 스캔 (이미지 파일에서)
+        // html5-qrcode로 QR 스캔 (이미지 파일에서)
         async function scanQRFromFile(file) {
-            return new Promise((resolve) => {
+            try {
                 const html5QrCode = new Html5Qrcode("temp-qr-reader", { verbose: false });
-
-                html5QrCode.scanFile(file, true)
-                    .then(decodedText => {
-                        resolve({ success: true, text: decodedText });
-                    })
-                    .catch(err => {
-                        resolve({ success: false, error: err });
-                    });
-            });
+                const result = await html5QrCode.scanFile(file, true);
+                return { success: true, text: result };
+            } catch (err) {
+                return { success: false, error: err };
+            }
         }
 
         // 시리얼 번호 추출 함수 (OCR용)
@@ -308,7 +304,7 @@
             scanBtn.disabled = true;
             status.textContent = 'Scanning...';
             processingInfo.style.display = 'block';
-            qrStatusEl.innerHTML = '<span class="pending">QR/Barcode: 처리중...</span>';
+            qrStatusEl.innerHTML = '<span class="pending">QR: 처리중...</span>';
             ocrStatusEl.innerHTML = '<span class="pending">OCR: 처리중...</span>';
             serialList.innerHTML = '<div class="serial-item"><span class="serial-value">...</span></div>';
             verificationStatus.style.display = 'none';
@@ -323,11 +319,11 @@
             const qrPromise = scanQRFromFile(currentFile).then(result => {
                 if (result.success) {
                     qrValue = result.text;
-                    details.push(`[QR/Barcode - html5-qrcode] ${result.text}`);
-                    qrStatusEl.innerHTML = '<span class="check">✓ QR/Barcode: 완료</span>';
+                    details.push(`[QR - html5-qrcode] ${result.text}`);
+                    qrStatusEl.innerHTML = '<span class="check">✓ QR: 인식됨</span>';
                 } else {
-                    details.push(`[QR/Barcode] 미인식`);
-                    qrStatusEl.innerHTML = '<span class="check">✓ QR/Barcode: 미인식</span>';
+                    details.push(`[QR] 미인식`);
+                    qrStatusEl.innerHTML = '<span class="check">✓ QR: 미인식</span>';
                 }
                 return result;
             });
@@ -377,19 +373,19 @@
             let html = '';
             const values = [];
 
-            // QR/Barcode
+            // QR
             if (qrValue) {
                 values.push(qrValue.toUpperCase().replace(/[^A-Z0-9]/g, ''));
                 html += `
                     <div class="serial-item">
                         <span class="serial-value">${qrValue}</span>
-                        <span class="method-tag method-qr">QR/Barcode</span>
+                        <span class="method-tag method-qr">QR</span>
                     </div>`;
             } else {
                 html += `
                     <div class="serial-item">
                         <span class="serial-value no-detect">(미인식)</span>
-                        <span class="method-tag method-qr">QR/Barcode</span>
+                        <span class="method-tag method-qr">QR</span>
                     </div>`;
             }
 
