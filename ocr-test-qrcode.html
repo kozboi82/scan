@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR/Barcode Scanner</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 20px; color: #4ecca3; }
+
+        .scan-type { display: flex; gap: 10px; margin-bottom: 20px; }
+        .scan-type button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .scan-type button.active { background: #4ecca3; color: #1a1a2e; }
+        .scan-type button:not(.active) { background: #2d2d44; color: #888; }
+
+        #reader { width: 100%; min-height: 300px; background: #2d2d44; border-radius: 12px; }
+
+        .file-section { display: none; }
+        .file-section.active { display: block; }
+        .file-input-wrapper { background: #2d2d44; border: 2px dashed #4ecca3; border-radius: 12px; padding: 40px; text-align: center; cursor: pointer; }
+        .file-input-wrapper:hover { background: #3d3d5c; }
+        #qr-input-file { display: none; }
+        #file-preview { max-width: 100%; max-height: 300px; margin-top: 20px; border-radius: 8px; display: none; }
+
+        .result { background: #2d2d44; border-radius: 12px; padding: 20px; margin-top: 20px; }
+        .result-title { color: #888; font-size: 14px; margin-bottom: 10px; }
+        .result-value { font-family: Consolas, monospace; font-size: 20px; color: #4ecca3; word-break: break-all; }
+        #status { color: #ffd93d; margin-top: 10px; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>QR/Barcode Scanner</h1>
+
+        <div class="scan-type">
+            <button id="btn-camera" class="active">Camera</button>
+            <button id="btn-file">File Upload</button>
+        </div>
+
+        <!-- Camera Section -->
+        <div id="camera-section">
+            <div id="reader"></div>
+        </div>
+
+        <!-- File Section -->
+        <div id="file-section" class="file-section">
+            <label class="file-input-wrapper" for="qr-input-file">
+                <div>Click to select image</div>
+            </label>
+            <input type="file" id="qr-input-file" accept="image/*">
+            <img id="file-preview" alt="preview">
+        </div>
+
+        <div class="result">
+            <div class="result-title">Result</div>
+            <div class="result-value" id="result">-</div>
+            <div id="status"></div>
+        </div>
+    </div>
+
+    <script>
+        const resultEl = document.getElementById('result');
+        const statusEl = document.getElementById('status');
+        const btnCamera = document.getElementById('btn-camera');
+        const btnFile = document.getElementById('btn-file');
+        const cameraSection = document.getElementById('camera-section');
+        const fileSection = document.getElementById('file-section');
+        const fileInput = document.getElementById('qr-input-file');
+        const filePreview = document.getElementById('file-preview');
+
+        let html5QrcodeScanner = null;
+        let html5QrCode = null;
+
+        // Camera scan callbacks
+        function onScanSuccess(decodedText, decodedResult) {
+            resultEl.textContent = decodedText;
+            statusEl.textContent = 'Scan successful!';
+        }
+
+        function onScanFailure(error) {
+            // ignore
+        }
+
+        // Start camera scanner
+        function startCameraScanner() {
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "reader",
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                false
+            );
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        }
+
+        // Stop camera scanner
+        function stopCameraScanner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear();
+                html5QrcodeScanner = null;
+            }
+        }
+
+        // Switch to camera mode
+        btnCamera.addEventListener('click', () => {
+            btnCamera.classList.add('active');
+            btnFile.classList.remove('active');
+            cameraSection.style.display = 'block';
+            fileSection.classList.remove('active');
+            resultEl.textContent = '-';
+            statusEl.textContent = '';
+            startCameraScanner();
+        });
+
+        // Switch to file mode
+        btnFile.addEventListener('click', () => {
+            btnFile.classList.add('active');
+            btnCamera.classList.remove('active');
+            fileSection.classList.add('active');
+            cameraSection.style.display = 'none';
+            resultEl.textContent = '-';
+            statusEl.textContent = '';
+            filePreview.style.display = 'none';
+            stopCameraScanner();
+        });
+
+        // HEIC 등 모든 이미지를 JPEG로 변환
+        function convertToJpeg(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+
+                        canvas.toBlob(blob => {
+                            const jpegFile = new File([blob], 'converted.jpg', { type: 'image/jpeg' });
+                            resolve({ file: jpegFile, dataUrl: canvas.toDataURL('image/jpeg', 0.9) });
+                        }, 'image/jpeg', 0.9);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // File input handler
+        fileInput.addEventListener('change', async e => {
+            if (e.target.files.length == 0) return;
+
+            const originalFile = e.target.files[0];
+            statusEl.textContent = 'Converting image...';
+            resultEl.textContent = '...';
+
+            // 이미지 변환 (HEIC 포함 모든 포맷 → JPEG)
+            const { file: jpegFile, dataUrl } = await convertToJpeg(originalFile);
+
+            // Show preview
+            filePreview.src = dataUrl;
+            filePreview.style.display = 'block';
+
+            // Scan
+            statusEl.textContent = 'Scanning...';
+
+            html5QrCode = new Html5Qrcode("file-section");
+            html5QrCode.scanFile(jpegFile, false)
+                .then(decodedText => {
+                    resultEl.textContent = decodedText;
+                    statusEl.textContent = 'Scan successful!';
+                })
+                .catch(err => {
+                    resultEl.textContent = '(Not found)';
+                    statusEl.textContent = `Error: ${err}`;
+                });
+        });
+
+        // Initialize with camera mode
+        startCameraScanner();
+    </script>
+</body>
+</html>
