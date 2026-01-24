@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OCR Test - html5-qrcode</title>
+    <title>OCR Test - QR/Barcode Scanner</title>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -11,6 +11,10 @@
         .container { max-width: 600px; margin: 0 auto; }
         h1 { text-align: center; margin-bottom: 20px; color: #4ecca3; font-size: 18px; }
         .method-badge { background: #10b981; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        .info-box { background: #2d2d44; border-radius: 12px; padding: 15px; margin-bottom: 20px; font-size: 12px; color: #888; }
+        .info-box strong { color: #10b981; }
+        .format-list { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+        .format-tag { font-size: 10px; padding: 2px 6px; background: #1a1a2e; border-radius: 4px; color: #4ecca3; }
         .upload-area { background: #2d2d44; border: 2px dashed #4ecca3; border-radius: 12px; padding: 40px; text-align: center; margin-bottom: 20px; cursor: pointer; }
         .upload-area:hover { background: #3d3d5c; }
         input[type="file"] { display: none; }
@@ -23,6 +27,10 @@
         .result-box { background: #2d2d44; border-radius: 12px; padding: 20px; margin-bottom: 15px; }
         .result-title { font-size: 14px; color: #888; margin-bottom: 10px; }
         .serial-result { font-family: Consolas, monospace; font-size: 24px; color: #4ecca3; text-align: center; padding: 20px; background: #1a1a2e; border-radius: 8px; word-break: break-all; }
+        .format-detected { text-align: center; margin-top: 10px; }
+        .format-detected span { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .format-qr { background: #8b5cf6; }
+        .format-barcode { background: #3b82f6; }
         .raw-result { font-family: Consolas, monospace; font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; color: #888; max-height: 200px; overflow-y: auto; }
         #status { text-align: center; color: #ffd93d; margin-bottom: 15px; }
         .time { font-size: 12px; color: #888; margin-top: 10px; }
@@ -31,8 +39,6 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
         .modal img { max-width: 95%; max-height: 85%; object-fit: contain; }
         .modal-close { position: absolute; top: 15px; right: 20px; color: #fff; font-size: 32px; cursor: pointer; z-index: 1001; }
-        .info-box { background: #2d2d44; border-radius: 12px; padding: 15px; margin-bottom: 20px; font-size: 12px; color: #888; }
-        .info-box strong { color: #10b981; }
     </style>
 </head>
 <body>
@@ -41,7 +47,18 @@
 
         <div class="info-box">
             <strong>특징:</strong> 로컬에서 처리 (API 불필요, 무료)<br>
-            <strong>지원:</strong> QR Code, Code128, Code39, EAN, UPC 등
+            <strong>지원 포맷:</strong>
+            <div class="format-list">
+                <span class="format-tag">QR Code</span>
+                <span class="format-tag">Code 128</span>
+                <span class="format-tag">Code 39</span>
+                <span class="format-tag">EAN-13</span>
+                <span class="format-tag">EAN-8</span>
+                <span class="format-tag">UPC-A</span>
+                <span class="format-tag">UPC-E</span>
+                <span class="format-tag">ITF</span>
+                <span class="format-tag">Codabar</span>
+            </div>
         </div>
 
         <label class="upload-area" for="fileInput" id="uploadArea">
@@ -61,6 +78,7 @@
         <div class="result-box">
             <div class="result-title">Result</div>
             <div class="serial-result" id="serial">-</div>
+            <div class="format-detected" id="formatDetected"></div>
             <div class="time" id="time"></div>
         </div>
 
@@ -78,20 +96,56 @@
         <img id="modalImage" src="" alt="full size">
     </div>
 
-    <!-- html5-qrcode용 숨겨진 요소 -->
-    <div id="temp-qr-reader" style="display:none;"></div>
+    <!-- html5-qrcode 렌더링용 숨겨진 요소 -->
+    <div id="qr-reader" style="display:none;"></div>
 
     <script>
         const fileInput = document.getElementById('fileInput');
         const preview = document.getElementById('preview');
         const scanBtn = document.getElementById('scanBtn');
         const serialEl = document.getElementById('serial');
+        const formatDetectedEl = document.getElementById('formatDetected');
         const rawResultEl = document.getElementById('rawResult');
         const status = document.getElementById('status');
         const timeEl = document.getElementById('time');
         const sizeInfo = document.getElementById('sizeInfo');
 
         let currentFile = null;
+
+        // 지원할 포맷 명시적 설정
+        const supportedFormats = [
+            Html5QrcodeSupportedFormats.QR_CODE,
+            Html5QrcodeSupportedFormats.CODE_128,
+            Html5QrcodeSupportedFormats.CODE_39,
+            Html5QrcodeSupportedFormats.CODE_93,
+            Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.EAN_8,
+            Html5QrcodeSupportedFormats.UPC_A,
+            Html5QrcodeSupportedFormats.UPC_E,
+            Html5QrcodeSupportedFormats.ITF,
+            Html5QrcodeSupportedFormats.CODABAR
+        ];
+
+        // 포맷 이름 매핑
+        const formatNames = {
+            0: 'QR Code',
+            1: 'Aztec',
+            2: 'Codabar',
+            3: 'Code 39',
+            4: 'Code 93',
+            5: 'Code 128',
+            6: 'Data Matrix',
+            7: 'MaxiCode',
+            8: 'ITF',
+            9: 'EAN-13',
+            10: 'EAN-8',
+            11: 'PDF 417',
+            12: 'RSS-14',
+            13: 'RSS Expanded',
+            14: 'UPC-A',
+            15: 'UPC-E',
+            16: 'UPC/EAN Extension'
+        };
 
         function toggleRaw() {
             rawResultEl.style.display = rawResultEl.style.display === 'none' ? 'block' : 'none';
@@ -126,6 +180,7 @@
                 sizeInfo.textContent = `${(file.size / 1024).toFixed(1)}KB`;
                 scanBtn.disabled = false;
                 serialEl.textContent = '-';
+                formatDetectedEl.innerHTML = '';
                 rawResultEl.textContent = 'Ready to scan...';
                 status.textContent = '';
                 timeEl.textContent = '';
@@ -140,26 +195,44 @@
             if (!currentFile) return;
 
             scanBtn.disabled = true;
-            status.textContent = 'Scanning QR/Barcode...';
+            status.textContent = 'Scanning...';
             serialEl.textContent = '...';
+            formatDetectedEl.innerHTML = '';
             rawResultEl.textContent = '';
             const startTime = Date.now();
 
             try {
-                const html5QrCode = new Html5Qrcode("temp-qr-reader", { verbose: false });
+                // Html5Qrcode 인스턴스 생성 (포맷 지정 + 네이티브 API 사용)
+                const html5QrCode = new Html5Qrcode("qr-reader", {
+                    formatsToSupport: supportedFormats,
+                    verbose: false,
+                    useBarCodeDetectorIfSupported: true
+                });
 
-                const result = await html5QrCode.scanFile(currentFile, true);
+                // scanFileV2 사용하여 포맷 정보도 함께 획득
+                const result = await html5QrCode.scanFileV2(currentFile, false);
                 const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
 
-                serialEl.textContent = result;
-                rawResultEl.textContent = `Decoded Text: ${result}\n\nScan successful!`;
+                const decodedText = result.decodedText;
+                const format = result.result?.format;
+                const formatName = formatNames[format] || `Unknown (${format})`;
+                const isQR = format === 0;
+
+                serialEl.textContent = decodedText;
+                formatDetectedEl.innerHTML = `<span class="${isQR ? 'format-qr' : 'format-barcode'}">${formatName}</span>`;
+
+                rawResultEl.textContent = `Decoded Text: ${decodedText}\nFormat: ${formatName}\nFormat Code: ${format}\n\nScan successful!`;
                 status.textContent = 'Done!';
                 timeEl.textContent = `Time: ${elapsed}s`;
+
+                // 스캐너 정리
+                await html5QrCode.clear();
 
             } catch (err) {
                 const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
                 serialEl.textContent = '(Not found)';
-                rawResultEl.textContent = `Error: ${err}\n\nNo QR code or barcode detected in the image.`;
+                formatDetectedEl.innerHTML = '';
+                rawResultEl.textContent = `Error: ${err}\n\nNo QR code or barcode detected.\n\nTips:\n- 이미지가 선명한지 확인\n- QR/바코드가 잘 보이는지 확인\n- 조명이 충분한지 확인`;
                 status.textContent = 'Not detected';
                 timeEl.textContent = `Time: ${elapsed}s`;
             }
