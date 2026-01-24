@@ -14,7 +14,10 @@
         .upload-area { background: #2d2d44; border: 2px dashed #4ecca3; border-radius: 12px; padding: 40px; text-align: center; margin-bottom: 20px; cursor: pointer; }
         .upload-area:hover { background: #3d3d5c; }
         input[type="file"] { display: none; }
-        #preview { max-width: 100%; border-radius: 8px; margin-top: 15px; display: none; }
+        #preview { max-width: 100%; max-height: 120px; object-fit: contain; border-radius: 8px; margin-top: 10px; display: none; cursor: pointer; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
+        .modal img { max-width: 95%; max-height: 85%; object-fit: contain; }
+        .modal-close { position: absolute; top: 15px; right: 20px; color: #fff; font-size: 32px; cursor: pointer; z-index: 1001; }
         .btn { width: 100%; padding: 15px; background: #4ecca3; color: #1a1a2e; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
         .btn:disabled { background: #555; color: #888; cursor: not-allowed; }
         .result-box { background: #2d2d44; border-radius: 12px; padding: 20px; margin-bottom: 15px; }
@@ -56,6 +59,11 @@
         </div>
     </div>
 
+    <div class="modal" id="imageModal">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <img id="modalImage" src="" alt="full size">
+    </div>
+
     <script>
         const fileInput = document.getElementById('fileInput');
         const preview = document.getElementById('preview');
@@ -71,6 +79,17 @@
         function toggleRaw() {
             rawResultEl.style.display = rawResultEl.style.display === 'none' ? 'block' : 'none';
         }
+
+        function openModal(src) {
+            document.getElementById('modalImage').src = src;
+            document.getElementById('imageModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        preview.addEventListener('click', () => openModal(preview.src));
 
         // 이미지 리사이즈 함수
         function resizeImage(file, maxWidth = 1280) {
