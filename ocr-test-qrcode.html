@@ -3,192 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OCR Test - QR/Barcode Scanner</title>
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <title>QR/Barcode Scanner</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Malgun Gothic', sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; }
-        h1 { text-align: center; margin-bottom: 20px; color: #4ecca3; font-size: 18px; }
-        .method-badge { background: #10b981; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
-        .info-box { background: #2d2d44; border-radius: 12px; padding: 15px; margin-bottom: 20px; font-size: 12px; color: #888; }
-        .info-box strong { color: #10b981; }
-        .format-list { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
-        .format-tag { font-size: 10px; padding: 2px 6px; background: #1a1a2e; border-radius: 4px; color: #4ecca3; }
-        .upload-area { background: #2d2d44; border: 2px dashed #4ecca3; border-radius: 12px; padding: 40px; text-align: center; margin-bottom: 20px; cursor: pointer; }
-        .upload-area:hover { background: #3d3d5c; }
-        input[type="file"] { display: none; }
-        .preview-area { background: #2d2d44; border-radius: 12px; padding: 15px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
-        #preview { max-width: 120px; max-height: 100px; object-fit: contain; border-radius: 8px; cursor: pointer; flex-shrink: 0; }
-        .retake-btn { padding: 8px 16px; background: #3d3d5c; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; }
-        .retake-btn:hover { background: #4d4d6c; }
-        .btn { width: 100%; padding: 15px; background: #4ecca3; color: #1a1a2e; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
-        .btn:disabled { background: #555; color: #888; cursor: not-allowed; }
-        .result-box { background: #2d2d44; border-radius: 12px; padding: 20px; margin-bottom: 15px; }
-        .result-title { font-size: 14px; color: #888; margin-bottom: 10px; }
-        .serial-result { font-family: Consolas, monospace; font-size: 24px; color: #4ecca3; text-align: center; padding: 20px; background: #1a1a2e; border-radius: 8px; word-break: break-all; }
-        .format-detected { text-align: center; margin-top: 10px; }
-        .format-detected span { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-        .format-qr { background: #8b5cf6; }
-        .format-barcode { background: #3b82f6; }
-        .raw-result { font-family: Consolas, monospace; font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; color: #888; max-height: 200px; overflow-y: auto; }
-        #status { text-align: center; color: #ffd93d; margin-bottom: 15px; }
-        .time { font-size: 12px; color: #888; margin-top: 10px; }
-        .toggle-btn { float: right; font-size: 11px; background: #3d3d5c; border: none; color: #888; padding: 2px 8px; border-radius: 4px; cursor: pointer; }
-        .size-info { font-size: 11px; color: #4ecca3; margin-top: 5px; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
-        .modal img { max-width: 95%; max-height: 85%; object-fit: contain; }
-        .modal-close { position: absolute; top: 15px; right: 20px; color: #fff; font-size: 32px; cursor: pointer; z-index: 1001; }
+        h1 { text-align: center; margin-bottom: 20px; color: #4ecca3; }
+        #reader { width: 100%; margin-bottom: 20px; }
+        .result { background: #2d2d44; border-radius: 12px; padding: 20px; margin-top: 20px; }
+        .result-title { color: #888; font-size: 14px; margin-bottom: 10px; }
+        .result-value { font-family: Consolas, monospace; font-size: 20px; color: #4ecca3; word-break: break-all; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1><span class="method-badge">html5-qrcode</span> QR/Barcode Scanner</h1>
-
-        <div class="info-box">
-            <strong>특징:</strong> 로컬에서 처리 (API 불필요, 무료)<br>
-            <strong>지원 포맷:</strong>
-            <div class="format-list">
-                <span class="format-tag">QR Code</span>
-                <span class="format-tag">Code 128</span>
-                <span class="format-tag">Code 39</span>
-                <span class="format-tag">EAN-13</span>
-                <span class="format-tag">EAN-8</span>
-                <span class="format-tag">UPC-A</span>
-                <span class="format-tag">UPC-E</span>
-                <span class="format-tag">ITF</span>
-                <span class="format-tag">Codabar</span>
-            </div>
-        </div>
-
-        <label class="upload-area" for="fileInput" id="uploadArea">
-            <div>Click or Drag Image</div>
-        </label>
-        <input type="file" id="fileInput" accept="image/*" capture="environment">
-
-        <div class="preview-area" id="previewArea" style="display:none;">
-            <img id="preview" alt="preview">
-            <div class="size-info" id="sizeInfo"></div>
-            <button class="retake-btn" onclick="document.getElementById('fileInput').click()">Retake</button>
-        </div>
-
-        <div id="status"></div>
-        <button class="btn" id="scanBtn" disabled>Scan QR/Barcode</button>
-
-        <div class="result-box">
+        <h1>QR/Barcode Scanner</h1>
+        <div id="reader"></div>
+        <div class="result">
             <div class="result-title">Result</div>
-            <div class="serial-result" id="serial">-</div>
-            <div class="format-detected" id="formatDetected"></div>
-            <div class="time" id="time"></div>
-        </div>
-
-        <div class="result-box">
-            <div class="result-title">
-                Details
-                <button class="toggle-btn" onclick="toggleRaw()">Show/Hide</button>
-            </div>
-            <div class="raw-result" id="rawResult" style="display:none;">Waiting...</div>
+            <div class="result-value" id="result">-</div>
         </div>
     </div>
-
-    <div class="modal" id="imageModal">
-        <span class="modal-close" onclick="closeModal()">&times;</span>
-        <img id="modalImage" src="" alt="full size">
-    </div>
-
-    <!-- html5-qrcode 렌더링용 숨겨진 요소 -->
-    <div id="qr-reader" style="display:none;"></div>
 
     <script>
-        const fileInput = document.getElementById('fileInput');
-        const preview = document.getElementById('preview');
-        const scanBtn = document.getElementById('scanBtn');
-        const serialEl = document.getElementById('serial');
-        const formatDetectedEl = document.getElementById('formatDetected');
-        const rawResultEl = document.getElementById('rawResult');
-        const status = document.getElementById('status');
-        const timeEl = document.getElementById('time');
-        const sizeInfo = document.getElementById('sizeInfo');
-
-        let currentFile = null;
-
-        function toggleRaw() {
-            rawResultEl.style.display = rawResultEl.style.display === 'none' ? 'block' : 'none';
+        function onScanSuccess(decodedText, decodedResult) {
+            document.getElementById('result').textContent = decodedText;
+            console.log(`Code: ${decodedText}`, decodedResult);
         }
 
-        function openModal(src) {
-            document.getElementById('modalImage').src = src;
-            document.getElementById('imageModal').style.display = 'flex';
+        function onScanFailure(error) {
+            // ignore
         }
 
-        function closeModal() {
-            document.getElementById('imageModal').style.display = 'none';
-        }
-
-        preview.addEventListener('click', () => openModal(preview.src));
-
-        const uploadArea = document.getElementById('uploadArea');
-        const previewArea = document.getElementById('previewArea');
-
-        fileInput.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            currentFile = file;
-            status.textContent = 'Loading image...';
-
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-                preview.src = evt.target.result;
-                uploadArea.style.display = 'none';
-                previewArea.style.display = 'flex';
-                sizeInfo.textContent = `${(file.size / 1024).toFixed(1)}KB`;
-                scanBtn.disabled = false;
-                serialEl.textContent = '-';
-                formatDetectedEl.innerHTML = '';
-                rawResultEl.textContent = 'Ready to scan...';
-                status.textContent = '';
-                timeEl.textContent = '';
-
-                // 자동 스캔 시작
-                setTimeout(() => scanBtn.click(), 100);
-            };
-            reader.readAsDataURL(file);
-        });
-
-        scanBtn.addEventListener('click', async () => {
-            if (!currentFile) return;
-
-            scanBtn.disabled = true;
-            status.textContent = 'Scanning...';
-            serialEl.textContent = '...';
-            formatDetectedEl.innerHTML = '';
-            rawResultEl.textContent = '';
-            const startTime = Date.now();
-
-            try {
-                // 단순한 방식 (원래 작동하던 코드)
-                const html5QrCode = new Html5Qrcode("qr-reader", { verbose: false });
-                const result = await html5QrCode.scanFile(currentFile, true);
-                const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
-
-                serialEl.textContent = result;
-                formatDetectedEl.innerHTML = '<span class="format-qr">Detected</span>';
-                rawResultEl.textContent = `Decoded Text: ${result}\n\nScan successful!`;
-                status.textContent = 'Done!';
-                timeEl.textContent = `Time: ${elapsed}s`;
-
-            } catch (err) {
-                const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
-                serialEl.textContent = '(Not found)';
-                formatDetectedEl.innerHTML = '';
-                rawResultEl.textContent = `Error: ${err}\n\nNo QR code or barcode detected.`;
-                status.textContent = 'Not detected';
-                timeEl.textContent = `Time: ${elapsed}s`;
-            }
-
-            scanBtn.disabled = false;
-        });
+        const html5QrcodeScanner = new Html5QrcodeScanner(
+            "reader",
+            { fps: 10, qrbox: { width: 250, height: 250 } },
+            false
+        );
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
     </script>
 </body>
 </html>
