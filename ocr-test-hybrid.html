@@ -34,7 +34,8 @@
         .mismatch { background: #f59e0b; }
         .serial-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #1a1a2e; border-radius: 8px; margin-bottom: 8px; }
         .serial-item:last-child { margin-bottom: 0; }
-        .serial-value { font-family: Consolas, monospace; font-size: 18px; color: #4ecca3; }
+        .serial-value { font-family: Consolas, monospace; font-size: 16px; color: #4ecca3; word-break: break-all; }
+        .no-detect { color: #666; font-size: 12px; font-style: italic; }
         .serial-list { padding: 10px; }
         .verification-status { text-align: center; padding: 10px; margin-bottom: 10px; border-radius: 8px; font-size: 14px; font-weight: bold; }
         .status-verified { background: rgba(16, 185, 129, 0.2); color: #10b981; }
@@ -316,111 +317,109 @@
                 const result = data.responses[0];
                 let details = [];
 
-                // 모든 인식 결과 수집
-                let detectedValues = []; // { value, method, methodLabel, priority }
+                // 각 소스별 결과 저장
+                let qrValue = null;
+                let barcodeValue = null;
+                let barcodeFormat = null;
+                let ocrValue = null;
 
                 // 1. 바코드 확인
                 if (result.barcodeAnnotations && result.barcodeAnnotations.length > 0) {
-                    const barcodes = result.barcodeAnnotations;
-
-                    for (const barcode of barcodes) {
-                        const isQR = barcode.format === 'QR_CODE';
-                        detectedValues.push({
-                            value: barcode.rawValue,
-                            method: isQR ? 'qr' : 'barcode',
-                            methodLabel: isQR ? 'QR Code' : barcode.format,
-                            priority: isQR ? 1 : 2
-                        });
-                        details.push(`[${barcode.format}] ${barcode.rawValue}`);
+                    for (const barcode of result.barcodeAnnotations) {
+                        if (barcode.format === 'QR_CODE') {
+                            qrValue = barcode.rawValue;
+                            details.push(`[QR Code] ${barcode.rawValue}`);
+                        } else if (!barcodeValue) {
+                            barcodeValue = barcode.rawValue;
+                            barcodeFormat = barcode.format;
+                            details.push(`[${barcode.format}] ${barcode.rawValue}`);
+                        }
                     }
                 }
 
                 // 2. OCR 텍스트에서 시리얼 추출
                 const textAnnotations = result.textAnnotations;
-                let ocrText = '';
                 if (textAnnotations && textAnnotations.length > 0) {
-                    ocrText = textAnnotations[0].description;
+                    const ocrText = textAnnotations[0].description;
                     details.push('\n--- OCR Text ---\n' + ocrText);
-
-                    const ocrSerial = extractSerial(ocrText);
-                    if (ocrSerial) {
-                        detectedValues.push({
-                            value: ocrSerial,
-                            method: 'ocr',
-                            methodLabel: 'OCR',
-                            priority: 3
-                        });
-                    }
+                    ocrValue = extractSerial(ocrText);
                 }
 
-                // 우선순위로 정렬
-                detectedValues.sort((a, b) => a.priority - b.priority);
+                // 모든 소스 결과를 항상 표시
+                let html = '';
+                const values = [];
 
-                // 중복 제거 (같은 값은 우선순위 높은 것만)
-                const uniqueValues = [];
-                const seenValues = new Set();
-                for (const item of detectedValues) {
-                    const normalizedValue = item.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-                    if (!seenValues.has(normalizedValue)) {
-                        seenValues.add(normalizedValue);
-                        uniqueValues.push(item);
-                    }
-                }
-
-                // 결과 표시
-                if (uniqueValues.length === 0) {
-                    serialList.innerHTML = '<div class="serial-item"><span class="serial-value">(Not found)</span></div>';
-                    verificationStatus.style.display = 'none';
-                } else if (uniqueValues.length === 1) {
-                    // 단일 결과
-                    const item = uniqueValues[0];
-                    const methodClass = item.method === 'qr' ? 'method-qr' : (item.method === 'barcode' ? 'method-barcode' : 'method-ocr');
-                    serialList.innerHTML = `
+                // QR
+                if (qrValue) {
+                    values.push(qrValue.toUpperCase().replace(/[^A-Z0-9]/g, ''));
+                    html += `
                         <div class="serial-item">
-                            <span class="serial-value">${item.value}</span>
-                            <span class="method-tag ${methodClass}">${item.methodLabel}</span>
-                        </div>
-                    `;
+                            <span class="serial-value">${qrValue}</span>
+                            <span class="method-tag method-qr">QR Code</span>
+                        </div>`;
+                } else {
+                    html += `
+                        <div class="serial-item">
+                            <span class="serial-value no-detect">(미인식)</span>
+                            <span class="method-tag method-qr">QR Code</span>
+                        </div>`;
+                }
+
+                // Barcode
+                if (barcodeValue) {
+                    values.push(barcodeValue.toUpperCase().replace(/[^A-Z0-9]/g, ''));
+                    html += `
+                        <div class="serial-item">
+                            <span class="serial-value">${barcodeValue}</span>
+                            <span class="method-tag method-barcode">${barcodeFormat || 'Barcode'}</span>
+                        </div>`;
+                } else {
+                    html += `
+                        <div class="serial-item">
+                            <span class="serial-value no-detect">(미인식)</span>
+                            <span class="method-tag method-barcode">Barcode</span>
+                        </div>`;
+                }
+
+                // OCR
+                if (ocrValue) {
+                    values.push(ocrValue.toUpperCase().replace(/[^A-Z0-9]/g, ''));
+                    html += `
+                        <div class="serial-item">
+                            <span class="serial-value">${ocrValue}</span>
+                            <span class="method-tag method-ocr">OCR</span>
+                        </div>`;
+                } else {
+                    html += `
+                        <div class="serial-item">
+                            <span class="serial-value no-detect">(미인식)</span>
+                            <span class="method-tag method-ocr">OCR</span>
+                        </div>`;
+                }
+
+                serialList.innerHTML = html;
+
+                // 검증 상태 결정
+                const detectedCount = values.length;
+                if (detectedCount === 0) {
+                    verificationStatus.className = 'verification-status status-single';
+                    verificationStatus.textContent = '인식된 값 없음';
+                    verificationStatus.style.display = 'block';
+                } else if (detectedCount === 1) {
                     verificationStatus.className = 'verification-status status-single';
                     verificationStatus.textContent = '단일 소스 인식';
                     verificationStatus.style.display = 'block';
                 } else {
-                    // 복수 결과 - 검증 필요
-                    const allMatch = uniqueValues.every(v =>
-                        v.value.toUpperCase().replace(/[^A-Z0-9]/g, '') ===
-                        uniqueValues[0].value.toUpperCase().replace(/[^A-Z0-9]/g, '')
-                    );
-
+                    // 2개 이상 인식됨 - 비교
+                    const allMatch = values.every(v => v === values[0]);
                     if (allMatch) {
-                        // 모두 일치 - Verified
-                        const item = uniqueValues[0];
-                        const methodClass = item.method === 'qr' ? 'method-qr' : (item.method === 'barcode' ? 'method-barcode' : 'method-ocr');
-                        serialList.innerHTML = `
-                            <div class="serial-item">
-                                <span class="serial-value">${item.value}</span>
-                                <span class="method-tag ${methodClass}">${item.methodLabel}</span>
-                            </div>
-                        `;
                         verificationStatus.className = 'verification-status status-verified';
-                        verificationStatus.textContent = `✓ 검증완료 (${uniqueValues.length}개 소스 일치)`;
-                        verificationStatus.style.display = 'block';
+                        verificationStatus.textContent = `✓ 검증완료 (${detectedCount}개 소스 일치)`;
                     } else {
-                        // 불일치 - 모두 표시
-                        let html = '';
-                        for (const item of uniqueValues) {
-                            const methodClass = item.method === 'qr' ? 'method-qr' : (item.method === 'barcode' ? 'method-barcode' : 'method-ocr');
-                            html += `
-                                <div class="serial-item">
-                                    <span class="serial-value">${item.value}</span>
-                                    <span class="method-tag ${methodClass}">${item.methodLabel}</span>
-                                </div>
-                            `;
-                        }
-                        serialList.innerHTML = html;
                         verificationStatus.className = 'verification-status status-mismatch';
-                        verificationStatus.textContent = '⚠ 값 불일치 - 확인 필요';
-                        verificationStatus.style.display = 'block';
+                        verificationStatus.textContent = `⚠ 값 불일치 - 확인 필요`;
                     }
+                    verificationStatus.style.display = 'block';
                 }
 
                 rawResultEl.textContent = details.join('\n') || '(No data detected)';
