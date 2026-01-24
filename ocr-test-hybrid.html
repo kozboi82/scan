@@ -112,6 +112,9 @@
         <img id="modalImage" src="" alt="full size">
     </div>
 
+    <!-- html5-qrcode용 숨겨진 요소 (스크립트 전에 배치) -->
+    <div id="temp-qr-reader" style="display:none;"></div>
+
     <script>
         const fileInput = document.getElementById('fileInput');
         const preview = document.getElementById('preview');
@@ -322,7 +325,7 @@
                     details.push(`[QR - html5-qrcode] ${result.text}`);
                     qrStatusEl.innerHTML = '<span class="check">✓ QR: 인식됨</span>';
                 } else {
-                    details.push(`[QR] 미인식`);
+                    details.push(`[QR] 미인식 (${result.error || 'No QR code found'})`);
                     qrStatusEl.innerHTML = '<span class="check">✓ QR: 미인식</span>';
                 }
                 return result;
@@ -437,8 +440,5 @@
             scanBtn.disabled = false;
         });
     </script>
-
-    <!-- html5-qrcode용 숨겨진 요소 -->
-    <div id="temp-qr-reader" style="display:none;"></div>
 </body>
 </html>
