@@ -191,17 +191,6 @@
             });
         }
 
-        // html5-qrcode로 QR 스캔 (이미지 파일에서)
-        async function scanQRFromFile(file) {
-            try {
-                const html5QrCode = new Html5Qrcode("temp-qr-reader", { verbose: false });
-                const result = await html5QrCode.scanFile(file, true);
-                return { success: true, text: result };
-            } catch (err) {
-                return { success: false, error: err };
-            }
-        }
-
         // 시리얼 번호 추출 함수 (OCR용)
         function extractSerial(text) {
             if (!text) return null;
@@ -279,25 +268,34 @@
             const file = e.target.files[0];
             if (!file) return;
 
+            // 원본 파일 즉시 저장 (QR 스캔용)
             currentFile = file;
             status.textContent = 'Loading image...';
 
-            const resized = await resizeImage(file, 1280);
+            // 프리뷰용으로 원본 파일 직접 읽기 (qrcode.html과 동일한 방식)
+            const reader = new FileReader();
+            reader.onload = async (evt) => {
+                preview.src = evt.target.result;
+                uploadArea.style.display = 'none';
+                previewArea.style.display = 'flex';
+                sizeInfo.textContent = `${(file.size / 1024).toFixed(1)}KB`;
 
-            imageBase64 = resized.base64;
-            preview.src = resized.dataUrl;
-            uploadArea.style.display = 'none';
-            previewArea.style.display = 'flex';
-            sizeInfo.textContent = `${resized.originalSize}KB → ${resized.newSize}KB (${resized.width}x${resized.height})`;
-            scanBtn.disabled = false;
-            serialList.innerHTML = '<div class="serial-item"><span class="serial-value">-</span></div>';
-            verificationStatus.style.display = 'none';
-            rawResultEl.textContent = 'Ready to scan...';
-            status.textContent = '';
-            timeEl.textContent = '';
+                // OCR용 리사이즈는 별도로 처리
+                const resized = await resizeImage(file, 1280);
+                imageBase64 = resized.base64;
+                sizeInfo.textContent = `${resized.originalSize}KB → ${resized.newSize}KB (${resized.width}x${resized.height})`;
 
-            // 자동 스캔 시작
-            setTimeout(() => scanBtn.click(), 100);
+                scanBtn.disabled = false;
+                serialList.innerHTML = '<div class="serial-item"><span class="serial-value">-</span></div>';
+                verificationStatus.style.display = 'none';
+                rawResultEl.textContent = 'Ready to scan...';
+                status.textContent = '';
+                timeEl.textContent = '';
+
+                // 자동 스캔 시작
+                setTimeout(() => scanBtn.click(), 100);
+            };
+            reader.readAsDataURL(file);
         });
 
         scanBtn.addEventListener('click', async () => {
@@ -319,17 +317,21 @@
             let ocrValue = null;
 
             // 병렬 처리: QR/바코드 (로컬) + OCR (API)
-            const qrPromise = scanQRFromFile(currentFile).then(result => {
-                if (result.success) {
-                    qrValue = result.text;
-                    details.push(`[QR - html5-qrcode] ${result.text}`);
+            // qrcode.html과 동일한 방식으로 직접 처리
+            const qrPromise = (async () => {
+                try {
+                    const html5QrCode = new Html5Qrcode("temp-qr-reader", { verbose: false });
+                    const result = await html5QrCode.scanFile(currentFile, true);
+                    qrValue = result;
+                    details.push(`[QR - html5-qrcode] ${result}`);
                     qrStatusEl.innerHTML = '<span class="check">✓ QR: 인식됨</span>';
-                } else {
-                    details.push(`[QR] 미인식 (${result.error || 'No QR code found'})`);
+                    return { success: true, text: result };
+                } catch (err) {
+                    details.push(`[QR] 미인식 (${err})`);
                     qrStatusEl.innerHTML = '<span class="check">✓ QR: 미인식</span>';
+                    return { success: false, error: err };
                 }
-                return result;
-            });
+            })();
 
             const ocrPromise = apiKey ? fetch(`https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`, {
                 method: 'POST',
