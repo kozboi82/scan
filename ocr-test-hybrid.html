@@ -259,24 +259,28 @@
             const file = e.target.files[0];
             if (!file) return;
 
-            status.textContent = 'Resizing image...';
+            status.textContent = 'Loading image...';
 
-            const resized = await resizeImage(file, 1280);
+            // 원본 이미지 그대로 사용 (리사이즈 없음)
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const dataUrl = evt.target.result;
+                imageBase64 = dataUrl.split(',')[1];
+                preview.src = dataUrl;
+                uploadArea.style.display = 'none';
+                previewArea.style.display = 'flex';
+                sizeInfo.textContent = `${(file.size / 1024).toFixed(1)}KB (원본)`;
+                scanBtn.disabled = false;
+                serialList.innerHTML = '<div class="serial-item"><span class="serial-value">-</span></div>';
+                verificationStatus.style.display = 'none';
+                rawResultEl.textContent = 'Ready to scan...';
+                status.textContent = '';
+                timeEl.textContent = '';
 
-            imageBase64 = resized.base64;
-            preview.src = resized.dataUrl;
-            uploadArea.style.display = 'none';
-            previewArea.style.display = 'flex';
-            sizeInfo.textContent = `${resized.originalSize}KB → ${resized.newSize}KB (${resized.width}x${resized.height})`;
-            scanBtn.disabled = false;
-            serialList.innerHTML = '<div class="serial-item"><span class="serial-value">-</span></div>';
-            verificationStatus.style.display = 'none';
-            rawResultEl.textContent = 'Ready to scan...';
-            status.textContent = '';
-            timeEl.textContent = '';
-
-            // 자동 스캔 시작
-            setTimeout(() => scanBtn.click(), 100);
+                // 자동 스캔 시작
+                setTimeout(() => scanBtn.click(), 100);
+            };
+            reader.readAsDataURL(file);
         });
 
         scanBtn.addEventListener('click', async () => {
