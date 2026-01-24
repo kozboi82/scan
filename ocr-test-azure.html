@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR Test - Azure Vision API</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 20px; color: #4ecca3; font-size: 18px; }
+        .method-badge { background: #0078d4; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        .api-section { background: #2d2d44; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
+        .api-section label { font-size: 12px; color: #888; display: block; margin-bottom: 5px; }
+        .api-section input { width: 100%; padding: 10px; border: 1px solid #444; border-radius: 6px; background: #1a1a2e; color: #fff; font-size: 14px; margin-bottom: 10px; }
+        .upload-area { background: #2d2d44; border: 2px dashed #4ecca3; border-radius: 12px; padding: 40px; text-align: center; margin-bottom: 20px; cursor: pointer; }
+        .upload-area:hover { background: #3d3d5c; }
+        input[type="file"] { display: none; }
+        #preview { max-width: 100%; border-radius: 8px; margin-top: 15px; display: none; }
+        .btn { width: 100%; padding: 15px; background: #4ecca3; color: #1a1a2e; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
+        .btn:disabled { background: #555; color: #888; cursor: not-allowed; }
+        .result-box { background: #2d2d44; border-radius: 12px; padding: 20px; }
+        .result-title { font-size: 14px; color: #888; margin-bottom: 10px; }
+        #result { font-family: Consolas, monospace; font-size: 14px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; min-height: 100px; color: #4ecca3; }
+        #status { text-align: center; color: #ffd93d; margin-bottom: 15px; }
+        .time { font-size: 12px; color: #888; margin-top: 10px; }
+        .note { font-size: 11px; color: #888; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="method-badge">Azure Vision</span> OCR Test</h1>
+
+        <div class="api-section">
+            <label>Azure Endpoint (e.g., https://your-resource.cognitiveservices.azure.com)</label>
+            <input type="text" id="endpoint" placeholder="https://xxx.cognitiveservices.azure.com">
+
+            <label>Azure API Key</label>
+            <input type="password" id="apiKey" placeholder="Enter your API key...">
+            <div class="note">* Get from Azure Portal > Computer Vision > Keys and Endpoint</div>
+        </div>
+
+        <label class="upload-area" for="fileInput">
+            <div>Click or Drag Image</div>
+            <img id="preview" alt="preview">
+        </label>
+        <input type="file" id="fileInput" accept="image/*" capture="environment">
+
+        <div id="status"></div>
+        <button class="btn" id="scanBtn" disabled>Scan OCR</button>
+
+        <div class="result-box">
+            <div class="result-title">Result</div>
+            <div id="result">Waiting...</div>
+            <div class="time" id="time"></div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const scanBtn = document.getElementById('scanBtn');
+        const result = document.getElementById('result');
+        const status = document.getElementById('status');
+        const timeEl = document.getElementById('time');
+        const apiKeyInput = document.getElementById('apiKey');
+        const endpointInput = document.getElementById('endpoint');
+
+        let imageBlob = null;
+
+        // Load saved settings
+        apiKeyInput.value = localStorage.getItem('azure_vision_api_key') || '';
+        endpointInput.value = localStorage.getItem('azure_vision_endpoint') || '';
+
+        apiKeyInput.addEventListener('change', () => {
+            localStorage.setItem('azure_vision_api_key', apiKeyInput.value);
+        });
+
+        endpointInput.addEventListener('change', () => {
+            localStorage.setItem('azure_vision_endpoint', endpointInput.value);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            imageBlob = file;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                scanBtn.disabled = false;
+                result.textContent = 'Ready to scan...';
+                status.textContent = '';
+                timeEl.textContent = '';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        scanBtn.addEventListener('click', async () => {
+            const apiKey = apiKeyInput.value.trim();
+            const endpoint = endpointInput.value.trim().replace(/\/$/, '');
+
+            if (!apiKey || !endpoint) {
+                alert('Please enter Azure Endpoint and API Key');
+                return;
+            }
+            if (!imageBlob) return;
+
+            scanBtn.disabled = true;
+            status.textContent = 'Calling Azure Vision API...';
+            result.textContent = '';
+            const startTime = Date.now();
+
+            try {
+                // Use Read API (v3.2) for better accuracy
+                const analyzeUrl = `${endpoint}/vision/v3.2/read/analyze`;
+
+                // Step 1: Submit image for analysis
+                const submitResponse = await fetch(analyzeUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/octet-stream',
+                        'Ocp-Apim-Subscription-Key': apiKey
+                    },
+                    body: imageBlob
+                });
+
+                if (!submitResponse.ok) {
+                    const err = await submitResponse.json();
+                    throw new Error(err.error?.message || 'API Error');
+                }
+
+                // Step 2: Get operation location
+                const operationLocation = submitResponse.headers.get('Operation-Location');
+                if (!operationLocation) {
+                    throw new Error('No operation location returned');
+                }
+
+                status.textContent = 'Processing...';
+
+                // Step 3: Poll for results
+                let resultData = null;
+                for (let i = 0; i < 10; i++) {
+                    await new Promise(r => setTimeout(r, 1000));
+
+                    const resultResponse = await fetch(operationLocation, {
+                        headers: { 'Ocp-Apim-Subscription-Key': apiKey }
+                    });
+
+                    resultData = await resultResponse.json();
+
+                    if (resultData.status === 'succeeded') {
+                        break;
+                    } else if (resultData.status === 'failed') {
+                        throw new Error('Analysis failed');
+                    }
+
+                    status.textContent = `Processing... (${i + 1}s)`;
+                }
+
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+
+                // Extract text from results
+                if (resultData?.analyzeResult?.readResults) {
+                    const lines = [];
+                    for (const page of resultData.analyzeResult.readResults) {
+                        for (const line of page.lines || []) {
+                            lines.push(line.text);
+                        }
+                    }
+                    result.textContent = lines.join('\n') || '(No text detected)';
+                    status.textContent = 'Done!';
+                } else {
+                    result.textContent = '(No text detected)';
+                    status.textContent = 'Done (empty)';
+                }
+
+                timeEl.textContent = `Time: ${elapsed}s`;
+
+            } catch (err) {
+                result.textContent = 'Error: ' + err.message;
+                status.textContent = 'Failed';
+            }
+
+            scanBtn.disabled = false;
+        });
+    </script>
+</body>
+</html>

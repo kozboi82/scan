@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR Test - Google Vision API</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 20px; color: #4ecca3; font-size: 18px; }
+        .method-badge { background: #4285f4; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        .api-key-section { background: #2d2d44; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
+        .api-key-section label { font-size: 12px; color: #888; display: block; margin-bottom: 5px; }
+        .api-key-section input { width: 100%; padding: 10px; border: 1px solid #444; border-radius: 6px; background: #1a1a2e; color: #fff; font-size: 14px; }
+        .upload-area { background: #2d2d44; border: 2px dashed #4ecca3; border-radius: 12px; padding: 40px; text-align: center; margin-bottom: 20px; cursor: pointer; }
+        .upload-area:hover { background: #3d3d5c; }
+        input[type="file"] { display: none; }
+        #preview { max-width: 100%; border-radius: 8px; margin-top: 15px; display: none; }
+        .btn { width: 100%; padding: 15px; background: #4ecca3; color: #1a1a2e; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
+        .btn:disabled { background: #555; color: #888; cursor: not-allowed; }
+        .result-box { background: #2d2d44; border-radius: 12px; padding: 20px; }
+        .result-title { font-size: 14px; color: #888; margin-bottom: 10px; }
+        #result { font-family: Consolas, monospace; font-size: 14px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; min-height: 100px; color: #4ecca3; }
+        #status { text-align: center; color: #ffd93d; margin-bottom: 15px; }
+        .time { font-size: 12px; color: #888; margin-top: 10px; }
+        .note { font-size: 11px; color: #888; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="method-badge">Google Vision</span> OCR Test</h1>
+
+        <div class="api-key-section">
+            <label>Google Cloud Vision API Key</label>
+            <input type="password" id="apiKey" placeholder="Enter your API key...">
+            <div class="note">* Get key from Google Cloud Console > APIs & Services > Credentials</div>
+        </div>
+
+        <label class="upload-area" for="fileInput">
+            <div>Click or Drag Image</div>
+            <img id="preview" alt="preview">
+        </label>
+        <input type="file" id="fileInput" accept="image/*" capture="environment">
+
+        <div id="status"></div>
+        <button class="btn" id="scanBtn" disabled>Scan OCR</button>
+
+        <div class="result-box">
+            <div class="result-title">Result</div>
+            <div id="result">Waiting...</div>
+            <div class="time" id="time"></div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const scanBtn = document.getElementById('scanBtn');
+        const result = document.getElementById('result');
+        const status = document.getElementById('status');
+        const timeEl = document.getElementById('time');
+        const apiKeyInput = document.getElementById('apiKey');
+
+        let imageBase64 = null;
+
+        // Load saved API key
+        apiKeyInput.value = localStorage.getItem('google_vision_api_key') || '';
+
+        apiKeyInput.addEventListener('change', () => {
+            localStorage.setItem('google_vision_api_key', apiKeyInput.value);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const dataUrl = e.target.result;
+                imageBase64 = dataUrl.split(',')[1]; // Remove data:image/...;base64,
+                preview.src = dataUrl;
+                preview.style.display = 'block';
+                scanBtn.disabled = false;
+                result.textContent = 'Ready to scan...';
+                status.textContent = '';
+                timeEl.textContent = '';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        scanBtn.addEventListener('click', async () => {
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) {
+                alert('Please enter Google Vision API Key');
+                return;
+            }
+            if (!imageBase64) return;
+
+            scanBtn.disabled = true;
+            status.textContent = 'Calling Google Vision API...';
+            result.textContent = '';
+            const startTime = Date.now();
+
+            try {
+                const response = await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        requests: [{
+                            image: { content: imageBase64 },
+                            features: [{ type: 'TEXT_DETECTION' }]
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+
+                const textAnnotations = data.responses[0]?.textAnnotations;
+                if (textAnnotations && textAnnotations.length > 0) {
+                    result.textContent = textAnnotations[0].description;
+                    status.textContent = 'Done!';
+                } else {
+                    result.textContent = '(No text detected)';
+                    status.textContent = 'Done (empty)';
+                }
+
+                timeEl.textContent = `Time: ${elapsed}s`;
+
+            } catch (err) {
+                result.textContent = 'Error: ' + err.message;
+                status.textContent = 'Failed';
+            }
+
+            scanBtn.disabled = false;
+        });
+    </script>
+</body>
+</html>
