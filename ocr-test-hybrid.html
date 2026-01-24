@@ -98,7 +98,7 @@
                 Detection Details
                 <button class="toggle-btn" onclick="toggleRaw()">Show/Hide</button>
             </div>
-            <div class="raw-result" id="rawResult" style="display:none;">Waiting...</div>
+            <div class="raw-result" id="rawResult" style="display:block;">Waiting...</div>
         </div>
     </div>
 
@@ -323,6 +323,10 @@
                 const result = data.responses[0];
                 let details = [];
 
+                // 디버깅: 전체 API 응답 출력
+                details.push('=== API Response ===');
+                details.push(JSON.stringify(result, null, 2));
+
                 // QR 코드만 확인 (테스트용)
                 let qrValue = null;
 
@@ -333,6 +337,8 @@
                             qrValue = barcode.rawValue;
                         }
                     }
+                } else {
+                    details.push('barcodeAnnotations: 없음');
                 }
 
                 // 결과 표시
