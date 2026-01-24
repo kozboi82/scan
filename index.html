@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR Test - Select Method</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Malgun Gothic', sans-serif; background: #1a1a2e; color: #fff; min-height: 100vh; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 10px; color: #4ecca3; font-size: 22px; }
+        .subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 30px; }
+        .card { display: block; background: #2d2d44; border-radius: 12px; padding: 20px; margin-bottom: 15px; text-decoration: none; color: #fff; transition: all 0.2s; border: 2px solid transparent; }
+        .card:hover { border-color: #4ecca3; transform: translateY(-2px); }
+        .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .card-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .badge-red { background: #ff6b6b; }
+        .badge-blue { background: #4285f4; }
+        .badge-azure { background: #0078d4; }
+        .badge-purple { background: #8b5cf6; }
+        .card-title { font-size: 16px; font-weight: bold; }
+        .card-desc { font-size: 13px; color: #aaa; line-height: 1.5; }
+        .card-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { font-size: 11px; padding: 3px 8px; background: #1a1a2e; border-radius: 4px; color: #888; }
+        .tag.free { color: #4ecca3; }
+        .tag.paid { color: #ffd93d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>OCR Test</h1>
+        <p class="subtitle">S/N Recognition Test</p>
+
+        <a href="ocr-test-tesseract.html" class="card">
+            <div class="card-header">
+                <span class="card-badge badge-red">Tesseract.js</span>
+                <span class="card-title">Local OCR</span>
+            </div>
+            <div class="card-desc">
+                Browser-based OCR. No API key needed. Runs entirely in your browser.
+            </div>
+            <div class="card-tags">
+                <span class="tag free">Free</span>
+                <span class="tag">No API Key</span>
+                <span class="tag">Slow</span>
+            </div>
+        </a>
+
+        <a href="ocr-test-google.html" class="card">
+            <div class="card-header">
+                <span class="card-badge badge-blue">Google Vision</span>
+                <span class="card-title">Google Cloud OCR</span>
+            </div>
+            <div class="card-desc">
+                Google Cloud Vision API. High accuracy, fast response.
+            </div>
+            <div class="card-tags">
+                <span class="tag paid">Paid</span>
+                <span class="tag">API Key Required</span>
+                <span class="tag">Fast</span>
+            </div>
+        </a>
+
+        <a href="ocr-test-azure.html" class="card">
+            <div class="card-header">
+                <span class="card-badge badge-azure">Azure Vision</span>
+                <span class="card-title">Microsoft Azure OCR</span>
+            </div>
+            <div class="card-desc">
+                Azure Computer Vision Read API. Enterprise-grade accuracy.
+            </div>
+            <div class="card-tags">
+                <span class="tag paid">Paid</span>
+                <span class="tag">API Key Required</span>
+                <span class="tag">Fast</span>
+            </div>
+        </a>
+
+        <a href="ocr-test-llm.html" class="card">
+            <div class="card-header">
+                <span class="card-badge badge-purple">LLM Vision</span>
+                <span class="card-title">Claude / GPT-4</span>
+            </div>
+            <div class="card-desc">
+                AI Vision models. Can understand context and extract specific data.
+            </div>
+            <div class="card-tags">
+                <span class="tag paid">Paid</span>
+                <span class="tag">API Key Required</span>
+                <span class="tag">Smart</span>
+            </div>
+        </a>
+    </div>
+</body>
+</html>
