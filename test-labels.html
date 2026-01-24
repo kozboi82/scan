@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Labels - Print</title>
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -83,11 +83,12 @@
 
         .qr-section {
             margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
         }
 
-        .qr-section canvas {
-            display: block;
-            margin: 0 auto;
+        .qr-section > div {
+            display: inline-block;
         }
 
         .barcode-section {
@@ -155,7 +156,7 @@
             <div class="label-desc">QR + Barcode + OCR 모두 일치 → 검증완료</div>
             <div class="label-content">
                 <div class="qr-section">
-                    <canvas id="qr1"></canvas>
+                    <div id="qr1"></div>
                 </div>
                 <div class="barcode-section">
                     <svg id="barcode1"></svg>
@@ -172,7 +173,7 @@
             <div class="label-desc">QR 값이 다름 → 불일치 경고</div>
             <div class="label-content">
                 <div class="qr-section">
-                    <canvas id="qr2"></canvas>
+                    <div id="qr2"></div>
                 </div>
                 <div class="barcode-section">
                     <svg id="barcode2"></svg>
@@ -189,7 +190,7 @@
             <div class="label-desc">Barcode 값이 다름 → 불일치 경고</div>
             <div class="label-content">
                 <div class="qr-section">
-                    <canvas id="qr3"></canvas>
+                    <div id="qr3"></div>
                 </div>
                 <div class="barcode-section">
                     <svg id="barcode3"></svg>
@@ -206,7 +207,7 @@
             <div class="label-desc">텍스트 값이 다름 → 불일치 경고</div>
             <div class="label-content">
                 <div class="qr-section">
-                    <canvas id="qr4"></canvas>
+                    <div id="qr4"></div>
                 </div>
                 <div class="barcode-section">
                     <svg id="barcode4"></svg>
@@ -219,20 +220,23 @@
     </div>
 
     <script>
+        // QR Code options
+        const qrOptions = { width: 100, height: 100, margin: 1 };
+
         // Label 1: All Match - SN2024TEST001
-        QRCode.toCanvas(document.getElementById('qr1'), 'SN2024TEST001', { width: 100, margin: 1 });
+        new QRCode(document.getElementById('qr1'), { text: 'SN2024TEST001', ...qrOptions });
         JsBarcode('#barcode1', 'SN2024TEST001', { format: 'CODE128', width: 1.5, height: 40, fontSize: 12, margin: 5 });
 
         // Label 2: QR Wrong - QR has different value
-        QRCode.toCanvas(document.getElementById('qr2'), 'SN2024WRONG02', { width: 100, margin: 1 });  // Wrong QR
+        new QRCode(document.getElementById('qr2'), { text: 'SN2024WRONG02', ...qrOptions });  // Wrong QR
         JsBarcode('#barcode2', 'SN2024TEST002', { format: 'CODE128', width: 1.5, height: 40, fontSize: 12, margin: 5 });
 
         // Label 3: Barcode Wrong - Barcode has different value
-        QRCode.toCanvas(document.getElementById('qr3'), 'SN2024TEST003', { width: 100, margin: 1 });
+        new QRCode(document.getElementById('qr3'), { text: 'SN2024TEST003', ...qrOptions });
         JsBarcode('#barcode3', 'SN2024WRONG03', { format: 'CODE128', width: 1.5, height: 40, fontSize: 12, margin: 5 });  // Wrong Barcode
 
         // Label 4: OCR Wrong - Text shows different value (QR and Barcode match)
-        QRCode.toCanvas(document.getElementById('qr4'), 'SN2024TEST004', { width: 100, margin: 1 });
+        new QRCode(document.getElementById('qr4'), { text: 'SN2024TEST004', ...qrOptions });
         JsBarcode('#barcode4', 'SN2024TEST004', { format: 'CODE128', width: 1.5, height: 40, fontSize: 12, margin: 5 });
         // Text shows SN2024TEST999 (wrong) - already in HTML
     </script>
