@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Labels - Print</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Malgun Gothic', Arial, sans-serif;
+            background: #1a1a2e;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .screen-only {
+            max-width: 800px;
+            margin: 0 auto 20px;
+            text-align: center;
+        }
+
+        h1 { color: #4ecca3; margin-bottom: 10px; }
+        .subtitle { color: #888; margin-bottom: 20px; }
+
+        .print-btn {
+            padding: 15px 40px;
+            background: #4ecca3;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .print-btn:hover { background: #3db892; }
+
+        .labels-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .label {
+            background: #fff;
+            color: #000;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .label-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .label-ok .label-title { background: #10b981; color: #fff; }
+        .label-qr-wrong .label-title { background: #8b5cf6; color: #fff; }
+        .label-barcode-wrong .label-title { background: #3b82f6; color: #fff; }
+        .label-ocr-wrong .label-title { background: #ef4444; color: #fff; }
+
+        .label-desc {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .label-content {
+            border: 2px solid #000;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .qr-section {
+            margin-bottom: 10px;
+        }
+
+        .qr-section canvas {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .barcode-section {
+            margin-bottom: 10px;
+        }
+
+        .barcode-section svg {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+        }
+
+        .text-section {
+            font-family: Consolas, monospace;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 8px;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+
+        .text-section .label-sn {
+            color: #666;
+            font-size: 11px;
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background: #fff;
+                padding: 10mm;
+            }
+
+            .screen-only {
+                display: none;
+            }
+
+            .labels-container {
+                gap: 10mm;
+            }
+
+            .label {
+                border: 1px solid #ccc;
+                page-break-inside: avoid;
+            }
+
+            .label-title {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="screen-only">
+        <h1>Test Labels for Hybrid OCR</h1>
+        <p class="subtitle">프린트 후 하이브리드 스캐너로 검수 기능 테스트</p>
+        <button class="print-btn" onclick="window.print()">Print Labels</button>
+    </div>
+
+    <div class="labels-container">
+        <!-- Label 1: All Match -->
+        <div class="label label-ok">
+            <div class="label-title">TEST 1: All Match</div>
+            <div class="label-desc">QR + Barcode + OCR 모두 일치 → 검증완료</div>
+            <div class="label-content">
+                <div class="qr-section">
+                    <canvas id="qr1"></canvas>
+                </div>
+                <div class="barcode-section">
+                    <svg id="barcode1"></svg>
+                </div>
+                <div class="text-section">
+                    <span class="label-sn">S/N:</span> SN2024TEST001
+                </div>
+            </div>
+        </div>
+
+        <!-- Label 2: QR Wrong -->
+        <div class="label label-qr-wrong">
+            <div class="label-title">TEST 2: QR Wrong</div>
+            <div class="label-desc">QR 값이 다름 → 불일치 경고</div>
+            <div class="label-content">
+                <div class="qr-section">
+                    <canvas id="qr2"></canvas>
+                </div>
+                <div class="barcode-section">
+                    <svg id="barcode2"></svg>
+                </div>
+                <div class="text-section">
+                    <span class="label-sn">S/N:</span> SN2024TEST002
+                </div>
+            </div>
+        </div>
+
+        <!-- Label 3: Barcode Wrong -->
+        <div class="label label-barcode-wrong">
+            <div class="label-title">TEST 3: Barcode Wrong</div>
+            <div class="label-desc">Barcode 값이 다름 → 불일치 경고</div>
+            <div class="label-content">
+                <div class="qr-section">
+                    <canvas id="qr3"></canvas>
+                </div>
+                <div class="barcode-section">
+                    <svg id="barcode3"></svg>
+                </div>
+                <div class="text-section">
+                    <span class="label-sn">S/N:</span> SN2024TEST003
+                </div>
+            </div>
+        </div>
+
+        <!-- Label 4: OCR Wrong -->
+        <div class="label label-ocr-wrong">
+            <div class="label-title">TEST 4: OCR Wrong</div>
+            <div class="label-desc">텍스트 값이 다름 → 불일치 경고</div>
+            <div class="label-content">
+                <div class="qr-section">
+                    <canvas id="qr4"></canvas>
+                </div>
+                <div class="barcode-section">
+                    <svg id="barcode4"></svg>
+                </div>
+                <div class="text-section">
+                    <span class="label-sn">S/N:</span> SN2024TEST999
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Label 1: All Match - SN2024TEST001
+        QRCode.toCanvas(document.getElementById('qr1'), 'SN2024TEST001', { width: 100, margin: 1 });
+        JsBarcode('#barcode1', 'SN2024TEST001', { format: 'CODE128', width: 1.5, height: 40, fontSize: 12, margin: 5 });
+
+        // Label 2: QR Wrong - QR has different value
+        QRCode.toCanvas(document.getElementById('qr2'), 'SN2024WRONG02', { width: 100, margin: 1 });  // Wrong QR
+        JsBarcode('#barcode2', 'SN2024TEST002', { format: 'CODE128', width: 1.5, height: 40, fontSize: 12, margin: 5 });
+
+        // Label 3: Barcode Wrong - Barcode has different value
+        QRCode.toCanvas(document.getElementById('qr3'), 'SN2024TEST003', { width: 100, margin: 1 });
+        JsBarcode('#barcode3', 'SN2024WRONG03', { format: 'CODE128', width: 1.5, height: 40, fontSize: 12, margin: 5 });  // Wrong Barcode
+
+        // Label 4: OCR Wrong - Text shows different value (QR and Barcode match)
+        QRCode.toCanvas(document.getElementById('qr4'), 'SN2024TEST004', { width: 100, margin: 1 });
+        JsBarcode('#barcode4', 'SN2024TEST004', { format: 'CODE128', width: 1.5, height: 40, fontSize: 12, margin: 5 });
+        // Text shows SN2024TEST999 (wrong) - already in HTML
+    </script>
+</body>
+</html>
