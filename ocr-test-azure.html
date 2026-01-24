@@ -161,6 +161,9 @@
         function extractSerial(text) {
             if (!text) return null;
 
+            // 제외할 단어들
+            const excludeWords = /^(number|serial|model|part|product|type|version|no|sn|id)$/i;
+
             const lines = text.split('\n').map(l => l.trim()).filter(l => l);
             let candidates = [];
 
@@ -168,23 +171,26 @@
                 const line = lines[i];
                 const lineUpper = line.toUpperCase();
 
-                const snMatch = line.match(/(?:S\/N|SN|Serial(?:\s*No)?)[:\s]+([A-Z0-9\-]{6,})/i);
-                if (snMatch) {
+                // "S/N: xxxxx" 또는 "Serial: xxxxx" 패턴
+                const snMatch = line.match(/(?:S\/N|SN|Serial(?:\s*(?:No|Number))?)[:\s]+([A-Z0-9\-]{8,})/i);
+                if (snMatch && !excludeWords.test(snMatch[1])) {
                     candidates.push({ value: snMatch[1], priority: 1 });
                 }
 
-                if (/^(SN|S\/N|Serial)$/i.test(lineUpper) && i + 1 < lines.length) {
+                // "Serial Number" 또는 "S/N" 다음 줄에 값이 있는 경우
+                if (/^(SN|S\/N|Serial|Serial\s*(No|Number)?)$/i.test(line) && i + 1 < lines.length) {
                     const nextLine = lines[i + 1].trim();
-                    if (/^[A-Z0-9\-]{8,}$/i.test(nextLine)) {
+                    if (/^[A-Z0-9\-]{8,}$/i.test(nextLine) && !excludeWords.test(nextLine)) {
                         candidates.push({ value: nextLine, priority: 1 });
                     }
                 }
             }
 
             const patterns = [
+                // LG 시리얼 패턴 (40LGD5K... 등)
                 /\b(\d{2,3}LG[A-Z0-9]{10,})\b/gi,
+                // 일반적인 시리얼 패턴
                 /\b([A-Z]{2,4}[0-9]{2}[A-Z0-9]{8,})\b/gi,
-                /\b([A-Z0-9]{7})\b/g,
                 /\b([A-Z]{3}[0-9][A-Z0-9]{6,})\b/gi,
                 /\b([A-Z]+[0-9]+[A-Z0-9]{8,})\b/gi,
                 /\b([0-9]+[A-Z]+[A-Z0-9]{8,})\b/gi,
@@ -194,17 +200,18 @@
                 const matches = text.match(pattern);
                 if (matches) {
                     for (const m of matches) {
-                        if (m.length >= 8 && !/^\d+$/.test(m) && !/^[A-Z]+$/i.test(m)) {
+                        if (m.length >= 8 && !excludeWords.test(m) && !/^\d+$/.test(m) && !/^[A-Z]+$/i.test(m)) {
                             candidates.push({ value: m, priority: 2 });
                         }
                     }
                 }
             }
 
+            // 긴 영숫자 조합 (최후의 수단)
             const allAlphaNum = text.match(/[A-Z0-9]{10,}/gi);
             if (allAlphaNum) {
                 for (const m of allAlphaNum) {
-                    if (!/^\d+$/.test(m) && !/^[A-Z]+$/i.test(m) && /[A-Z]/i.test(m) && /[0-9]/.test(m)) {
+                    if (!excludeWords.test(m) && !/^\d+$/.test(m) && !/^[A-Z]+$/i.test(m) && /[A-Z]/i.test(m) && /[0-9]/.test(m)) {
                         candidates.push({ value: m, priority: 3 });
                     }
                 }
