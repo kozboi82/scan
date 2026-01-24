@@ -17,11 +17,13 @@
         #preview { max-width: 100%; border-radius: 8px; margin-top: 15px; display: none; }
         .btn { width: 100%; padding: 15px; background: #4ecca3; color: #1a1a2e; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
         .btn:disabled { background: #555; color: #888; cursor: not-allowed; }
-        .result-box { background: #2d2d44; border-radius: 12px; padding: 20px; }
+        .result-box { background: #2d2d44; border-radius: 12px; padding: 20px; margin-bottom: 15px; }
         .result-title { font-size: 14px; color: #888; margin-bottom: 10px; }
-        #result { font-family: Consolas, monospace; font-size: 14px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; min-height: 100px; color: #4ecca3; }
+        .serial-result { font-family: Consolas, monospace; font-size: 24px; color: #4ecca3; text-align: center; padding: 20px; background: #1a1a2e; border-radius: 8px; }
+        .raw-result { font-family: Consolas, monospace; font-size: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; color: #888; max-height: 200px; overflow-y: auto; }
         #status { text-align: center; color: #ffd93d; margin-bottom: 15px; }
         .time { font-size: 12px; color: #888; margin-top: 10px; }
+        .toggle-btn { float: right; font-size: 11px; background: #3d3d5c; border: none; color: #888; padding: 2px 8px; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -38,9 +40,17 @@
         <button class="btn" id="scanBtn" disabled>Scan OCR</button>
 
         <div class="result-box">
-            <div class="result-title">Result</div>
-            <div id="result">Waiting...</div>
+            <div class="result-title">Serial Number</div>
+            <div class="serial-result" id="serial">-</div>
             <div class="time" id="time"></div>
+        </div>
+
+        <div class="result-box">
+            <div class="result-title">
+                Raw OCR Text
+                <button class="toggle-btn" onclick="toggleRaw()">Show/Hide</button>
+            </div>
+            <div class="raw-result" id="rawResult" style="display:none;">Waiting...</div>
         </div>
     </div>
 
@@ -48,11 +58,90 @@
         const fileInput = document.getElementById('fileInput');
         const preview = document.getElementById('preview');
         const scanBtn = document.getElementById('scanBtn');
-        const result = document.getElementById('result');
+        const serialEl = document.getElementById('serial');
+        const rawResultEl = document.getElementById('rawResult');
         const status = document.getElementById('status');
         const timeEl = document.getElementById('time');
 
         let imageData = null;
+
+        function toggleRaw() {
+            rawResultEl.style.display = rawResultEl.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // 시리얼 번호 추출 함수
+        function extractSerial(text) {
+            if (!text) return null;
+
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+            let candidates = [];
+
+            // 1. "SN", "S/N", "Serial" 라벨 뒤의 값 찾기
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const lineUpper = line.toUpperCase();
+
+                // 같은 줄에 SN: 값 형태
+                const snMatch = line.match(/(?:S\/N|SN|Serial(?:\s*No)?)[:\s]+([A-Z0-9\-]{6,})/i);
+                if (snMatch) {
+                    candidates.push({ value: snMatch[1], priority: 1 });
+                }
+
+                // "SN" 만 있는 줄이면 다음 줄이 시리얼
+                if (/^(SN|S\/N|Serial)$/i.test(lineUpper) && i + 1 < lines.length) {
+                    const nextLine = lines[i + 1].trim();
+                    if (/^[A-Z0-9\-]{8,}$/i.test(nextLine)) {
+                        candidates.push({ value: nextLine, priority: 1 });
+                    }
+                }
+            }
+
+            // 2. 제조사별 패턴
+            const patterns = [
+                // LG: 숫자+LG+영문숫자 (예: 40LGD5K202209000098)
+                /\b(\d{2,3}LG[A-Z0-9]{10,})\b/gi,
+                // Samsung: 시리얼 패턴
+                /\b([A-Z]{2,4}[0-9]{2}[A-Z0-9]{8,})\b/gi,
+                // Dell: 서비스태그 7자리
+                /\b([A-Z0-9]{7})\b/g,
+                // HP: 3글자+숫자+영숫자
+                /\b([A-Z]{3}[0-9][A-Z0-9]{6,})\b/gi,
+                // 일반: 영문+숫자 혼합 10자리 이상
+                /\b([A-Z]+[0-9]+[A-Z0-9]{8,})\b/gi,
+                /\b([0-9]+[A-Z]+[A-Z0-9]{8,})\b/gi,
+            ];
+
+            for (const pattern of patterns) {
+                const matches = text.match(pattern);
+                if (matches) {
+                    for (const m of matches) {
+                        if (m.length >= 8 && !/^\d+$/.test(m) && !/^[A-Z]+$/i.test(m)) {
+                            candidates.push({ value: m, priority: 2 });
+                        }
+                    }
+                }
+            }
+
+            // 3. 가장 긴 영숫자 조합 (fallback) - 영문+숫자 혼합만
+            const allAlphaNum = text.match(/[A-Z0-9]{10,}/gi);
+            if (allAlphaNum) {
+                for (const m of allAlphaNum) {
+                    if (!/^\d+$/.test(m) && !/^[A-Z]+$/i.test(m) && /[A-Z]/i.test(m) && /[0-9]/.test(m)) {
+                        candidates.push({ value: m, priority: 3 });
+                    }
+                }
+            }
+
+            if (candidates.length === 0) return null;
+
+            // 우선순위 정렬 (낮은 priority 우선, 같으면 긴 것 우선)
+            candidates.sort((a, b) => {
+                if (a.priority !== b.priority) return a.priority - b.priority;
+                return b.value.length - a.value.length;
+            });
+
+            return candidates[0].value;
+        }
 
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -64,7 +153,8 @@
                 preview.src = imageData;
                 preview.style.display = 'block';
                 scanBtn.disabled = false;
-                result.textContent = 'Ready to scan...';
+                serialEl.textContent = '-';
+                rawResultEl.textContent = 'Ready to scan...';
                 status.textContent = '';
                 timeEl.textContent = '';
             };
@@ -75,7 +165,8 @@
             if (!imageData) return;
 
             scanBtn.disabled = true;
-            result.textContent = '';
+            serialEl.textContent = '...';
+            rawResultEl.textContent = '';
             const startTime = Date.now();
 
             try {
@@ -90,12 +181,18 @@
                 });
 
                 const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
-                result.textContent = res.data.text || '(No text detected)';
+                const fullText = res.data.text || '';
+                rawResultEl.textContent = fullText || '(No text detected)';
+
+                const serial = extractSerial(fullText);
+                serialEl.textContent = serial || '(Not found)';
+
                 status.textContent = 'Done!';
                 timeEl.textContent = `Time: ${elapsed}s | Confidence: ${Math.round(res.data.confidence)}%`;
 
             } catch (err) {
-                result.textContent = 'Error: ' + err.message;
+                serialEl.textContent = 'Error';
+                rawResultEl.textContent = 'Error: ' + err.message;
                 status.textContent = 'Failed';
             }
 
