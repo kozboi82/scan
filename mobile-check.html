@@ -53,17 +53,8 @@
             z-index: 100;
         }
 
-        .header-title {
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .header-count {
-            background: rgba(255,255,255,0.2);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-        }
+        .header-title { font-size: 18px; font-weight: 600; }
+        .header-count { background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 13px; }
 
         /* ===== Location Bar ===== */
         .location-bar {
@@ -75,34 +66,12 @@
             border-bottom: 1px solid var(--sju-gray-200);
             cursor: pointer;
         }
-
-        .location-bar:active {
-            background: var(--sju-gray-100);
-        }
-
-        .location-icon {
-            font-size: 18px;
-        }
-
-        .location-text {
-            flex: 1;
-        }
-
-        .location-label {
-            font-size: 11px;
-            color: var(--sju-gray-500);
-        }
-
-        .location-value {
-            font-size: 15px;
-            font-weight: 500;
-            color: var(--sju-gray-800);
-        }
-
-        .location-arrow {
-            color: var(--sju-gray-500);
-            font-size: 14px;
-        }
+        .location-bar:active { background: var(--sju-gray-100); }
+        .location-icon { font-size: 18px; }
+        .location-text { flex: 1; }
+        .location-label { font-size: 11px; color: var(--sju-gray-500); }
+        .location-value { font-size: 15px; font-weight: 500; color: var(--sju-gray-800); }
+        .location-arrow { color: var(--sju-gray-500); font-size: 14px; }
 
         /* ===== Scan Area ===== */
         .scan-area {
@@ -115,50 +84,16 @@
             transition: transform 0.2s;
             box-shadow: var(--shadow-md);
         }
-
-        .scan-area:active {
-            transform: scale(0.98);
-        }
-
-        .scan-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-        }
-
-        .scan-text {
-            color: var(--sju-white);
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        .scan-hint {
-            color: rgba(255,255,255,0.7);
-            font-size: 13px;
-            margin-top: 8px;
-        }
+        .scan-area:active { transform: scale(0.98); }
+        .scan-icon { font-size: 48px; margin-bottom: 12px; }
+        .scan-text { color: var(--sju-white); font-size: 16px; font-weight: 500; }
+        .scan-hint { color: rgba(255,255,255,0.7); font-size: 13px; margin-top: 8px; }
 
         /* ===== Results Section ===== */
-        .results-section {
-            padding: 0 16px 100px;
-        }
-
-        .results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 4px;
-        }
-
-        .results-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--sju-gray-700);
-        }
-
-        .results-count {
-            font-size: 13px;
-            color: var(--sju-gray-500);
-        }
+        .results-section { padding: 0 16px 100px; }
+        .results-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 4px; }
+        .results-title { font-size: 14px; font-weight: 600; color: var(--sju-gray-700); }
+        .results-count { font-size: 13px; color: var(--sju-gray-500); }
 
         /* ===== Result Item ===== */
         .result-item {
@@ -173,58 +108,26 @@
             cursor: pointer;
             transition: background 0.2s;
         }
-
-        .result-item:active {
-            background: var(--sju-gray-100);
-        }
-
+        .result-item:active { background: var(--sju-gray-100); }
         .result-status {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            flex-shrink: 0;
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; flex-shrink: 0;
         }
-
         .result-status.ok { background: var(--sju-success-bg); }
         .result-status.move { background: #e0f2fe; }
         .result-status.warning { background: var(--sju-warning-bg); }
         .result-status.error { background: var(--sju-danger-bg); }
         .result-status.pending { background: var(--sju-gray-200); }
         .result-status.new { background: #ede9fe; }
-
-        .result-info {
-            flex: 1;
-            min-width: 0;
-        }
-
+        .result-info { flex: 1; min-width: 0; }
         .result-serial {
             font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--sju-gray-800);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 14px; font-weight: 600; color: var(--sju-gray-800);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
-
-        .result-detail {
-            font-size: 12px;
-            color: var(--sju-gray-600);
-            margin-top: 2px;
-        }
-
-        .result-badge {
-            font-size: 11px;
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
+        .result-detail { font-size: 12px; color: var(--sju-gray-600); margin-top: 2px; }
+        .result-badge { font-size: 11px; padding: 3px 8px; border-radius: 10px; font-weight: 500; white-space: nowrap; }
         .badge-ok { background: var(--sju-success-bg); color: var(--sju-success); }
         .badge-move { background: #e0f2fe; color: #0284c7; }
         .badge-repair { background: var(--sju-warning-bg); color: #d97706; }
@@ -232,304 +135,156 @@
         .badge-lost { background: #ffedd5; color: #ea580c; }
         .badge-delivery { background: #dbeafe; color: #2563eb; }
         .badge-unregistered { background: var(--sju-gray-200); color: var(--sju-gray-700); }
+        .badge-registered { background: #ede9fe; color: #7c3aed; }
 
         /* ===== Empty State ===== */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--sju-gray-500);
-        }
-
-        .empty-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-            opacity: 0.5;
-        }
-
-        .empty-text {
-            font-size: 14px;
-        }
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--sju-gray-500); }
+        .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+        .empty-text { font-size: 14px; }
 
         /* ===== Bottom Bar ===== */
         .bottom-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            position: fixed; bottom: 0; left: 0; right: 0;
             background: var(--sju-white);
             padding: 12px 16px;
             padding-bottom: max(12px, env(safe-area-inset-bottom));
             border-top: 1px solid var(--sju-gray-200);
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         }
-
         .btn-complete {
-            width: 100%;
-            padding: 16px;
-            background: var(--sju-primary);
-            color: var(--sju-white);
-            border: none;
-            border-radius: var(--radius-md);
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
+            width: 100%; padding: 16px;
+            background: var(--sju-primary); color: var(--sju-white);
+            border: none; border-radius: var(--radius-md);
+            font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: background 0.2s;
         }
-
-        .btn-complete:active {
-            background: var(--sju-primary-hover);
-        }
-
-        .btn-complete:disabled {
-            background: var(--sju-gray-400);
-            cursor: not-allowed;
-        }
+        .btn-complete:active { background: var(--sju-primary-hover); }
+        .btn-complete:disabled { background: #bdbdbd; cursor: not-allowed; }
 
         /* ===== Modal Overlay ===== */
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5);
-            display: none;
-            justify-content: center;
-            align-items: flex-end;
+            display: none; justify-content: center; align-items: flex-end;
             z-index: 1000;
         }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
+        .modal-overlay.active { display: flex; }
         .modal-content {
-            background: var(--sju-white);
-            width: 100%;
-            max-height: 80vh;
+            background: var(--sju-white); width: 100%; max-height: 85vh;
             border-radius: var(--radius-lg) var(--radius-lg) 0 0;
             padding: 20px;
             padding-bottom: max(20px, env(safe-area-inset-bottom));
             animation: slideUp 0.3s ease-out;
             overflow-y: auto;
         }
-
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .modal-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--sju-gray-800);
-        }
-
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .modal-title { font-size: 18px; font-weight: 600; color: var(--sju-gray-800); }
         .modal-close {
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: var(--sju-gray-100);
-            border-radius: 50%;
-            font-size: 20px;
-            color: var(--sju-gray-600);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 32px; height: 32px; border: none;
+            background: var(--sju-gray-100); border-radius: 50%;
+            font-size: 20px; color: var(--sju-gray-600);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
 
         /* ===== Department Select Modal ===== */
-        .dept-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
+        .dept-list { max-height: 300px; overflow-y: auto; }
         .dept-item {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--sju-gray-200);
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 14px 16px; border-bottom: 1px solid var(--sju-gray-200);
+            cursor: pointer; display: flex; justify-content: space-between; align-items: center;
         }
-
-        .dept-item:active {
-            background: var(--sju-gray-100);
-        }
-
-        .dept-item.selected {
-            background: #e8f5e9;
-        }
-
-        .dept-name {
-            font-size: 15px;
-            color: var(--sju-gray-800);
-        }
-
-        .dept-location {
-            font-size: 12px;
-            color: var(--sju-gray-500);
-        }
+        .dept-item:active { background: var(--sju-gray-100); }
+        .dept-item.selected { background: #e8f5e9; }
+        .dept-name { font-size: 15px; color: var(--sju-gray-800); }
+        .dept-location { font-size: 12px; color: var(--sju-gray-500); }
 
         /* ===== Case Popup Modal ===== */
         .case-info {
-            background: var(--sju-gray-100);
-            padding: 16px;
-            border-radius: var(--radius-md);
-            margin-bottom: 16px;
+            background: var(--sju-gray-100); padding: 16px;
+            border-radius: var(--radius-md); margin-bottom: 16px;
         }
-
         .case-serial {
             font-family: 'Consolas', monospace;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--sju-primary);
-            margin-bottom: 8px;
+            font-size: 16px; font-weight: 600; color: var(--sju-primary); margin-bottom: 8px;
         }
-
-        .case-detail {
-            font-size: 13px;
-            color: var(--sju-gray-700);
-            line-height: 1.5;
+        .case-detail { font-size: 13px; color: var(--sju-gray-700); line-height: 1.5; }
+        .case-status-badge {
+            display: inline-block; padding: 4px 10px; border-radius: 12px;
+            font-size: 12px; font-weight: 500; margin-top: 8px;
         }
-
-        .case-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
+        .case-actions { display: flex; flex-direction: column; gap: 10px; }
         .case-btn {
-            padding: 14px 16px;
-            border: none;
-            border-radius: var(--radius-md);
-            font-size: 15px;
-            font-weight: 500;
+            padding: 14px 16px; border: none; border-radius: var(--radius-md);
+            font-size: 15px; font-weight: 500; cursor: pointer; text-align: center;
+        }
+        .case-btn.primary { background: var(--sju-primary); color: var(--sju-white); }
+        .case-btn.secondary { background: var(--sju-gray-200); color: var(--sju-gray-700); }
+        .case-btn.success { background: var(--sju-success); color: var(--sju-white); }
+        .case-btn.warning { background: var(--sju-warning); color: var(--sju-white); }
+        .case-btn.accent { background: var(--sju-accent); color: var(--sju-white); }
+
+        /* ===== Form Styles ===== */
+        .form-group { margin-bottom: 14px; }
+        .form-label { display: block; font-size: 13px; color: var(--sju-gray-700); margin-bottom: 6px; font-weight: 500; }
+        .form-input, .form-select {
+            width: 100%; padding: 12px; border: 1px solid var(--sju-gray-300);
+            border-radius: var(--radius-sm); font-size: 15px;
+        }
+        .form-input:focus, .form-select:focus { outline: none; border-color: var(--sju-primary); }
+
+        /* ===== Multi Serial Select ===== */
+        .serial-select-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px; border: 1px solid var(--sju-gray-300);
+            border-radius: var(--radius-md); margin-bottom: 8px;
             cursor: pointer;
-            text-align: center;
         }
-
-        .case-btn.primary {
-            background: var(--sju-primary);
-            color: var(--sju-white);
-        }
-
-        .case-btn.secondary {
-            background: var(--sju-gray-200);
-            color: var(--sju-gray-700);
-        }
-
-        .case-btn.success {
-            background: var(--sju-success);
-            color: var(--sju-white);
-        }
-
-        .case-btn.warning {
-            background: var(--sju-warning);
-            color: var(--sju-white);
-        }
+        .serial-select-item.selected { border-color: var(--sju-primary); background: #e8f4fd; }
+        .serial-select-item input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--sju-primary); }
+        .serial-select-info { flex: 1; }
+        .serial-select-sn { font-family: 'Consolas', monospace; font-size: 14px; font-weight: 600; }
+        .serial-select-status { font-size: 12px; color: var(--sju-gray-600); margin-top: 2px; }
 
         /* ===== File Input Hidden ===== */
-        .file-input-hidden {
-            display: none;
-        }
+        .file-input-hidden { display: none; }
 
         /* ===== Toast ===== */
         .toast {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
+            position: fixed; bottom: 100px; left: 50%;
             transform: translateX(-50%) translateY(100px);
-            background: rgba(0,0,0,0.8);
-            color: var(--sju-white);
-            padding: 12px 24px;
-            border-radius: 24px;
-            font-size: 14px;
-            opacity: 0;
-            transition: all 0.3s ease;
-            z-index: 2000;
-            pointer-events: none;
+            background: rgba(0,0,0,0.8); color: var(--sju-white);
+            padding: 12px 24px; border-radius: 24px; font-size: 14px;
+            opacity: 0; transition: all 0.3s ease; z-index: 2000; pointer-events: none;
         }
-
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
         /* ===== Loading Overlay ===== */
         .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255,255,255,0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
+            display: none; justify-content: center; align-items: center; flex-direction: column;
             z-index: 3000;
         }
-
-        .loading-overlay.active {
-            display: flex;
-        }
-
+        .loading-overlay.active { display: flex; }
         .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--sju-gray-200);
-            border-top-color: var(--sju-primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            width: 40px; height: 40px;
+            border: 3px solid var(--sju-gray-200); border-top-color: var(--sju-primary);
+            border-radius: 50%; animation: spin 0.8s linear infinite;
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            margin-top: 16px;
-            font-size: 14px;
-            color: var(--sju-gray-600);
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { margin-top: 16px; font-size: 14px; color: var(--sju-gray-600); }
 
         /* ===== API Key Section ===== */
         .api-section {
-            background: var(--sju-white);
-            margin: 16px;
-            padding: 16px;
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-sm);
+            background: var(--sju-white); margin: 16px; padding: 16px;
+            border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
         }
-
-        .api-section label {
-            font-size: 12px;
-            color: var(--sju-gray-600);
-            display: block;
-            margin-bottom: 6px;
-        }
-
+        .api-section label { font-size: 12px; color: var(--sju-gray-600); display: block; margin-bottom: 6px; }
         .api-section input {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--sju-gray-300);
-            border-radius: var(--radius-sm);
-            font-size: 14px;
+            width: 100%; padding: 10px 12px;
+            border: 1px solid var(--sju-gray-300); border-radius: var(--radius-sm); font-size: 14px;
         }
-
-        .api-section input:focus {
-            outline: none;
-            border-color: var(--sju-primary);
-        }
+        .api-section input:focus { outline: none; border-color: var(--sju-primary); }
     </style>
 </head>
 <body>
@@ -540,7 +295,7 @@
     </div>
 
     <!-- Location Bar -->
-    <div class="location-bar" id="locationBar" onclick="openDeptModal()">
+    <div class="location-bar" onclick="openDeptModal()">
         <span class="location-icon">📍</span>
         <div class="location-text">
             <div class="location-label">현재 점검 위치</div>
@@ -549,14 +304,14 @@
         <span class="location-arrow">▶</span>
     </div>
 
-    <!-- API Key Section (테스트용) -->
+    <!-- API Key Section -->
     <div class="api-section">
         <label>Google Vision API Key</label>
         <input type="password" id="apiKey" placeholder="API Key 입력...">
     </div>
 
     <!-- Scan Area -->
-    <div class="scan-area" id="scanArea" onclick="triggerScan()">
+    <div class="scan-area" onclick="triggerScan()">
         <div class="scan-icon">📷</div>
         <div class="scan-text">탭하여 스캔</div>
         <div class="scan-hint">라벨을 촬영하면 자동으로 인식됩니다</div>
@@ -597,9 +352,12 @@
 
     <!-- Case Popup Modal -->
     <div class="modal-overlay" id="caseModal">
-        <div class="modal-content" id="caseModalContent">
-            <!-- Dynamic content -->
-        </div>
+        <div class="modal-content" id="caseModalContent"></div>
+    </div>
+
+    <!-- Multi Serial Select Modal -->
+    <div class="modal-overlay" id="multiSerialModal">
+        <div class="modal-content" id="multiSerialContent"></div>
     </div>
 
     <!-- Toast -->
@@ -615,60 +373,49 @@
     <script src="js/mock-data.js"></script>
     <script>
         // ===== State =====
-        let currentDeptCode = null;
-        let scannedItems = [];
+        var currentDeptCode = null;
+        var scannedItems = [];
+        var tempRegistrations = {}; // 간편등록 임시 저장
+
+        // ===== 장비 유형/제조사 목록 =====
+        var ASSET_TYPES = ['PC', '노트북', '모니터', '프린터', '태블릿', '기타'];
+        var MANUFACTURERS = ['LG', 'Samsung', 'Dell', 'HP', 'Lenovo', 'Apple', '기타'];
 
         // ===== Initialization =====
         document.addEventListener('DOMContentLoaded', function() {
-            // Load saved API key
-            const savedKey = localStorage.getItem('google_vision_api_key');
+            var savedKey = localStorage.getItem('google_vision_api_key');
             if (savedKey) {
                 document.getElementById('apiKey').value = savedKey;
             }
-
-            // Save API key on change
             document.getElementById('apiKey').addEventListener('change', function() {
                 localStorage.setItem('google_vision_api_key', this.value);
             });
-
-            // File input change handler
             document.getElementById('fileInput').addEventListener('change', handleFileSelect);
-
-            // Initialize department list
             initDeptList();
         });
 
         // ===== Department Functions =====
         async function initDeptList() {
-            const depts = await getDepartments();
-            const listEl = document.getElementById('deptList');
-            listEl.innerHTML = depts.map(d =>
-                '<div class="dept-item" data-code="' + d.code + '" onclick="selectDept(\'' + d.code + '\')">' +
-                    '<div>' +
-                        '<div class="dept-name">' + d.name + '</div>' +
-                        '<div class="dept-location">' + d.building + ' ' + d.floor + '</div>' +
-                    '</div>' +
-                '</div>'
-            ).join('');
+            var depts = await getDepartments();
+            var listEl = document.getElementById('deptList');
+            listEl.innerHTML = depts.map(function(d) {
+                return '<div class="dept-item" onclick="selectDept(\'' + d.code + '\')">' +
+                    '<div><div class="dept-name">' + d.name + '</div>' +
+                    '<div class="dept-location">' + d.building + ' ' + d.floor + '</div></div></div>';
+            }).join('');
         }
 
-        function openDeptModal() {
-            document.getElementById('deptModal').classList.add('active');
-        }
-
-        function closeDeptModal() {
-            document.getElementById('deptModal').classList.remove('active');
-        }
+        function openDeptModal() { document.getElementById('deptModal').classList.add('active'); }
+        function closeDeptModal() { document.getElementById('deptModal').classList.remove('active'); }
 
         function selectDept(code) {
             currentDeptCode = code;
-            const depts = Object.values(MOCK_DEPARTMENTS);
-            const dept = depts.find(function(d) { return d.code === code; });
+            var dept = MOCK_DEPARTMENTS[code];
             if (dept) {
                 document.getElementById('currentDept').textContent = dept.building + ' > ' + dept.name;
             }
             closeDeptModal();
-            showToast('점검 위치가 설정되었습니다');
+            showToast('점검 위치: ' + dept.name);
         }
 
         // ===== Scan Functions =====
@@ -678,29 +425,24 @@
                 openDeptModal();
                 return;
             }
-
-            const apiKey = document.getElementById('apiKey').value;
+            var apiKey = document.getElementById('apiKey').value;
             if (!apiKey) {
                 showToast('API Key를 입력하세요');
                 return;
             }
-
             document.getElementById('fileInput').click();
         }
 
         async function handleFileSelect(e) {
-            const file = e.target.files[0];
+            var file = e.target.files[0];
             if (!file) return;
 
             showLoading(true);
 
             try {
-                // Resize image
-                const resized = await resizeImage(file, 1280);
-
-                // Call Google Vision API
-                const apiKey = document.getElementById('apiKey').value;
-                const text = await callVisionAPI(resized.base64, apiKey);
+                var resized = await resizeImage(file, 1280);
+                var apiKey = document.getElementById('apiKey').value;
+                var text = await callVisionAPI(resized.base64, apiKey);
 
                 if (!text) {
                     showToast('텍스트를 인식하지 못했습니다');
@@ -708,42 +450,126 @@
                     return;
                 }
 
-                // Extract serials
-                const serials = extractSerials(text);
+                var serials = extractSerials(text);
                 if (serials.length === 0) {
                     showToast('시리얼 번호를 찾지 못했습니다');
                     showLoading(false);
                     return;
                 }
 
-                // Process each serial
-                for (const serial of serials) {
-                    await processSerial(serial);
+                // 다중 시리얼인 경우 선택 UI 표시
+                if (serials.length > 1) {
+                    showLoading(false);
+                    showMultiSerialModal(serials);
+                } else {
+                    await processSerial(serials[0]);
+                    updateUI();
+                    showToast('시리얼 인식 완료');
+                    showLoading(false);
                 }
-
-                updateUI();
-                showToast(serials.length + '개 시리얼 인식됨');
 
             } catch (err) {
                 console.error(err);
                 showToast('오류: ' + err.message);
+                showLoading(false);
             }
 
-            showLoading(false);
-            e.target.value = '';  // Reset file input
+            e.target.value = '';
         }
 
+        // ===== Multi Serial Select =====
+        function showMultiSerialModal(serials) {
+            var modal = document.getElementById('multiSerialModal');
+            var content = document.getElementById('multiSerialContent');
+
+            var html = '<div class="modal-header">' +
+                '<span class="modal-title">인식된 시리얼 (' + serials.length + '개)</span>' +
+                '<button class="modal-close" onclick="closeMultiSerialModal()">×</button>' +
+            '</div>';
+
+            html += '<p style="font-size:13px;color:var(--sju-gray-600);margin-bottom:12px;">추가할 시리얼을 선택하세요</p>';
+
+            html += '<div id="serialSelectList">';
+            serials.forEach(function(sn, idx) {
+                html += '<div class="serial-select-item selected" onclick="toggleSerialSelect(' + idx + ')">' +
+                    '<input type="checkbox" checked data-serial="' + sn + '">' +
+                    '<div class="serial-select-info">' +
+                        '<div class="serial-select-sn">' + sn + '</div>' +
+                        '<div class="serial-select-status">조회 중...</div>' +
+                    '</div>' +
+                '</div>';
+            });
+            html += '</div>';
+
+            html += '<div class="case-actions" style="margin-top:16px;">' +
+                '<button class="case-btn primary" onclick="processSelectedSerials()">선택 항목 추가</button>' +
+                '<button class="case-btn secondary" onclick="closeMultiSerialModal()">취소</button>' +
+            '</div>';
+
+            content.innerHTML = html;
+            modal.classList.add('active');
+
+            // 각 시리얼 상태 조회
+            serials.forEach(function(sn, idx) {
+                lookupSerial(sn, currentDeptCode).then(function(result) {
+                    var statusText = getStatusText(result.case, result.data);
+                    var statusEl = document.querySelectorAll('.serial-select-status')[idx];
+                    if (statusEl) statusEl.textContent = statusText;
+                });
+            });
+        }
+
+        function toggleSerialSelect(idx) {
+            var items = document.querySelectorAll('.serial-select-item');
+            var item = items[idx];
+            var checkbox = item.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            item.classList.toggle('selected', checkbox.checked);
+        }
+
+        async function processSelectedSerials() {
+            var checkboxes = document.querySelectorAll('#serialSelectList input[type="checkbox"]:checked');
+            var count = 0;
+
+            for (var i = 0; i < checkboxes.length; i++) {
+                var serial = checkboxes[i].getAttribute('data-serial');
+                await processSerial(serial);
+                count++;
+            }
+
+            closeMultiSerialModal();
+            updateUI();
+            showToast(count + '개 시리얼 추가됨');
+        }
+
+        function closeMultiSerialModal() {
+            document.getElementById('multiSerialModal').classList.remove('active');
+        }
+
+        function getStatusText(caseType, data) {
+            switch (caseType) {
+                case 'A1-1': return '정상 (같은 부서)';
+                case 'A1-2': return '수리중 (같은 부서)';
+                case 'A1-3': return '폐기됨';
+                case 'A1-4': return '분실 상태';
+                case 'A2-1': return '이동 필요 (' + (data ? data.dept : '') + ')';
+                case 'A2-2': return '이동+수리중';
+                case 'B1': return '납품 대기';
+                case 'C1': return '미등록 자산';
+                default: return '확인 필요';
+            }
+        }
+
+        // ===== Process Serial =====
         async function processSerial(serial) {
-            // Check for duplicate
             if (scannedItems.some(function(item) { return item.serial === serial; })) {
-                showToast(serial + ' - 이미 스캔됨');
+                showToast(serial.substring(0, 10) + '... 이미 스캔됨');
                 return;
             }
 
-            // Lookup serial
-            const result = await lookupSerial(serial, currentDeptCode);
+            var result = await lookupSerial(serial, currentDeptCode);
 
-            const item = {
+            var item = {
                 serial: serial,
                 case: result.case,
                 data: result.data,
@@ -752,26 +578,27 @@
                 timestamp: new Date()
             };
 
-            // Auto-process simple cases
+            // A1-1만 자동 완료 처리
             if (result.case === 'A1-1') {
                 item.status = 'ok';
             }
 
             scannedItems.push(item);
 
-            // Show popup for non-simple cases
-            if (result.case !== 'A1-1' && result.case !== 'C1') {
+            // 모든 케이스에서 팝업 표시 (A1-1 제외)
+            if (result.case !== 'A1-1') {
                 showCasePopup(item);
             }
         }
 
         // ===== Case Popup =====
         function showCasePopup(item) {
-            const modal = document.getElementById('caseModal');
-            const content = document.getElementById('caseModalContent');
+            var modal = document.getElementById('caseModal');
+            var content = document.getElementById('caseModalContent');
+            var currentDept = MOCK_DEPARTMENTS[currentDeptCode];
 
-            let html = '<div class="modal-header">' +
-                '<span class="modal-title">확인 필요</span>' +
+            var html = '<div class="modal-header">' +
+                '<span class="modal-title">' + getCaseTitle(item.case) + '</span>' +
                 '<button class="modal-close" onclick="closeCaseModal()">×</button>' +
             '</div>';
 
@@ -782,49 +609,69 @@
                 html += '<div class="case-detail">' +
                     item.data.model + ' | ' + item.data.assetType + '<br>' +
                     '등록 부서: ' + item.data.dept;
-                if (item.data.user) {
-                    html += ' | ' + item.data.user;
-                }
+                if (item.data.user) html += ' | ' + item.data.user;
                 html += '</div>';
+                html += '<span class="case-status-badge ' + getStatusBadgeClass(item.case) + '">' + getStatusBadgeText(item.case) + '</span>';
+            } else {
+                html += '<div class="case-detail">등록되지 않은 자산입니다</div>';
             }
             html += '</div>';
 
-            // Case-specific actions
             html += '<div class="case-actions">';
 
             switch (item.case) {
+                case 'A1-1': // 정상
+                    html += '<p style="font-size:14px;color:var(--sju-success);margin-bottom:10px;">✓ 정상 처리되었습니다</p>';
+                    html += '<button class="case-btn primary" onclick="closeCaseModal()">확인</button>';
+                    break;
+
                 case 'A1-2': // 수리중 (같은 부서)
                     html += '<button class="case-btn success" onclick="handleCase(\'' + item.serial + '\', \'repair-complete\')">수리완료 처리</button>';
-                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'keep\')">수리중 유지</button>';
+                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'keep-repair\')">수리중 유지 (점검완료)</button>';
                     break;
 
                 case 'A1-3': // 폐기
-                    html += '<button class="case-btn warning" onclick="handleCase(\'' + item.serial + '\', \'cancel-dispose\')">폐기 취소</button>';
-                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'keep\')">폐기 유지 (경고)</button>';
+                    html += '<p style="font-size:13px;color:var(--sju-danger);margin-bottom:10px;">⚠️ 폐기된 자산이 발견되었습니다</p>';
+                    html += '<button class="case-btn warning" onclick="handleCase(\'' + item.serial + '\', \'cancel-dispose\')">폐기 취소 (복구)</button>';
+                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'confirm-dispose\')">폐기 확인 (경고 기록)</button>';
                     break;
 
                 case 'A1-4': // 분실
+                    html += '<p style="font-size:13px;color:var(--sju-warning);margin-bottom:10px;">🔍 분실 신고된 자산이 발견되었습니다!</p>';
                     html += '<button class="case-btn success" onclick="handleCase(\'' + item.serial + '\', \'recover\')">분실 복구</button>';
-                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'keep\')">분실 유지</button>';
+                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'keep-lost\')">분실 유지</button>';
                     break;
 
                 case 'A2-1': // 이동
-                    var currentDept = MOCK_DEPARTMENTS[currentDeptCode];
+                    html += '<p style="font-size:13px;color:var(--sju-gray-600);margin-bottom:10px;">' +
+                        item.data.dept + ' → ' + currentDept.name + ' 이동</p>';
                     html += '<button class="case-btn primary" onclick="handleCase(\'' + item.serial + '\', \'move\')">' + currentDept.name + '으로 이동</button>';
-                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'keep\')">' + item.data.dept + ' 유지</button>';
+                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'keep-dept\')">' + item.data.dept + ' 유지</button>';
                     break;
 
                 case 'A2-2': // 이동 + 수리중
-                    var currentDept2 = MOCK_DEPARTMENTS[currentDeptCode];
-                    html += '<p style="font-size:13px;color:var(--sju-gray-600);margin-bottom:10px;">부서 이동과 상태 변경을 선택하세요</p>';
-                    html += '<button class="case-btn primary" onclick="handleCase(\'' + item.serial + '\', \'move-repair\')">이동 + 수리완료</button>';
+                    html += '<p style="font-size:13px;color:var(--sju-gray-600);margin-bottom:10px;">' +
+                        '부서: ' + item.data.dept + ' → ' + currentDept.name + '<br>상태: 수리중</p>';
+                    html += '<button class="case-btn success" onclick="handleCase(\'' + item.serial + '\', \'move-repair\')">이동 + 수리완료</button>';
                     html += '<button class="case-btn primary" onclick="handleCase(\'' + item.serial + '\', \'move-only\')">이동만 (수리중 유지)</button>';
-                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'keep\')">현재 상태 유지</button>';
+                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'keep-all\')">현재 상태 유지</button>';
                     break;
 
                 case 'B1': // 납품 매칭
+                    html += '<p style="font-size:13px;color:#2563eb;margin-bottom:10px;">📦 납품 예정 목록과 일치합니다</p>';
+                    if (item.data) {
+                        html += '<p style="font-size:12px;color:var(--sju-gray-600);margin-bottom:10px;">' +
+                            '모델: ' + item.data.model + '<br>납품예정: ' + item.data.expectedDate + '</p>';
+                    }
                     html += '<button class="case-btn success" onclick="handleCase(\'' + item.serial + '\', \'receive\')">입고 확인</button>';
-                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'skip\')">나중에 처리</button>';
+                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'skip-delivery\')">나중에 처리</button>';
+                    break;
+
+                case 'C1': // 미등록
+                    html += '<p style="font-size:13px;color:var(--sju-gray-600);margin-bottom:10px;">등록되지 않은 자산입니다. 등록 방법을 선택하세요.</p>';
+                    html += '<button class="case-btn accent" onclick="showQuickRegister(\'' + item.serial + '\')">간편 등록</button>';
+                    html += '<button class="case-btn primary" onclick="handleCase(\'' + item.serial + '\', \'register-later\')">나중에 등록 (PC에서)</button>';
+                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'skip-unregistered\')">건너뛰기</button>';
                     break;
 
                 default:
@@ -837,51 +684,180 @@
             modal.classList.add('active');
         }
 
+        function getCaseTitle(caseType) {
+            switch (caseType) {
+                case 'A1-1': return '정상';
+                case 'A1-2': return '수리중 자산';
+                case 'A1-3': return '폐기 자산 발견';
+                case 'A1-4': return '분실 자산 발견';
+                case 'A2-1': return '부서 이동';
+                case 'A2-2': return '부서 이동 + 수리중';
+                case 'B1': return '납품 매칭';
+                case 'C1': return '미등록 자산';
+                default: return '확인 필요';
+            }
+        }
+
+        function getStatusBadgeClass(caseType) {
+            switch (caseType) {
+                case 'A1-1': return 'badge-ok';
+                case 'A1-2': return 'badge-repair';
+                case 'A1-3': return 'badge-dispose';
+                case 'A1-4': return 'badge-lost';
+                case 'A2-1': case 'A2-2': return 'badge-move';
+                case 'B1': return 'badge-delivery';
+                default: return 'badge-unregistered';
+            }
+        }
+
+        function getStatusBadgeText(caseType) {
+            switch (caseType) {
+                case 'A1-1': return '정상';
+                case 'A1-2': return '수리중';
+                case 'A1-3': return '폐기';
+                case 'A1-4': return '분실';
+                case 'A2-1': return '이동 필요';
+                case 'A2-2': return '이동+수리';
+                case 'B1': return '납품 대기';
+                default: return '미등록';
+            }
+        }
+
         function closeCaseModal() {
             document.getElementById('caseModal').classList.remove('active');
             updateUI();
         }
 
+        // ===== Quick Register (간편등록) =====
+        function showQuickRegister(serial) {
+            var content = document.getElementById('caseModalContent');
+            var currentDept = MOCK_DEPARTMENTS[currentDeptCode];
+
+            var html = '<div class="modal-header">' +
+                '<span class="modal-title">간편 등록</span>' +
+                '<button class="modal-close" onclick="closeCaseModal()">×</button>' +
+            '</div>';
+
+            html += '<div class="case-info">' +
+                '<div class="case-serial">' + serial + '</div>' +
+                '<div class="case-detail">등록 위치: ' + currentDept.name + '</div>' +
+            '</div>';
+
+            html += '<div class="form-group">' +
+                '<label class="form-label">장비 유형 *</label>' +
+                '<select class="form-select" id="regAssetType">' +
+                '<option value="">선택하세요</option>';
+            ASSET_TYPES.forEach(function(t) { html += '<option value="' + t + '">' + t + '</option>'; });
+            html += '</select></div>';
+
+            html += '<div class="form-group">' +
+                '<label class="form-label">제조사 *</label>' +
+                '<select class="form-select" id="regManufacturer">' +
+                '<option value="">선택하세요</option>';
+            MANUFACTURERS.forEach(function(m) { html += '<option value="' + m + '">' + m + '</option>'; });
+            html += '</select></div>';
+
+            html += '<div class="form-group">' +
+                '<label class="form-label">모델명</label>' +
+                '<input type="text" class="form-input" id="regModel" placeholder="예: LG 그램 15">' +
+            '</div>';
+
+            html += '<div class="case-actions">' +
+                '<button class="case-btn accent" onclick="submitQuickRegister(\'' + serial + '\')">등록</button>' +
+                '<button class="case-btn secondary" onclick="showCasePopup(scannedItems.find(function(i){return i.serial===\'' + serial + '\'}))">뒤로</button>' +
+            '</div>';
+
+            content.innerHTML = html;
+        }
+
+        function submitQuickRegister(serial) {
+            var assetType = document.getElementById('regAssetType').value;
+            var manufacturer = document.getElementById('regManufacturer').value;
+            var model = document.getElementById('regModel').value;
+
+            if (!assetType || !manufacturer) {
+                showToast('장비 유형과 제조사를 선택하세요');
+                return;
+            }
+
+            // 임시 저장
+            tempRegistrations[serial] = {
+                serial: serial,
+                assetType: assetType,
+                manufacturer: manufacturer,
+                model: model || (manufacturer + ' ' + assetType),
+                dept: MOCK_DEPARTMENTS[currentDeptCode].name,
+                deptCode: currentDeptCode,
+                registeredAt: new Date()
+            };
+
+            // 상태 업데이트
+            var item = scannedItems.find(function(i) { return i.serial === serial; });
+            if (item) {
+                item.status = 'new';
+                item.action = 'quick-register';
+                item.registrationData = tempRegistrations[serial];
+            }
+
+            closeCaseModal();
+            showToast('간편 등록 완료');
+        }
+
+        // ===== Handle Case Actions =====
         function handleCase(serial, action) {
             var item = scannedItems.find(function(i) { return i.serial === serial; });
             if (!item) return;
 
             switch (action) {
+                // 정상 처리
                 case 'repair-complete':
-                    item.status = 'ok';
-                    item.action = 'repair-complete';
-                    break;
                 case 'recover':
+                case 'cancel-dispose':
                     item.status = 'ok';
-                    item.action = 'recover';
+                    item.action = action;
                     break;
+
+                // 이동 처리
                 case 'move':
-                    item.status = 'move';
-                    item.action = 'move';
-                    item.targetDept = currentDeptCode;
-                    break;
                 case 'move-repair':
-                    item.status = 'move';
-                    item.action = 'move-repair';
-                    item.targetDept = currentDeptCode;
-                    break;
                 case 'move-only':
                     item.status = 'move';
-                    item.action = 'move-only';
+                    item.action = action;
                     item.targetDept = currentDeptCode;
                     break;
+
+                // 입고 확인
                 case 'receive':
                     item.status = 'new';
                     item.action = 'receive';
                     break;
-                case 'cancel-dispose':
-                    item.status = 'warning';
-                    item.action = 'cancel-dispose';
+
+                // 나중에 등록 (PC에서)
+                case 'register-later':
+                    item.status = 'new';
+                    item.action = 'register-later';
                     break;
-                case 'keep':
-                case 'skip':
-                    item.status = 'pending';
+
+                // 상태 유지하며 점검 완료 처리
+                case 'keep-repair':
+                case 'keep-lost':
+                case 'keep-dept':
+                case 'keep-all':
+                case 'confirm-dispose':
+                    item.status = 'warning';  // 경고 상태로 표시하되 점검은 완료
+                    item.action = action;
                     break;
+
+                // 건너뛰기 (이번 점검에서 제외)
+                case 'skip-delivery':
+                case 'skip-unregistered':
+                    // 리스트에서 제거
+                    var idx = scannedItems.indexOf(item);
+                    if (idx > -1) scannedItems.splice(idx, 1);
+                    closeCaseModal();
+                    updateUI();
+                    showToast('건너뛰기 처리됨');
+                    return;
             }
 
             closeCaseModal();
@@ -890,14 +866,20 @@
 
         // ===== UI Update =====
         function updateUI() {
-            const count = scannedItems.length;
+            var count = scannedItems.length;
+            var pendingCount = scannedItems.filter(function(i) { return i.status === 'pending'; }).length;
 
             document.getElementById('headerCount').textContent = count + '건';
             document.getElementById('resultsCount').textContent = count + '건';
             document.getElementById('btnComplete').disabled = count === 0;
-            document.getElementById('btnComplete').textContent = '점검 완료 (' + count + '건)';
 
-            const listEl = document.getElementById('resultsList');
+            if (pendingCount > 0) {
+                document.getElementById('btnComplete').textContent = '점검 완료 (' + count + '건, 미처리 ' + pendingCount + '건)';
+            } else {
+                document.getElementById('btnComplete').textContent = '점검 완료 (' + count + '건)';
+            }
+
+            var listEl = document.getElementById('resultsList');
 
             if (count === 0) {
                 listEl.innerHTML = '<div class="empty-state">' +
@@ -909,7 +891,7 @@
 
             listEl.innerHTML = scannedItems.map(function(item) {
                 var statusIcon = getStatusIcon(item.status);
-                var statusClass = getStatusClass(item.status);
+                var statusClass = item.status;
                 var badge = getBadge(item);
                 var detail = getDetail(item);
 
@@ -935,25 +917,22 @@
             }
         }
 
-        function getStatusClass(status) {
-            switch (status) {
-                case 'ok': return 'ok';
-                case 'move': return 'move';
-                case 'warning': return 'warning';
-                case 'error': return 'error';
-                case 'new': return 'new';
-                default: return 'pending';
-            }
-        }
-
         function getBadge(item) {
+            // 처리 완료된 상태 표시
+            if (item.action === 'quick-register' || item.action === 'register-later') {
+                return { class: 'badge-registered', text: '등록' };
+            }
+            if (item.action === 'receive') {
+                return { class: 'badge-delivery', text: '입고' };
+            }
+
             switch (item.case) {
                 case 'A1-1': return { class: 'badge-ok', text: '정상' };
-                case 'A1-2': return { class: 'badge-repair', text: '수리중' };
+                case 'A1-2': return { class: 'badge-repair', text: item.action === 'repair-complete' ? '수리완료' : '수리중' };
                 case 'A1-3': return { class: 'badge-dispose', text: '폐기' };
-                case 'A1-4': return { class: 'badge-lost', text: '분실' };
+                case 'A1-4': return { class: 'badge-lost', text: item.action === 'recover' ? '복구' : '분실' };
                 case 'A2-1': return { class: 'badge-move', text: '이동' };
-                case 'A2-2': return { class: 'badge-repair', text: '이동+수리' };
+                case 'A2-2': return { class: 'badge-move', text: '이동' };
                 case 'B1': return { class: 'badge-delivery', text: '납품' };
                 case 'C1': return { class: 'badge-unregistered', text: '미등록' };
                 default: return { class: 'badge-unregistered', text: '확인필요' };
@@ -961,6 +940,9 @@
         }
 
         function getDetail(item) {
+            if (item.registrationData) {
+                return item.registrationData.model + ' | ' + item.registrationData.dept;
+            }
             if (item.data) {
                 return item.data.model + ' | ' + (item.data.dept || '미정');
             }
@@ -969,9 +951,7 @@
 
         function showItemDetail(serial) {
             var item = scannedItems.find(function(i) { return i.serial === serial; });
-            if (item) {
-                showCasePopup(item);
-            }
+            if (item) showCasePopup(item);
         }
 
         // ===== Complete Check =====
@@ -982,14 +962,26 @@
                 return;
             }
 
-            // In real implementation, this would submit to server
-            showToast('점검이 완료되었습니다! (' + scannedItems.length + '건)');
+            // 결과 요약
+            var okCount = scannedItems.filter(function(i) { return i.status === 'ok'; }).length;
+            var moveCount = scannedItems.filter(function(i) { return i.status === 'move'; }).length;
+            var newCount = scannedItems.filter(function(i) { return i.status === 'new'; }).length;
+            var warnCount = scannedItems.filter(function(i) { return i.status === 'warning'; }).length;
 
-            // Reset for demo
+            var summary = '점검 완료!\n';
+            summary += '정상: ' + okCount + '건';
+            if (moveCount > 0) summary += ', 이동: ' + moveCount + '건';
+            if (newCount > 0) summary += ', 등록: ' + newCount + '건';
+            if (warnCount > 0) summary += ', 경고: ' + warnCount + '건';
+
+            showToast(summary);
+
+            // 3초 후 리셋
             setTimeout(function() {
                 scannedItems = [];
+                tempRegistrations = {};
                 updateUI();
-            }, 2000);
+            }, 3000);
         }
 
         // ===== Utility Functions =====
@@ -997,9 +989,7 @@
             var toast = document.getElementById('toast');
             toast.textContent = message;
             toast.classList.add('show');
-            setTimeout(function() {
-                toast.classList.remove('show');
-            }, 2500);
+            setTimeout(function() { toast.classList.remove('show'); }, 2500);
         }
 
         function showLoading(show) {
@@ -1014,29 +1004,16 @@
                     var img = new Image();
                     img.onload = function() {
                         var canvas = document.createElement('canvas');
-                        var width = img.width;
-                        var height = img.height;
-
+                        var width = img.width, height = img.height;
                         if (width > maxWidth) {
                             height = Math.round((height * maxWidth) / width);
                             width = maxWidth;
                         }
-
                         canvas.width = width;
                         canvas.height = height;
-
-                        var ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-
+                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
                         var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                        var base64 = dataUrl.split(',')[1];
-
-                        resolve({
-                            dataUrl: dataUrl,
-                            base64: base64,
-                            width: width,
-                            height: height
-                        });
+                        resolve({ dataUrl: dataUrl, base64: dataUrl.split(',')[1], width: width, height: height });
                     };
                     img.src = e.target.result;
                 };
@@ -1050,33 +1027,20 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    requests: [{
-                        image: { content: base64 },
-                        features: [{ type: 'TEXT_DETECTION' }]
-                    }]
+                    requests: [{ image: { content: base64 }, features: [{ type: 'TEXT_DETECTION' }] }]
                 })
             });
-
             var data = await response.json();
-            if (data.error) {
-                throw new Error(data.error.message);
-            }
-
+            if (data.error) throw new Error(data.error.message);
             var textAnnotations = data.responses[0] && data.responses[0].textAnnotations;
-            if (textAnnotations && textAnnotations.length > 0) {
-                return textAnnotations[0].description;
-            }
-            return null;
+            return textAnnotations && textAnnotations.length > 0 ? textAnnotations[0].description : null;
         }
 
-        // ===== Serial Extraction (Multi) =====
+        // ===== Serial Extraction =====
         function extractSerials(text) {
             if (!text) return [];
-
             var excludeWords = /^(number|serial|model|part|product|type|version|no|sn|id|null|test|match|barcode|qr|code)$/i;
             var candidates = [];
-
-            // High priority patterns
             var patterns = [
                 /\b(\d{2,3}LG[A-Z]\d[A-Z][A-Z0-9]{10,})\b/gi,
                 /\b(G[12]L\d{3}E\d{5}-\d{5})\b/gi,
@@ -1086,29 +1050,19 @@
                 /\b([A-Z]{2,4}\d{2,4}[A-Z0-9]{6,})\b/gi,
                 /\b(\d{3}[A-Z]{2,4}[A-Z0-9]{6,})\b/gi
             ];
-
             patterns.forEach(function(pattern) {
                 var matches = text.match(pattern);
                 if (matches) {
                     matches.forEach(function(m) {
-                        if (!excludeWords.test(m) && m.length >= 10) {
-                            candidates.push(m);
-                        }
+                        if (!excludeWords.test(m) && m.length >= 10) candidates.push(m);
                     });
                 }
             });
-
-            // Remove duplicates
-            var unique = [];
-            var seen = {};
+            var unique = [], seen = {};
             candidates.forEach(function(c) {
-                if (!seen[c]) {
-                    seen[c] = true;
-                    unique.push(c);
-                }
+                if (!seen[c]) { seen[c] = true; unique.push(c); }
             });
-
-            return unique.slice(0, 5);  // Max 5 serials
+            return unique.slice(0, 5);
         }
     </script>
 </body>
