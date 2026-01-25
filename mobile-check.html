@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>자산 점검</title>
+    <style>
+        /* ===== SJU Design System Variables ===== */
+        :root {
+            --sju-primary: #11306E;
+            --sju-primary-hover: #0a1f4a;
+            --sju-accent: #E6007E;
+            --sju-success: #00978E;
+            --sju-success-bg: #e0f2f1;
+            --sju-warning: #f59e0b;
+            --sju-warning-bg: #fef3c7;
+            --sju-danger: #ef4444;
+            --sju-danger-bg: #fee2e2;
+            --sju-gray-100: #f5f5f5;
+            --sju-gray-200: #eeeeee;
+            --sju-gray-300: #e0e0e0;
+            --sju-gray-500: #9e9e9e;
+            --sju-gray-600: #757575;
+            --sju-gray-700: #616161;
+            --sju-gray-800: #424242;
+            --sju-white: #ffffff;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Pretendard', 'Malgun Gothic', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--sju-gray-100);
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ===== Header ===== */
+        .header {
+            background-color: var(--sju-primary);
+            color: var(--sju-white);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .header-count {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        /* ===== Location Bar ===== */
+        .location-bar {
+            background: var(--sju-white);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--sju-gray-200);
+            cursor: pointer;
+        }
+
+        .location-bar:active {
+            background: var(--sju-gray-100);
+        }
+
+        .location-icon {
+            font-size: 18px;
+        }
+
+        .location-text {
+            flex: 1;
+        }
+
+        .location-label {
+            font-size: 11px;
+            color: var(--sju-gray-500);
+        }
+
+        .location-value {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--sju-gray-800);
+        }
+
+        .location-arrow {
+            color: var(--sju-gray-500);
+            font-size: 14px;
+        }
+
+        /* ===== Scan Area ===== */
+        .scan-area {
+            background: linear-gradient(135deg, var(--sju-primary) 0%, #1a4a9e 100%);
+            margin: 16px;
+            padding: 30px 20px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: var(--shadow-md);
+        }
+
+        .scan-area:active {
+            transform: scale(0.98);
+        }
+
+        .scan-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .scan-text {
+            color: var(--sju-white);
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .scan-hint {
+            color: rgba(255,255,255,0.7);
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        /* ===== Results Section ===== */
+        .results-section {
+            padding: 0 16px 100px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 4px;
+        }
+
+        .results-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--sju-gray-700);
+        }
+
+        .results-count {
+            font-size: 13px;
+            color: var(--sju-gray-500);
+        }
+
+        /* ===== Result Item ===== */
+        .result-item {
+            background: var(--sju-white);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .result-item:active {
+            background: var(--sju-gray-100);
+        }
+
+        .result-status {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .result-status.ok { background: var(--sju-success-bg); }
+        .result-status.move { background: #e0f2fe; }
+        .result-status.warning { background: var(--sju-warning-bg); }
+        .result-status.error { background: var(--sju-danger-bg); }
+        .result-status.pending { background: var(--sju-gray-200); }
+        .result-status.new { background: #ede9fe; }
+
+        .result-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .result-serial {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--sju-gray-800);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .result-detail {
+            font-size: 12px;
+            color: var(--sju-gray-600);
+            margin-top: 2px;
+        }
+
+        .result-badge {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .badge-ok { background: var(--sju-success-bg); color: var(--sju-success); }
+        .badge-move { background: #e0f2fe; color: #0284c7; }
+        .badge-repair { background: var(--sju-warning-bg); color: #d97706; }
+        .badge-dispose { background: var(--sju-danger-bg); color: var(--sju-danger); }
+        .badge-lost { background: #ffedd5; color: #ea580c; }
+        .badge-delivery { background: #dbeafe; color: #2563eb; }
+        .badge-unregistered { background: var(--sju-gray-200); color: var(--sju-gray-700); }
+
+        /* ===== Empty State ===== */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--sju-gray-500);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .empty-text {
+            font-size: 14px;
+        }
+
+        /* ===== Bottom Bar ===== */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--sju-white);
+            padding: 12px 16px;
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
+            border-top: 1px solid var(--sju-gray-200);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+
+        .btn-complete {
+            width: 100%;
+            padding: 16px;
+            background: var(--sju-primary);
+            color: var(--sju-white);
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-complete:active {
+            background: var(--sju-primary-hover);
+        }
+
+        .btn-complete:disabled {
+            background: var(--sju-gray-400);
+            cursor: not-allowed;
+        }
+
+        /* ===== Modal Overlay ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--sju-white);
+            width: 100%;
+            max-height: 80vh;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            padding: 20px;
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+            animation: slideUp 0.3s ease-out;
+            overflow-y: auto;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--sju-gray-800);
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: var(--sju-gray-100);
+            border-radius: 50%;
+            font-size: 20px;
+            color: var(--sju-gray-600);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ===== Department Select Modal ===== */
+        .dept-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .dept-item {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--sju-gray-200);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dept-item:active {
+            background: var(--sju-gray-100);
+        }
+
+        .dept-item.selected {
+            background: #e8f5e9;
+        }
+
+        .dept-name {
+            font-size: 15px;
+            color: var(--sju-gray-800);
+        }
+
+        .dept-location {
+            font-size: 12px;
+            color: var(--sju-gray-500);
+        }
+
+        /* ===== Case Popup Modal ===== */
+        .case-info {
+            background: var(--sju-gray-100);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+        }
+
+        .case-serial {
+            font-family: 'Consolas', monospace;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--sju-primary);
+            margin-bottom: 8px;
+        }
+
+        .case-detail {
+            font-size: 13px;
+            color: var(--sju-gray-700);
+            line-height: 1.5;
+        }
+
+        .case-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .case-btn {
+            padding: 14px 16px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .case-btn.primary {
+            background: var(--sju-primary);
+            color: var(--sju-white);
+        }
+
+        .case-btn.secondary {
+            background: var(--sju-gray-200);
+            color: var(--sju-gray-700);
+        }
+
+        .case-btn.success {
+            background: var(--sju-success);
+            color: var(--sju-white);
+        }
+
+        .case-btn.warning {
+            background: var(--sju-warning);
+            color: var(--sju-white);
+        }
+
+        /* ===== File Input Hidden ===== */
+        .file-input-hidden {
+            display: none;
+        }
+
+        /* ===== Toast ===== */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(0,0,0,0.8);
+            color: var(--sju-white);
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 14px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 2000;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* ===== Loading Overlay ===== */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 3000;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--sju-gray-200);
+            border-top-color: var(--sju-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--sju-gray-600);
+        }
+
+        /* ===== API Key Section ===== */
+        .api-section {
+            background: var(--sju-white);
+            margin: 16px;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .api-section label {
+            font-size: 12px;
+            color: var(--sju-gray-600);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .api-section input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--sju-gray-300);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+        }
+
+        .api-section input:focus {
+            outline: none;
+            border-color: var(--sju-primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <span class="header-title">자산 점검</span>
+        <span class="header-count" id="headerCount">0건</span>
+    </div>
+
+    <!-- Location Bar -->
+    <div class="location-bar" id="locationBar" onclick="openDeptModal()">
+        <span class="location-icon">📍</span>
+        <div class="location-text">
+            <div class="location-label">현재 점검 위치</div>
+            <div class="location-value" id="currentDept">부서를 선택하세요</div>
+        </div>
+        <span class="location-arrow">▶</span>
+    </div>
+
+    <!-- API Key Section (테스트용) -->
+    <div class="api-section">
+        <label>Google Vision API Key</label>
+        <input type="password" id="apiKey" placeholder="API Key 입력...">
+    </div>
+
+    <!-- Scan Area -->
+    <div class="scan-area" id="scanArea" onclick="triggerScan()">
+        <div class="scan-icon">📷</div>
+        <div class="scan-text">탭하여 스캔</div>
+        <div class="scan-hint">라벨을 촬영하면 자동으로 인식됩니다</div>
+    </div>
+    <input type="file" id="fileInput" class="file-input-hidden" accept="image/*" capture="environment">
+
+    <!-- Results Section -->
+    <div class="results-section">
+        <div class="results-header">
+            <span class="results-title">스캔 결과</span>
+            <span class="results-count" id="resultsCount">0건</span>
+        </div>
+        <div id="resultsList">
+            <div class="empty-state">
+                <div class="empty-icon">📋</div>
+                <div class="empty-text">스캔된 자산이 없습니다</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="bottom-bar">
+        <button class="btn-complete" id="btnComplete" disabled onclick="completeCheck()">
+            점검 완료 (0건)
+        </button>
+    </div>
+
+    <!-- Department Select Modal -->
+    <div class="modal-overlay" id="deptModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">점검 위치 선택</span>
+                <button class="modal-close" onclick="closeDeptModal()">×</button>
+            </div>
+            <div class="dept-list" id="deptList"></div>
+        </div>
+    </div>
+
+    <!-- Case Popup Modal -->
+    <div class="modal-overlay" id="caseModal">
+        <div class="modal-content" id="caseModalContent">
+            <!-- Dynamic content -->
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">인식 중...</div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/mock-data.js"></script>
+    <script>
+        // ===== State =====
+        let currentDeptCode = null;
+        let scannedItems = [];
+
+        // ===== Initialization =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved API key
+            const savedKey = localStorage.getItem('google_vision_api_key');
+            if (savedKey) {
+                document.getElementById('apiKey').value = savedKey;
+            }
+
+            // Save API key on change
+            document.getElementById('apiKey').addEventListener('change', function() {
+                localStorage.setItem('google_vision_api_key', this.value);
+            });
+
+            // File input change handler
+            document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+            // Initialize department list
+            initDeptList();
+        });
+
+        // ===== Department Functions =====
+        async function initDeptList() {
+            const depts = await getDepartments();
+            const listEl = document.getElementById('deptList');
+            listEl.innerHTML = depts.map(d =>
+                '<div class="dept-item" data-code="' + d.code + '" onclick="selectDept(\'' + d.code + '\')">' +
+                    '<div>' +
+                        '<div class="dept-name">' + d.name + '</div>' +
+                        '<div class="dept-location">' + d.building + ' ' + d.floor + '</div>' +
+                    '</div>' +
+                '</div>'
+            ).join('');
+        }
+
+        function openDeptModal() {
+            document.getElementById('deptModal').classList.add('active');
+        }
+
+        function closeDeptModal() {
+            document.getElementById('deptModal').classList.remove('active');
+        }
+
+        function selectDept(code) {
+            currentDeptCode = code;
+            const depts = Object.values(MOCK_DEPARTMENTS);
+            const dept = depts.find(function(d) { return d.code === code; });
+            if (dept) {
+                document.getElementById('currentDept').textContent = dept.building + ' > ' + dept.name;
+            }
+            closeDeptModal();
+            showToast('점검 위치가 설정되었습니다');
+        }
+
+        // ===== Scan Functions =====
+        function triggerScan() {
+            if (!currentDeptCode) {
+                showToast('먼저 점검 위치를 선택하세요');
+                openDeptModal();
+                return;
+            }
+
+            const apiKey = document.getElementById('apiKey').value;
+            if (!apiKey) {
+                showToast('API Key를 입력하세요');
+                return;
+            }
+
+            document.getElementById('fileInput').click();
+        }
+
+        async function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            showLoading(true);
+
+            try {
+                // Resize image
+                const resized = await resizeImage(file, 1280);
+
+                // Call Google Vision API
+                const apiKey = document.getElementById('apiKey').value;
+                const text = await callVisionAPI(resized.base64, apiKey);
+
+                if (!text) {
+                    showToast('텍스트를 인식하지 못했습니다');
+                    showLoading(false);
+                    return;
+                }
+
+                // Extract serials
+                const serials = extractSerials(text);
+                if (serials.length === 0) {
+                    showToast('시리얼 번호를 찾지 못했습니다');
+                    showLoading(false);
+                    return;
+                }
+
+                // Process each serial
+                for (const serial of serials) {
+                    await processSerial(serial);
+                }
+
+                updateUI();
+                showToast(serials.length + '개 시리얼 인식됨');
+
+            } catch (err) {
+                console.error(err);
+                showToast('오류: ' + err.message);
+            }
+
+            showLoading(false);
+            e.target.value = '';  // Reset file input
+        }
+
+        async function processSerial(serial) {
+            // Check for duplicate
+            if (scannedItems.some(function(item) { return item.serial === serial; })) {
+                showToast(serial + ' - 이미 스캔됨');
+                return;
+            }
+
+            // Lookup serial
+            const result = await lookupSerial(serial, currentDeptCode);
+
+            const item = {
+                serial: serial,
+                case: result.case,
+                data: result.data,
+                source: result.source,
+                status: 'pending',
+                timestamp: new Date()
+            };
+
+            // Auto-process simple cases
+            if (result.case === 'A1-1') {
+                item.status = 'ok';
+            }
+
+            scannedItems.push(item);
+
+            // Show popup for non-simple cases
+            if (result.case !== 'A1-1' && result.case !== 'C1') {
+                showCasePopup(item);
+            }
+        }
+
+        // ===== Case Popup =====
+        function showCasePopup(item) {
+            const modal = document.getElementById('caseModal');
+            const content = document.getElementById('caseModalContent');
+
+            let html = '<div class="modal-header">' +
+                '<span class="modal-title">확인 필요</span>' +
+                '<button class="modal-close" onclick="closeCaseModal()">×</button>' +
+            '</div>';
+
+            html += '<div class="case-info">' +
+                '<div class="case-serial">' + item.serial + '</div>';
+
+            if (item.data) {
+                html += '<div class="case-detail">' +
+                    item.data.model + ' | ' + item.data.assetType + '<br>' +
+                    '등록 부서: ' + item.data.dept;
+                if (item.data.user) {
+                    html += ' | ' + item.data.user;
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+
+            // Case-specific actions
+            html += '<div class="case-actions">';
+
+            switch (item.case) {
+                case 'A1-2': // 수리중 (같은 부서)
+                    html += '<button class="case-btn success" onclick="handleCase(\'' + item.serial + '\', \'repair-complete\')">수리완료 처리</button>';
+                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'keep\')">수리중 유지</button>';
+                    break;
+
+                case 'A1-3': // 폐기
+                    html += '<button class="case-btn warning" onclick="handleCase(\'' + item.serial + '\', \'cancel-dispose\')">폐기 취소</button>';
+                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'keep\')">폐기 유지 (경고)</button>';
+                    break;
+
+                case 'A1-4': // 분실
+                    html += '<button class="case-btn success" onclick="handleCase(\'' + item.serial + '\', \'recover\')">분실 복구</button>';
+                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'keep\')">분실 유지</button>';
+                    break;
+
+                case 'A2-1': // 이동
+                    var currentDept = MOCK_DEPARTMENTS[currentDeptCode];
+                    html += '<button class="case-btn primary" onclick="handleCase(\'' + item.serial + '\', \'move\')">' + currentDept.name + '으로 이동</button>';
+                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'keep\')">' + item.data.dept + ' 유지</button>';
+                    break;
+
+                case 'A2-2': // 이동 + 수리중
+                    var currentDept2 = MOCK_DEPARTMENTS[currentDeptCode];
+                    html += '<p style="font-size:13px;color:var(--sju-gray-600);margin-bottom:10px;">부서 이동과 상태 변경을 선택하세요</p>';
+                    html += '<button class="case-btn primary" onclick="handleCase(\'' + item.serial + '\', \'move-repair\')">이동 + 수리완료</button>';
+                    html += '<button class="case-btn primary" onclick="handleCase(\'' + item.serial + '\', \'move-only\')">이동만 (수리중 유지)</button>';
+                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'keep\')">현재 상태 유지</button>';
+                    break;
+
+                case 'B1': // 납품 매칭
+                    html += '<button class="case-btn success" onclick="handleCase(\'' + item.serial + '\', \'receive\')">입고 확인</button>';
+                    html += '<button class="case-btn secondary" onclick="handleCase(\'' + item.serial + '\', \'skip\')">나중에 처리</button>';
+                    break;
+
+                default:
+                    html += '<button class="case-btn primary" onclick="closeCaseModal()">확인</button>';
+            }
+
+            html += '</div>';
+
+            content.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        function closeCaseModal() {
+            document.getElementById('caseModal').classList.remove('active');
+            updateUI();
+        }
+
+        function handleCase(serial, action) {
+            var item = scannedItems.find(function(i) { return i.serial === serial; });
+            if (!item) return;
+
+            switch (action) {
+                case 'repair-complete':
+                    item.status = 'ok';
+                    item.action = 'repair-complete';
+                    break;
+                case 'recover':
+                    item.status = 'ok';
+                    item.action = 'recover';
+                    break;
+                case 'move':
+                    item.status = 'move';
+                    item.action = 'move';
+                    item.targetDept = currentDeptCode;
+                    break;
+                case 'move-repair':
+                    item.status = 'move';
+                    item.action = 'move-repair';
+                    item.targetDept = currentDeptCode;
+                    break;
+                case 'move-only':
+                    item.status = 'move';
+                    item.action = 'move-only';
+                    item.targetDept = currentDeptCode;
+                    break;
+                case 'receive':
+                    item.status = 'new';
+                    item.action = 'receive';
+                    break;
+                case 'cancel-dispose':
+                    item.status = 'warning';
+                    item.action = 'cancel-dispose';
+                    break;
+                case 'keep':
+                case 'skip':
+                    item.status = 'pending';
+                    break;
+            }
+
+            closeCaseModal();
+            showToast('처리되었습니다');
+        }
+
+        // ===== UI Update =====
+        function updateUI() {
+            const count = scannedItems.length;
+
+            document.getElementById('headerCount').textContent = count + '건';
+            document.getElementById('resultsCount').textContent = count + '건';
+            document.getElementById('btnComplete').disabled = count === 0;
+            document.getElementById('btnComplete').textContent = '점검 완료 (' + count + '건)';
+
+            const listEl = document.getElementById('resultsList');
+
+            if (count === 0) {
+                listEl.innerHTML = '<div class="empty-state">' +
+                    '<div class="empty-icon">📋</div>' +
+                    '<div class="empty-text">스캔된 자산이 없습니다</div>' +
+                '</div>';
+                return;
+            }
+
+            listEl.innerHTML = scannedItems.map(function(item) {
+                var statusIcon = getStatusIcon(item.status);
+                var statusClass = getStatusClass(item.status);
+                var badge = getBadge(item);
+                var detail = getDetail(item);
+
+                return '<div class="result-item" onclick="showItemDetail(\'' + item.serial + '\')">' +
+                    '<div class="result-status ' + statusClass + '">' + statusIcon + '</div>' +
+                    '<div class="result-info">' +
+                        '<div class="result-serial">' + item.serial + '</div>' +
+                        '<div class="result-detail">' + detail + '</div>' +
+                    '</div>' +
+                    '<span class="result-badge ' + badge.class + '">' + badge.text + '</span>' +
+                '</div>';
+            }).join('');
+        }
+
+        function getStatusIcon(status) {
+            switch (status) {
+                case 'ok': return '✓';
+                case 'move': return '→';
+                case 'warning': return '!';
+                case 'error': return '✕';
+                case 'new': return '+';
+                default: return '?';
+            }
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'ok': return 'ok';
+                case 'move': return 'move';
+                case 'warning': return 'warning';
+                case 'error': return 'error';
+                case 'new': return 'new';
+                default: return 'pending';
+            }
+        }
+
+        function getBadge(item) {
+            switch (item.case) {
+                case 'A1-1': return { class: 'badge-ok', text: '정상' };
+                case 'A1-2': return { class: 'badge-repair', text: '수리중' };
+                case 'A1-3': return { class: 'badge-dispose', text: '폐기' };
+                case 'A1-4': return { class: 'badge-lost', text: '분실' };
+                case 'A2-1': return { class: 'badge-move', text: '이동' };
+                case 'A2-2': return { class: 'badge-repair', text: '이동+수리' };
+                case 'B1': return { class: 'badge-delivery', text: '납품' };
+                case 'C1': return { class: 'badge-unregistered', text: '미등록' };
+                default: return { class: 'badge-unregistered', text: '확인필요' };
+            }
+        }
+
+        function getDetail(item) {
+            if (item.data) {
+                return item.data.model + ' | ' + (item.data.dept || '미정');
+            }
+            return '미등록 자산';
+        }
+
+        function showItemDetail(serial) {
+            var item = scannedItems.find(function(i) { return i.serial === serial; });
+            if (item) {
+                showCasePopup(item);
+            }
+        }
+
+        // ===== Complete Check =====
+        function completeCheck() {
+            var pendingCount = scannedItems.filter(function(i) { return i.status === 'pending'; }).length;
+            if (pendingCount > 0) {
+                showToast(pendingCount + '건의 미처리 항목이 있습니다');
+                return;
+            }
+
+            // In real implementation, this would submit to server
+            showToast('점검이 완료되었습니다! (' + scannedItems.length + '건)');
+
+            // Reset for demo
+            setTimeout(function() {
+                scannedItems = [];
+                updateUI();
+            }, 2000);
+        }
+
+        // ===== Utility Functions =====
+        function showToast(message) {
+            var toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(function() {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        function showLoading(show) {
+            document.getElementById('loadingOverlay').classList.toggle('active', show);
+        }
+
+        // ===== Image Processing =====
+        function resizeImage(file, maxWidth) {
+            return new Promise(function(resolve) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var img = new Image();
+                    img.onload = function() {
+                        var canvas = document.createElement('canvas');
+                        var width = img.width;
+                        var height = img.height;
+
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        var ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        var base64 = dataUrl.split(',')[1];
+
+                        resolve({
+                            dataUrl: dataUrl,
+                            base64: base64,
+                            width: width,
+                            height: height
+                        });
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // ===== Google Vision API =====
+        async function callVisionAPI(base64, apiKey) {
+            var response = await fetch('https://vision.googleapis.com/v1/images:annotate?key=' + apiKey, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    requests: [{
+                        image: { content: base64 },
+                        features: [{ type: 'TEXT_DETECTION' }]
+                    }]
+                })
+            });
+
+            var data = await response.json();
+            if (data.error) {
+                throw new Error(data.error.message);
+            }
+
+            var textAnnotations = data.responses[0] && data.responses[0].textAnnotations;
+            if (textAnnotations && textAnnotations.length > 0) {
+                return textAnnotations[0].description;
+            }
+            return null;
+        }
+
+        // ===== Serial Extraction (Multi) =====
+        function extractSerials(text) {
+            if (!text) return [];
+
+            var excludeWords = /^(number|serial|model|part|product|type|version|no|sn|id|null|test|match|barcode|qr|code)$/i;
+            var candidates = [];
+
+            // High priority patterns
+            var patterns = [
+                /\b(\d{2,3}LG[A-Z]\d[A-Z][A-Z0-9]{10,})\b/gi,
+                /\b(G[12]L\d{3}E\d{5}-\d{5})\b/gi,
+                /\b(TAG-?N\d+[A-Z]+\d+-[A-Z]?\d+)\b/gi,
+                /\b(CW[A-Z0-9]{2,4}H[0-9][A-Z]{2}[A-Z0-9]{6,})\b/gi,
+                /\b(LED\d{10}[A-Z]\d)\b/gi,
+                /\b([A-Z]{2,4}\d{2,4}[A-Z0-9]{6,})\b/gi,
+                /\b(\d{3}[A-Z]{2,4}[A-Z0-9]{6,})\b/gi
+            ];
+
+            patterns.forEach(function(pattern) {
+                var matches = text.match(pattern);
+                if (matches) {
+                    matches.forEach(function(m) {
+                        if (!excludeWords.test(m) && m.length >= 10) {
+                            candidates.push(m);
+                        }
+                    });
+                }
+            });
+
+            // Remove duplicates
+            var unique = [];
+            var seen = {};
+            candidates.forEach(function(c) {
+                if (!seen[c]) {
+                    seen[c] = true;
+                    unique.push(c);
+                }
+            });
+
+            return unique.slice(0, 5);  // Max 5 serials
+        }
+    </script>
+</body>
+</html>
