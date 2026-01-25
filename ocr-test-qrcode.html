@@ -2,7 +2,8 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>진짜 바코드 최적화 스캐너</title>
+    <meta charset="UTF-8">
+    <title>진짜 바코드 최적화 스캐너 (수정판)</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         body { 
@@ -44,43 +45,7 @@
             border-radius: 8px;
             overflow: hidden;
             position: relative;
-        }
-        
-        /* 커스텀 가이드 오버레이 */
-        .custom-guide {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            z-index: 100;
-        }
-        
-        .barcode-guide {
-            width: 300px;
-            height: 80px;
-            border: 3px dashed #ff5722;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 87, 34, 0.1);
-        }
-        
-        .barcode-guide::before {
-            content: "││││ ││ ││││";
-            color: #ff5722;
-            font-size: 24px;
-            font-family: monospace;
-            opacity: 0.3;
-        }
-        
-        .qr-guide {
-            width: 200px;
-            height: 200px;
-            border: 3px dashed #4caf50;
-            border-radius: 8px;
-            background: rgba(76, 175, 80, 0.1);
+            min-height: 300px;
         }
         
         .settings {
@@ -101,8 +66,7 @@
             font-size: 14px;
         }
         
-        .setting-row select,
-        .setting-row input {
+        .setting-row select {
             flex: 1;
             padding: 8px;
             border: 1px solid #ddd;
@@ -147,6 +111,45 @@
         .btn:hover {
             background: #1976d2;
         }
+        
+        .btn.start {
+            background: #4caf50;
+        }
+        
+        .btn.start:hover {
+            background: #45a049;
+        }
+        
+        .btn.stop {
+            background: #f44336;
+        }
+        
+        .btn.stop:hover {
+            background: #da190b;
+        }
+        
+        .status-indicator {
+            padding: 10px;
+            text-align: center;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .status-indicator.ready {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-indicator.scanning {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .status-indicator.stopped {
+            background: #f8d7da;
+            color: #721c24;
+        }
     </style>
 </head>
 <body>
@@ -154,8 +157,15 @@
         <h2>🔬 진짜 바코드 최적화 스캐너</h2>
         
         <div class="info-box">
-            <strong>진실:</strong> qrbox는 단순 가이드라인입니다.<br>
-            <strong>진짜 최적화:</strong> 포맷 선택, 해상도, 스캔 주파수
+            <strong>사용법:</strong><br>
+            1. 설정 선택 (포맷, FPS, 해상도)<br>
+            2. "스캐너 시작" 버튼 클릭<br>
+            3. 카메라 권한 허용<br>
+            4. QR/바코드를 카메라에 비추기
+        </div>
+        
+        <div id="statusIndicator" class="status-indicator ready">
+            📷 준비됨 - 시작 버튼을 누르세요
         </div>
         
         <!-- 실제 효과가 있는 설정들 -->
@@ -164,7 +174,7 @@
             
             <div class="setting-row">
                 <label>스캔 포맷 (진짜 효과 ✅)</label>
-                <select id="formatSelect" onchange="updateSettings()">
+                <select id="formatSelect">
                     <option value="all">모든 포맷</option>
                     <option value="qr">QR 코드만</option>
                     <option value="barcode">바코드만</option>
@@ -175,7 +185,7 @@
             
             <div class="setting-row">
                 <label>스캔 속도 FPS (진짜 효과 ✅)</label>
-                <select id="fpsSelect" onchange="updateSettings()">
+                <select id="fpsSelect">
                     <option value="5">5 FPS (배터리 절약)</option>
                     <option value="10" selected>10 FPS (균형)</option>
                     <option value="15">15 FPS (빠른 인식)</option>
@@ -185,37 +195,31 @@
             
             <div class="setting-row">
                 <label>카메라 해상도 (진짜 효과 ✅)</label>
-                <select id="resolutionSelect" onchange="updateSettings()">
-                    <option value="low">낮음 (빠름, 저품질)</option>
-                    <option value="medium" selected>중간 (균형)</option>
-                    <option value="high">높음 (느림, 고품질)</option>
-                    <option value="ultra">최고 (1080p+)</option>
-                </select>
-            </div>
-            
-            <div class="setting-row">
-                <label>가이드 박스 (단순 UI 😅)</label>
-                <select id="boxSelect" onchange="updateGuide()">
-                    <option value="square">정사각형 (QR용)</option>
-                    <option value="wide">가로형 (바코드용)</option>
-                    <option value="none">없음</option>
+                <select id="resolutionSelect">
+                    <option value="low">낮음 (640x480)</option>
+                    <option value="medium" selected>중간 (1280x720)</option>
+                    <option value="high">높음 (1920x1080)</option>
                 </select>
             </div>
         </div>
         
+        <!-- 컨트롤 버튼 -->
+        <button id="startBtn" class="btn start" onclick="startScanner()">
+            ▶️ 스캐너 시작
+        </button>
+        
+        <button id="stopBtn" class="btn stop" onclick="stopScanner()" style="display:none;">
+            ⏹️ 스캐너 중지
+        </button>
+        
         <!-- 카메라 -->
-        <div id="reader">
-            <!-- 커스텀 가이드 오버레이 -->
-            <div class="custom-guide" id="customGuide" style="display:none;">
-                <div class="barcode-guide" id="barcodeGuide"></div>
-                <div class="qr-guide" id="qrGuide" style="display:none;"></div>
-            </div>
-        </div>
+        <div id="reader"></div>
         
         <!-- 결과 -->
         <div id="result">
-            <strong>인식 성공!</strong>
+            <strong>✅ 인식 성공!</strong>
             <div id="resultText"></div>
+            <button class="btn" onclick="restartScanner()">다시 스캔</button>
         </div>
         
         <!-- 디버그 정보 -->
@@ -225,55 +229,28 @@
                 - 대기 중...
             </div>
         </div>
-        
-        <button class="btn" onclick="restartScanner()">스캐너 재시작</button>
     </div>
 
     <script>
-        let html5QrCode;
+        let html5QrCode = null;
+        let isScanning = false;
         let scanCount = 0;
         let startTime = Date.now();
         let lastFormat = '';
-        
-        // 초기 시작
-        window.onload = function() {
-            startScanner();
-            updateDebugInfo();
-        };
-        
-        // 진짜 설정 업데이트
-        function updateSettings() {
-            console.log('Settings changed, restarting scanner...');
-            if (html5QrCode && html5QrCode.getState() === Html5QrcodeScannerState.SCANNING) {
-                html5QrCode.stop().then(() => {
-                    startScanner();
-                });
-            }
-        }
-        
-        // UI 가이드만 업데이트 (실제 스캔에는 영향 없음)
-        function updateGuide() {
-            const boxType = document.getElementById('boxSelect').value;
-            const customGuide = document.getElementById('customGuide');
-            const barcodeGuide = document.getElementById('barcodeGuide');
-            const qrGuide = document.getElementById('qrGuide');
-            
-            if (boxType === 'none') {
-                customGuide.style.display = 'none';
-            } else {
-                customGuide.style.display = 'block';
-                if (boxType === 'wide') {
-                    barcodeGuide.style.display = 'flex';
-                    qrGuide.style.display = 'none';
-                } else {
-                    barcodeGuide.style.display = 'none';
-                    qrGuide.style.display = 'block';
-                }
-            }
-        }
+        let debugInterval = null;
         
         // 스캐너 시작
         function startScanner() {
+            console.log('Starting scanner...');
+            
+            // UI 업데이트
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('stopBtn').style.display = 'block';
+            document.getElementById('statusIndicator').className = 'status-indicator scanning';
+            document.getElementById('statusIndicator').innerHTML = '🔍 스캔 중...';
+            document.getElementById('result').classList.remove('show');
+            
+            // Html5Qrcode 인스턴스 생성
             html5QrCode = new Html5Qrcode("reader");
             
             // 1. 포맷 설정 (진짜 효과!)
@@ -338,22 +315,13 @@
                     videoConstraints.width = { ideal: 1920 };
                     videoConstraints.height = { ideal: 1080 };
                     break;
-                case 'ultra':
-                    videoConstraints.width = { min: 1920 };
-                    videoConstraints.height = { min: 1080 };
-                    break;
             }
             
             // 설정 적용
             const config = {
                 fps: fps,
                 qrbox: { width: 250, height: 250 },  // 이건 단순 UI
-                formatsToSupport: formats,  // 이건 진짜 효과!
-                experimentalFeatures: {
-                    useBarCodeDetectorIfSupported: true  // 네이티브 API 사용
-                },
-                aspectRatio: 16/9,
-                showTorchButtonIfSupported: true  // 플래시 버튼
+                formatsToSupport: formats  // 이건 진짜 효과!
             };
             
             // 스캐너 시작
@@ -363,21 +331,47 @@
                 onScanSuccess,
                 onScanFailure
             ).then(() => {
-                console.log('Scanner started with:', {
-                    formats: lastFormat,
-                    fps: fps,
-                    resolution: resolution
-                });
+                console.log('Scanner started successfully');
+                isScanning = true;
                 startTime = Date.now();
                 scanCount = 0;
+                startDebugInfo();
             }).catch(err => {
-                console.error('Failed to start:', err);
+                console.error('Failed to start scanner:', err);
+                alert('카메라 시작 실패: ' + err);
+                stopScanner();
             });
         }
         
+        // 스캐너 중지
+        function stopScanner() {
+            console.log('Stopping scanner...');
+            
+            if (html5QrCode && isScanning) {
+                html5QrCode.stop().then(() => {
+                    console.log('Scanner stopped');
+                    isScanning = false;
+                    html5QrCode = null;
+                }).catch(err => {
+                    console.error('Failed to stop scanner:', err);
+                });
+            }
+            
+            // UI 업데이트
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('stopBtn').style.display = 'none';
+            document.getElementById('statusIndicator').className = 'status-indicator stopped';
+            document.getElementById('statusIndicator').innerHTML = '⏹️ 중지됨';
+            
+            stopDebugInfo();
+        }
+        
+        // 스캔 성공
         function onScanSuccess(decodedText, decodedResult) {
             const format = decodedResult.result.format.formatName;
             const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(1);
+            
+            console.log('Scan success:', format, decodedText);
             
             document.getElementById('resultText').innerHTML = `
                 <strong>포맷:</strong> ${format}<br>
@@ -392,40 +386,56 @@
                 navigator.vibrate(200);
             }
             
-            html5QrCode.stop();
+            // 자동 중지
+            stopScanner();
         }
         
+        // 스캔 실패 (계속 시도)
         function onScanFailure(errorMessage) {
             scanCount++;
+            // 에러는 무시 (계속 스캔 시도)
         }
         
+        // 다시 스캔
         function restartScanner() {
             document.getElementById('result').classList.remove('show');
-            if (html5QrCode && html5QrCode.getState() === Html5QrcodeScannerState.SCANNING) {
-                html5QrCode.stop().then(() => {
-                    startScanner();
-                });
-            } else {
-                startScanner();
+            startScanner();
+        }
+        
+        // 디버그 정보 시작
+        function startDebugInfo() {
+            debugInterval = setInterval(() => {
+                if (isScanning) {
+                    const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(1);
+                    const scanRate = (scanCount / elapsedTime).toFixed(1);
+                    
+                    document.getElementById('debugInfo').innerHTML = `
+                        - 상태: ${isScanning ? '스캔 중' : '중지됨'}<br>
+                        - 활성 포맷: ${lastFormat}<br>
+                        - 스캔 시도: ${scanCount}회<br>
+                        - 경과 시간: ${elapsedTime}초<br>
+                        - 스캔 속도: ${scanRate}회/초<br>
+                        - FPS 설정: ${document.getElementById('fpsSelect').value}<br>
+                        - 해상도: ${document.getElementById('resolutionSelect').value}
+                    `;
+                }
+            }, 500);
+        }
+        
+        // 디버그 정보 중지
+        function stopDebugInfo() {
+            if (debugInterval) {
+                clearInterval(debugInterval);
+                debugInterval = null;
             }
         }
         
-        // 디버그 정보 업데이트
-        function updateDebugInfo() {
-            setInterval(() => {
-                const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(1);
-                const scanRate = (scanCount / elapsedTime).toFixed(1);
-                
-                document.getElementById('debugInfo').innerHTML = `
-                    - 활성 포맷: ${lastFormat}<br>
-                    - 스캔 시도: ${scanCount}회<br>
-                    - 경과 시간: ${elapsedTime}초<br>
-                    - 스캔 속도: ${scanRate}회/초<br>
-                    - FPS 설정: ${document.getElementById('fpsSelect').value}<br>
-                    - 해상도: ${document.getElementById('resolutionSelect').value}
-                `;
-            }, 500);
-        }
+        // 페이지 언로드 시 정리
+        window.addEventListener('beforeunload', () => {
+            if (html5QrCode && isScanning) {
+                html5QrCode.stop();
+            }
+        });
     </script>
 </body>
 </html>
