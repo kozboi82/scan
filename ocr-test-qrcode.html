@@ -2,12 +2,13 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>QR/바코드 스캐너 (개선판)</title>
+    <title>진짜 바코드 최적화 스캐너</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         body { 
             font-family: sans-serif; 
-            padding: 10px; 
+            padding: 10px;
+            margin: 0;
             background: #f0f0f0;
         }
         
@@ -17,35 +18,24 @@
             background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
         h2 { 
             color: #333; 
             text-align: center;
+            margin-bottom: 10px;
         }
         
-        .scan-mode {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0;
-        }
-        
-        .mode-btn {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #ddd;
-            background: white;
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
             border-radius: 8px;
-            cursor: pointer;
+            margin-bottom: 20px;
             font-size: 14px;
-            transition: all 0.3s;
         }
         
-        .mode-btn.active {
-            background: #4ecca3;
-            color: white;
-            border-color: #4ecca3;
+        .info-box strong {
+            color: #1976d2;
         }
         
         #reader { 
@@ -53,35 +43,76 @@
             border: 2px solid #ddd;
             border-radius: 8px;
             overflow: hidden;
+            position: relative;
         }
         
-        .status {
-            margin: 20px 0;
-            padding: 15px;
-            background: #f8f9fa;
+        /* 커스텀 가이드 오버레이 */
+        .custom-guide {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        .barcode-guide {
+            width: 300px;
+            height: 80px;
+            border: 3px dashed #ff5722;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 87, 34, 0.1);
+        }
+        
+        .barcode-guide::before {
+            content: "││││ ││ ││││";
+            color: #ff5722;
+            font-size: 24px;
+            font-family: monospace;
+            opacity: 0.3;
+        }
+        
+        .qr-guide {
+            width: 200px;
+            height: 200px;
+            border: 3px dashed #4caf50;
             border-radius: 8px;
-            text-align: center;
+            background: rgba(76, 175, 80, 0.1);
         }
         
-        .status.scanning {
-            background: #fff3cd;
-            color: #856404;
+        .settings {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
         }
         
-        .status.success {
+        .setting-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .setting-row label {
+            flex: 1;
+            font-size: 14px;
+        }
+        
+        .setting-row select,
+        .setting-row input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        #result {
+            margin-top: 20px;
+            padding: 15px;
             background: #d4edda;
-            color: #155724;
-        }
-        
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        #result { 
-            margin-top: 20px; 
-            padding: 20px; 
-            background: #f8f9fa;
             border-radius: 8px;
             display: none;
         }
@@ -90,54 +121,20 @@
             display: block;
         }
         
-        .result-header {
-            font-size: 18px;
-            font-weight: bold;
-            color: #28a745;
-            margin-bottom: 10px;
-        }
-        
-        .result-format {
-            display: inline-block;
-            padding: 4px 8px;
-            background: #007bff;
-            color: white;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-bottom: 10px;
-        }
-        
-        .result-value {
-            font-family: 'Courier New', monospace;
-            font-size: 16px;
-            padding: 10px;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            word-break: break-all;
-        }
-        
-        .tips {
+        .debug {
             margin-top: 20px;
-            padding: 15px;
-            background: #e8f4fd;
+            padding: 10px;
+            background: #f8f9fa;
             border-radius: 8px;
-            font-size: 14px;
-        }
-        
-        .tips h3 {
-            margin-top: 0;
-            color: #0066cc;
-        }
-        
-        .tips ul {
-            margin: 10px 0;
-            padding-left: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
         }
         
         .btn {
             padding: 12px 24px;
-            background: #4ecca3;
+            background: #2196f3;
             color: white;
             border: none;
             border-radius: 6px;
@@ -148,320 +145,286 @@
         }
         
         .btn:hover {
-            background: #3db892;
-        }
-        
-        .btn.secondary {
-            background: #6c757d;
-        }
-        
-        .btn.secondary:hover {
-            background: #5a6268;
-        }
-        
-        #manualCapture {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            background: #fff3cd;
-            border-radius: 8px;
-            text-align: center;
-        }
-        
-        .debug-info {
-            margin-top: 10px;
-            padding: 10px;
-            background: #f0f0f0;
-            border-radius: 4px;
-            font-size: 12px;
-            font-family: monospace;
+            background: #1976d2;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>📷 QR/바코드 스캐너</h2>
+        <h2>🔬 진짜 바코드 최적화 스캐너</h2>
         
-        <!-- 스캔 모드 선택 -->
-        <div class="scan-mode">
-            <button class="mode-btn active" onclick="setScanMode('auto')">
-                🔄 자동 인식<br>
-                <small>QR + 바코드</small>
-            </button>
-            <button class="mode-btn" onclick="setScanMode('qr')">
-                ◻ QR 코드만<br>
-                <small>빠른 인식</small>
-            </button>
-            <button class="mode-btn" onclick="setScanMode('barcode')">
-                ||| 바코드만<br>
-                <small>1차원 코드</small>
-            </button>
+        <div class="info-box">
+            <strong>진실:</strong> qrbox는 단순 가이드라인입니다.<br>
+            <strong>진짜 최적화:</strong> 포맷 선택, 해상도, 스캔 주파수
         </div>
         
-        <!-- 상태 표시 -->
-        <div id="status" class="status scanning">
-            🔍 카메라에 코드를 비춰주세요...
-        </div>
-        
-        <!-- 카메라 화면 -->
-        <div id="reader"></div>
-        
-        <!-- 스캔 팁 -->
-        <div class="tips">
-            <h3>💡 스캔 팁</h3>
-            <div id="scan-tips">
-                <strong>자동 인식 모드:</strong>
-                <ul>
-                    <li>QR 코드: 20-30cm 거리</li>
-                    <li>바코드: 10-15cm 거리, 수평으로</li>
-                    <li>밝은 곳에서 그림자 없이</li>
-                </ul>
+        <!-- 실제 효과가 있는 설정들 -->
+        <div class="settings">
+            <h3>⚙️ 실제 효과가 있는 설정</h3>
+            
+            <div class="setting-row">
+                <label>스캔 포맷 (진짜 효과 ✅)</label>
+                <select id="formatSelect" onchange="updateSettings()">
+                    <option value="all">모든 포맷</option>
+                    <option value="qr">QR 코드만</option>
+                    <option value="barcode">바코드만</option>
+                    <option value="code128">CODE-128만</option>
+                    <option value="ean">EAN-13/8만</option>
+                </select>
+            </div>
+            
+            <div class="setting-row">
+                <label>스캔 속도 FPS (진짜 효과 ✅)</label>
+                <select id="fpsSelect" onchange="updateSettings()">
+                    <option value="5">5 FPS (배터리 절약)</option>
+                    <option value="10" selected>10 FPS (균형)</option>
+                    <option value="15">15 FPS (빠른 인식)</option>
+                    <option value="30">30 FPS (최대 성능)</option>
+                </select>
+            </div>
+            
+            <div class="setting-row">
+                <label>카메라 해상도 (진짜 효과 ✅)</label>
+                <select id="resolutionSelect" onchange="updateSettings()">
+                    <option value="low">낮음 (빠름, 저품질)</option>
+                    <option value="medium" selected>중간 (균형)</option>
+                    <option value="high">높음 (느림, 고품질)</option>
+                    <option value="ultra">최고 (1080p+)</option>
+                </select>
+            </div>
+            
+            <div class="setting-row">
+                <label>가이드 박스 (단순 UI 😅)</label>
+                <select id="boxSelect" onchange="updateGuide()">
+                    <option value="square">정사각형 (QR용)</option>
+                    <option value="wide">가로형 (바코드용)</option>
+                    <option value="none">없음</option>
+                </select>
             </div>
         </div>
         
-        <!-- 수동 촬영 옵션 -->
-        <div id="manualCapture">
-            <p>⚠️ 자동 인식이 어려우신가요?</p>
-            <button class="btn" onclick="captureAndOCR()">
-                📸 사진 찍어서 OCR 인식
-            </button>
+        <!-- 카메라 -->
+        <div id="reader">
+            <!-- 커스텀 가이드 오버레이 -->
+            <div class="custom-guide" id="customGuide" style="display:none;">
+                <div class="barcode-guide" id="barcodeGuide"></div>
+                <div class="qr-guide" id="qrGuide" style="display:none;"></div>
+            </div>
         </div>
         
-        <!-- 결과 표시 -->
+        <!-- 결과 -->
         <div id="result">
-            <div class="result-header">✅ 인식 성공!</div>
-            <div class="result-format" id="format-type">QR_CODE</div>
-            <div class="result-value" id="result-value">-</div>
-            <button class="btn" onclick="restartScanner()">다시 스캔</button>
-            <button class="btn secondary" onclick="lookupAsset()">자산 조회</button>
+            <strong>인식 성공!</strong>
+            <div id="resultText"></div>
         </div>
         
         <!-- 디버그 정보 -->
-        <div class="debug-info" style="display:none;" id="debug">
-            <strong>Debug Info:</strong>
-            <div id="debug-content"></div>
+        <div class="debug">
+            <strong>📊 실시간 디버그 정보:</strong>
+            <div id="debugInfo">
+                - 대기 중...
+            </div>
         </div>
+        
+        <button class="btn" onclick="restartScanner()">스캐너 재시작</button>
     </div>
 
     <script>
         let html5QrCode;
-        let currentMode = 'auto';
-        let lastScannedValue = '';
-        let scanAttempts = 0;
-        let manualTimer;
+        let scanCount = 0;
+        let startTime = Date.now();
+        let lastFormat = '';
         
-        // 페이지 로드 시 스캐너 시작
+        // 초기 시작
         window.onload = function() {
             startScanner();
+            updateDebugInfo();
         };
         
-        // 스캔 모드 설정
-        function setScanMode(mode) {
-            currentMode = mode;
-            
-            // 버튼 스타일 업데이트
-            document.querySelectorAll('.mode-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.closest('.mode-btn').classList.add('active');
-            
-            // 팁 업데이트
-            updateTips(mode);
-            
-            // 스캐너 재시작
-            if (html5QrCode) {
+        // 진짜 설정 업데이트
+        function updateSettings() {
+            console.log('Settings changed, restarting scanner...');
+            if (html5QrCode && html5QrCode.getState() === Html5QrcodeScannerState.SCANNING) {
                 html5QrCode.stop().then(() => {
                     startScanner();
                 });
             }
         }
         
-        // 팁 업데이트
-        function updateTips(mode) {
-            const tipsDiv = document.getElementById('scan-tips');
+        // UI 가이드만 업데이트 (실제 스캔에는 영향 없음)
+        function updateGuide() {
+            const boxType = document.getElementById('boxSelect').value;
+            const customGuide = document.getElementById('customGuide');
+            const barcodeGuide = document.getElementById('barcodeGuide');
+            const qrGuide = document.getElementById('qrGuide');
             
-            if (mode === 'qr') {
-                tipsDiv.innerHTML = `
-                    <strong>QR 코드 전용 모드:</strong>
-                    <ul>
-                        <li>정사각형 QR 코드에 최적화</li>
-                        <li>20-30cm 거리 권장</li>
-                        <li>빠른 인식 속도</li>
-                    </ul>
-                `;
-            } else if (mode === 'barcode') {
-                tipsDiv.innerHTML = `
-                    <strong>바코드 전용 모드:</strong>
-                    <ul>
-                        <li>📏 10-15cm 가까이</li>
-                        <li>➡️ 수평으로 정렬</li>
-                        <li>💡 밝은 조명 필수</li>
-                        <li>🎯 중앙에 정확히</li>
-                    </ul>
-                `;
+            if (boxType === 'none') {
+                customGuide.style.display = 'none';
             } else {
-                tipsDiv.innerHTML = `
-                    <strong>자동 인식 모드:</strong>
-                    <ul>
-                        <li>QR 코드: 20-30cm 거리</li>
-                        <li>바코드: 10-15cm 거리, 수평으로</li>
-                        <li>밝은 곳에서 그림자 없이</li>
-                    </ul>
-                `;
+                customGuide.style.display = 'block';
+                if (boxType === 'wide') {
+                    barcodeGuide.style.display = 'flex';
+                    qrGuide.style.display = 'none';
+                } else {
+                    barcodeGuide.style.display = 'none';
+                    qrGuide.style.display = 'block';
+                }
             }
         }
         
         // 스캐너 시작
         function startScanner() {
-            const statusDiv = document.getElementById('status');
-            statusDiv.className = 'status scanning';
-            statusDiv.innerHTML = '🔍 카메라에 코드를 비춰주세요...';
-            
             html5QrCode = new Html5Qrcode("reader");
             
-            // 모드별 설정
-            let config = {
-                fps: 10,
-                qrbox: { width: 250, height: 250 }  // 기본값
-            };
-            
+            // 1. 포맷 설정 (진짜 효과!)
+            const formatSelect = document.getElementById('formatSelect').value;
             let formats = [];
             
-            if (currentMode === 'qr') {
-                // QR 코드만
-                formats = [Html5QrcodeSupportedFormats.QR_CODE];
-                config.qrbox = { width: 250, height: 250 };
-            } else if (currentMode === 'barcode') {
-                // 바코드만 - 스캔 박스를 가로로 길게
-                formats = [
-                    Html5QrcodeSupportedFormats.CODE_128,
-                    Html5QrcodeSupportedFormats.CODE_39,
-                    Html5QrcodeSupportedFormats.EAN_13,
-                    Html5QrcodeSupportedFormats.EAN_8,
-                    Html5QrcodeSupportedFormats.UPC_A,
-                    Html5QrcodeSupportedFormats.UPC_E,
-                    Html5QrcodeSupportedFormats.ITF
-                ];
-                config.qrbox = { width: 350, height: 150 };  // 바코드용 가로 박스
-            } else {
-                // 자동 - 모든 포맷
-                formats = [
-                    Html5QrcodeSupportedFormats.QR_CODE,
-                    Html5QrcodeSupportedFormats.CODE_128,
-                    Html5QrcodeSupportedFormats.CODE_39,
-                    Html5QrcodeSupportedFormats.EAN_13,
-                    Html5QrcodeSupportedFormats.EAN_8,
-                    Html5QrcodeSupportedFormats.UPC_A,
-                    Html5QrcodeSupportedFormats.UPC_E,
-                    Html5QrcodeSupportedFormats.ITF,
-                    Html5QrcodeSupportedFormats.DATA_MATRIX
-                ];
-                config.qrbox = { width: 280, height: 280 };  // 중간 크기
+            switch(formatSelect) {
+                case 'qr':
+                    formats = [Html5QrcodeSupportedFormats.QR_CODE];
+                    lastFormat = 'QR Only';
+                    break;
+                case 'barcode':
+                    formats = [
+                        Html5QrcodeSupportedFormats.CODE_128,
+                        Html5QrcodeSupportedFormats.CODE_39,
+                        Html5QrcodeSupportedFormats.EAN_13,
+                        Html5QrcodeSupportedFormats.EAN_8,
+                        Html5QrcodeSupportedFormats.UPC_A,
+                        Html5QrcodeSupportedFormats.UPC_E
+                    ];
+                    lastFormat = 'Barcode Only';
+                    break;
+                case 'code128':
+                    formats = [Html5QrcodeSupportedFormats.CODE_128];
+                    lastFormat = 'CODE-128 Only';
+                    break;
+                case 'ean':
+                    formats = [
+                        Html5QrcodeSupportedFormats.EAN_13,
+                        Html5QrcodeSupportedFormats.EAN_8
+                    ];
+                    lastFormat = 'EAN Only';
+                    break;
+                default:
+                    formats = [
+                        Html5QrcodeSupportedFormats.QR_CODE,
+                        Html5QrcodeSupportedFormats.CODE_128,
+                        Html5QrcodeSupportedFormats.CODE_39,
+                        Html5QrcodeSupportedFormats.EAN_13,
+                        Html5QrcodeSupportedFormats.EAN_8
+                    ];
+                    lastFormat = 'All Formats';
             }
             
-            config.formatsToSupport = formats;
+            // 2. FPS 설정 (진짜 효과!)
+            const fps = parseInt(document.getElementById('fpsSelect').value);
             
+            // 3. 해상도 설정 (진짜 효과!)
+            const resolution = document.getElementById('resolutionSelect').value;
+            let videoConstraints = { facingMode: "environment" };
+            
+            switch(resolution) {
+                case 'low':
+                    videoConstraints.width = { ideal: 640 };
+                    videoConstraints.height = { ideal: 480 };
+                    break;
+                case 'medium':
+                    videoConstraints.width = { ideal: 1280 };
+                    videoConstraints.height = { ideal: 720 };
+                    break;
+                case 'high':
+                    videoConstraints.width = { ideal: 1920 };
+                    videoConstraints.height = { ideal: 1080 };
+                    break;
+                case 'ultra':
+                    videoConstraints.width = { min: 1920 };
+                    videoConstraints.height = { min: 1080 };
+                    break;
+            }
+            
+            // 설정 적용
+            const config = {
+                fps: fps,
+                qrbox: { width: 250, height: 250 },  // 이건 단순 UI
+                formatsToSupport: formats,  // 이건 진짜 효과!
+                experimentalFeatures: {
+                    useBarCodeDetectorIfSupported: true  // 네이티브 API 사용
+                },
+                aspectRatio: 16/9,
+                showTorchButtonIfSupported: true  // 플래시 버튼
+            };
+            
+            // 스캐너 시작
             html5QrCode.start(
-                { facingMode: "environment" },  // 후면 카메라
+                videoConstraints,  // 진짜 해상도 설정!
                 config,
                 onScanSuccess,
                 onScanFailure
             ).then(() => {
-                console.log('Scanner started in', currentMode, 'mode');
-                
-                // 10초 후 수동 촬영 옵션 표시
-                clearTimeout(manualTimer);
-                manualTimer = setTimeout(() => {
-                    document.getElementById('manualCapture').style.display = 'block';
-                }, 10000);
+                console.log('Scanner started with:', {
+                    formats: lastFormat,
+                    fps: fps,
+                    resolution: resolution
+                });
+                startTime = Date.now();
+                scanCount = 0;
             }).catch(err => {
-                console.error('Failed to start scanner:', err);
-                statusDiv.className = 'status error';
-                statusDiv.innerHTML = '❌ 카메라 접근 실패: ' + err;
+                console.error('Failed to start:', err);
             });
         }
         
-        // 스캔 성공
         function onScanSuccess(decodedText, decodedResult) {
-            clearTimeout(manualTimer);
-            
             const format = decodedResult.result.format.formatName;
-            lastScannedValue = decodedText;
+            const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(1);
             
-            // 상태 업데이트
-            const statusDiv = document.getElementById('status');
-            statusDiv.className = 'status success';
-            statusDiv.innerHTML = '✅ 인식 성공!';
-            
-            // 결과 표시
-            document.getElementById('format-type').textContent = format;
-            document.getElementById('result-value').textContent = decodedText;
+            document.getElementById('resultText').innerHTML = `
+                <strong>포맷:</strong> ${format}<br>
+                <strong>값:</strong> ${decodedText}<br>
+                <strong>인식 시간:</strong> ${elapsedTime}초<br>
+                <strong>스캔 횟수:</strong> ${scanCount}회
+            `;
             document.getElementById('result').classList.add('show');
             
-            // 진동 피드백 (모바일)
+            // 진동 피드백
             if (navigator.vibrate) {
                 navigator.vibrate(200);
             }
             
-            // 카메라 중지
             html5QrCode.stop();
-            
-            // 디버그 정보
-            console.log('Scanned:', format, decodedText);
         }
         
-        // 스캔 실패 (계속 시도)
         function onScanFailure(errorMessage) {
-            scanAttempts++;
-            
-            // 100번 시도마다 디버그 로그
-            if (scanAttempts % 100 === 0) {
-                console.log('Scanning...', scanAttempts, 'attempts');
-            }
+            scanCount++;
         }
         
-        // 스캐너 재시작
         function restartScanner() {
             document.getElementById('result').classList.remove('show');
-            document.getElementById('manualCapture').style.display = 'none';
-            scanAttempts = 0;
-            startScanner();
-        }
-        
-        // 자산 조회
-        function lookupAsset() {
-            if (lastScannedValue) {
-                // 실제로는 서버 API 호출
-                alert('자산 조회: ' + lastScannedValue);
+            if (html5QrCode && html5QrCode.getState() === Html5QrcodeScannerState.SCANNING) {
+                html5QrCode.stop().then(() => {
+                    startScanner();
+                });
+            } else {
+                startScanner();
             }
         }
         
-        // OCR 촬영
-        async function captureAndOCR() {
-            try {
-                const video = document.querySelector('#reader video');
-                if (!video) {
-                    alert('카메라를 찾을 수 없습니다.');
-                    return;
-                }
+        // 디버그 정보 업데이트
+        function updateDebugInfo() {
+            setInterval(() => {
+                const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(1);
+                const scanRate = (scanCount / elapsedTime).toFixed(1);
                 
-                // 캔버스에 현재 화면 캡처
-                const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                canvas.getContext('2d').drawImage(video, 0, 0);
-                
-                // Base64로 변환
-                const imageData = canvas.toDataURL('image/jpeg', 0.8);
-                
-                // 여기서 OCR API 호출
-                console.log('OCR image captured, size:', imageData.length);
-                alert('OCR 기능은 서버 API 연동이 필요합니다.');
-                
-            } catch (error) {
-                console.error('OCR capture error:', error);
-                alert('캡처 실패: ' + error.message);
-            }
+                document.getElementById('debugInfo').innerHTML = `
+                    - 활성 포맷: ${lastFormat}<br>
+                    - 스캔 시도: ${scanCount}회<br>
+                    - 경과 시간: ${elapsedTime}초<br>
+                    - 스캔 속도: ${scanRate}회/초<br>
+                    - FPS 설정: ${document.getElementById('fpsSelect').value}<br>
+                    - 해상도: ${document.getElementById('resolutionSelect').value}
+                `;
+            }, 500);
         }
     </script>
 </body>
