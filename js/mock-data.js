@@ -10,8 +10,16 @@
 // ============================================================
 // 자산 데이터 (TB_ASSET Mock)
 // ============================================================
+// 시리얼 패턴 (OCR 인식용):
+//   LG:  /\d{2,3}LG[A-Z]\d[A-Z][A-Z0-9]{10,}/  예: 40LGD5K202209000001
+//   CW:  /CW[A-Z0-9]{2,4}H[0-9][A-Z]{2}[A-Z0-9]{6,}/  예: CWAB12H5MN23050002
+//   G1L: /G[12]L\d{3}E\d{5}-\d{5}/  예: G1L007E00001-00007
+//   TAG: /TAG-?N\d+[A-Z]+\d+-[A-Z]?\d+/  예: TAGN001UNK001-0008
+//   LED: /LED\d{10}[A-Z]\d/  예: LED2023051001A1
+//   숫자시작: /\d{3}[A-Z]{2,4}[A-Z0-9]{6,}/  예: 309DEL2019120003
+// ============================================================
 const MOCK_ASSETS = {
-    // A1-1: 정상 (같은 부서 - 교무실)
+    // A1-1: 정상 (같은 부서 - 교무실) - LG 패턴
     "40LGD5K202209000001": {
         serial: "40LGD5K202209000001",
         assetType: "PC",
@@ -28,9 +36,9 @@ const MOCK_ASSETS = {
         expireDate: "2027-09-15"
     },
 
-    // A1-2: 수리중 (같은 부서 - 교무실)
-    "HP24MON2023050002": {
-        serial: "HP24MON2023050002",
+    // A1-2: 수리중 (같은 부서 - 교무실) - CW 패턴
+    "CWAB12H5MN23050002": {
+        serial: "CWAB12H5MN23050002",
         assetType: "모니터",
         typeName: "모니터",
         model: "HP 24인치 FHD",
@@ -50,9 +58,9 @@ const MOCK_ASSETS = {
         }
     },
 
-    // A1-3: 폐기 (같은 부서 - 교무실)
-    "DELLXPS2019120003": {
-        serial: "DELLXPS2019120003",
+    // A1-3: 폐기 (같은 부서 - 교무실) - 숫자시작 패턴
+    "309DEL2019120003AB": {
+        serial: "309DEL2019120003AB",
         assetType: "PC",
         typeName: "노트북",
         model: "Dell XPS 13",
@@ -72,9 +80,9 @@ const MOCK_ASSETS = {
         }
     },
 
-    // A1-4: 분실 (같은 부서 - 교무실)
-    "SAMSUNGTAB2022080004": {
-        serial: "SAMSUNGTAB2022080004",
+    // A1-4: 분실 (같은 부서 - 교무실) - 숫자시작 패턴
+    "408SAM2022080004TB": {
+        serial: "408SAM2022080004TB",
         assetType: "태블릿",
         typeName: "태블릿",
         model: "삼성 Galaxy Tab S8",
@@ -94,9 +102,9 @@ const MOCK_ASSETS = {
         }
     },
 
-    // A2-1: 다른 부서 (입학팀 → 교무실 이동)
-    "LGGRAM2024010005": {
-        serial: "LGGRAM2024010005",
+    // A2-1: 다른 부서 (입학팀 → 교무실 이동) - LG 패턴
+    "17LGR7T2024010005": {
+        serial: "17LGR7T2024010005",
         assetType: "PC",
         typeName: "노트북",
         model: "LG 그램 17",
@@ -111,9 +119,9 @@ const MOCK_ASSETS = {
         expireDate: "2029-01-05"
     },
 
-    // A2-2: 다른 부서 + 수리중 (총무팀 → 교무실)
-    "HPPRINTER2022030006": {
-        serial: "HPPRINTER2022030006",
+    // A2-2: 다른 부서 + 수리중 (총무팀 → 교무실) - CW 패턴
+    "CWPR22H1LJ22030006": {
+        serial: "CWPR22H1LJ22030006",
         assetType: "프린터",
         typeName: "레이저프린터",
         model: "HP LaserJet Pro M404",
@@ -133,7 +141,7 @@ const MOCK_ASSETS = {
         }
     },
 
-    // 다중 시리얼 테스트용 - 모니터 1
+    // 다중 시리얼 테스트용 - 모니터 1 - LED 패턴
     "LED2023051001A1": {
         serial: "LED2023051001A1",
         assetType: "모니터",
@@ -150,7 +158,7 @@ const MOCK_ASSETS = {
         expireDate: "2028-05-10"
     },
 
-    // 다중 시리얼 테스트용 - 모니터 2
+    // 다중 시리얼 테스트용 - 모니터 2 - LED 패턴
     "LED2023051001A2": {
         serial: "LED2023051001A2",
         assetType: "모니터",
@@ -172,9 +180,9 @@ const MOCK_ASSETS = {
 // 납품 예정 데이터 (TB_DELIVERY Mock)
 // ============================================================
 const MOCK_DELIVERIES = {
-    // B1: 납품 대기
-    "NEWDELL2025010007": {
-        serial: "NEWDELL2025010007",
+    // B1: 납품 대기 - G1L 패턴
+    "G1L007E00001-00007": {
+        serial: "G1L007E00001-00007",
         assetType: "PC",
         typeName: "데스크톱",
         model: "Dell Optiplex 7090",
