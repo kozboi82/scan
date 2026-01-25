@@ -3,264 +3,441 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
-    <title>진짜 바코드 최적화 스캐너 (수정판)</title>
+    <title>바코드/QR 스캐너 최종판</title>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         body { 
-            font-family: sans-serif; 
-            padding: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 0;
             margin: 0;
-            background: #f0f0f0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
         }
         
         .container {
-            max-width: 600px;
-            margin: 0 auto;
+            max-width: 500px;
+            margin: 20px auto;
             background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             padding: 20px;
-            border-radius: 10px;
-        }
-        
-        h2 { 
-            color: #333; 
             text-align: center;
-            margin-bottom: 10px;
         }
         
-        .info-box {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .header p {
+            margin: 5px 0 0 0;
+            opacity: 0.9;
             font-size: 14px;
         }
         
-        .info-box strong {
-            color: #1976d2;
+        .content {
+            padding: 20px;
         }
         
-        #reader { 
-            width: 100%;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
-            min-height: 300px;
-        }
-        
-        .settings {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 8px;
+        .quick-settings {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
             margin-bottom: 20px;
         }
         
-        .setting-row {
+        .quick-btn {
+            padding: 12px 8px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .quick-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        
+        .quick-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .quick-btn .icon {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .quick-btn .label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        #reader {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f5f5f5;
+            min-height: 300px;
+            position: relative;
+        }
+        
+        #reader.scanning {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .control-panel {
+            margin-top: 20px;
+        }
+        
+        .main-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
+            justify-content: center;
+            gap: 8px;
         }
         
-        .setting-row label {
-            flex: 1;
-            font-size: 14px;
+        .main-btn.start {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
         }
         
-        .setting-row select {
-            flex: 1;
+        .main-btn.start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .main-btn.stop {
+            background: #f44336;
+            color: white;
+        }
+        
+        .main-btn.stop:hover {
+            background: #d32f2f;
+        }
+        
+        .result-box {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #e8f5e9;
+            border-radius: 12px;
+            border: 2px solid #4caf50;
+        }
+        
+        .result-box.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            color: #2e7d32;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .result-content {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+        
+        .result-meta {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+        
+        .result-meta-item {
             padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            background: white;
+            border-radius: 6px;
+            font-size: 12px;
         }
         
-        #result {
+        .result-meta-item strong {
+            display: block;
+            color: #666;
+            margin-bottom: 2px;
+        }
+        
+        .stats {
             margin-top: 20px;
             padding: 15px;
-            background: #d4edda;
-            border-radius: 8px;
-            display: none;
-        }
-        
-        #result.show {
-            display: block;
-        }
-        
-        .debug {
-            margin-top: 20px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            font-family: monospace;
+            background: #f5f5f5;
+            border-radius: 10px;
             font-size: 12px;
-            max-height: 200px;
-            overflow-y: auto;
+            color: #666;
         }
         
-        .btn {
-            padding: 12px 24px;
-            background: #2196f3;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-        }
-        
-        .btn:hover {
-            background: #1976d2;
-        }
-        
-        .btn.start {
-            background: #4caf50;
-        }
-        
-        .btn.start:hover {
-            background: #45a049;
-        }
-        
-        .btn.stop {
-            background: #f44336;
-        }
-        
-        .btn.stop:hover {
-            background: #da190b;
-        }
-        
-        .status-indicator {
-            padding: 10px;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
             text-align: center;
+        }
+        
+        .stat-item {
+            padding: 8px;
+            background: white;
             border-radius: 6px;
-            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            font-size: 18px;
             font-weight: bold;
+            color: #333;
         }
         
-        .status-indicator.ready {
-            background: #fff3cd;
-            color: #856404;
+        .stat-label {
+            font-size: 10px;
+            color: #999;
+            margin-top: 2px;
         }
         
-        .status-indicator.scanning {
-            background: #cce5ff;
-            color: #004085;
+        .tips {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3e0;
+            border-radius: 10px;
+            font-size: 13px;
         }
         
-        .status-indicator.stopped {
-            background: #f8d7da;
-            color: #721c24;
+        .tips h4 {
+            margin: 0 0 8px 0;
+            color: #f57c00;
+        }
+        
+        .tips ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .tips li {
+            margin: 4px 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>🔬 진짜 바코드 최적화 스캐너</h2>
-        
-        <div class="info-box">
-            <strong>사용법:</strong><br>
-            1. 설정 선택 (포맷, FPS, 해상도)<br>
-            2. "스캐너 시작" 버튼 클릭<br>
-            3. 카메라 권한 허용<br>
-            4. QR/바코드를 카메라에 비추기
+        <div class="header">
+            <h1>📷 스마트 스캐너</h1>
+            <p>QR 코드 & 바코드 인식</p>
         </div>
         
-        <div id="statusIndicator" class="status-indicator ready">
-            📷 준비됨 - 시작 버튼을 누르세요
-        </div>
-        
-        <!-- 실제 효과가 있는 설정들 -->
-        <div class="settings">
-            <h3>⚙️ 실제 효과가 있는 설정</h3>
-            
-            <div class="setting-row">
-                <label>스캔 포맷 (진짜 효과 ✅)</label>
-                <select id="formatSelect">
-                    <option value="all">모든 포맷</option>
-                    <option value="qr">QR 코드만</option>
-                    <option value="barcode">바코드만</option>
-                    <option value="code128">CODE-128만</option>
-                    <option value="ean">EAN-13/8만</option>
-                </select>
+        <div class="content">
+            <!-- 빠른 설정 버튼 -->
+            <div class="quick-settings">
+                <div class="quick-btn active" onclick="setMode('auto')" data-mode="auto">
+                    <span class="icon">🔄</span>
+                    <span class="label">자동</span>
+                </div>
+                <div class="quick-btn" onclick="setMode('qr')" data-mode="qr">
+                    <span class="icon">◻️</span>
+                    <span class="label">QR</span>
+                </div>
+                <div class="quick-btn" onclick="setMode('barcode')" data-mode="barcode">
+                    <span class="icon">|||</span>
+                    <span class="label">바코드</span>
+                </div>
             </div>
             
-            <div class="setting-row">
-                <label>스캔 속도 FPS (진짜 효과 ✅)</label>
-                <select id="fpsSelect">
-                    <option value="5">5 FPS (배터리 절약)</option>
-                    <option value="10" selected>10 FPS (균형)</option>
-                    <option value="15">15 FPS (빠른 인식)</option>
-                    <option value="30">30 FPS (최대 성능)</option>
-                </select>
+            <!-- 카메라 뷰 -->
+            <div id="reader"></div>
+            
+            <!-- 컨트롤 패널 -->
+            <div class="control-panel">
+                <button id="startBtn" class="main-btn start" onclick="toggleScanner()">
+                    <span>▶️</span>
+                    <span>스캔 시작</span>
+                </button>
+                <button id="stopBtn" class="main-btn stop" onclick="toggleScanner()" style="display:none;">
+                    <span>⏹️</span>
+                    <span>스캔 중지</span>
+                </button>
             </div>
             
-            <div class="setting-row">
-                <label>카메라 해상도 (진짜 효과 ✅)</label>
-                <select id="resolutionSelect">
-                    <option value="low">낮음 (640x480)</option>
-                    <option value="medium" selected>중간 (1280x720)</option>
-                    <option value="high">높음 (1920x1080)</option>
-                </select>
+            <!-- 결과 표시 -->
+            <div id="resultBox" class="result-box">
+                <div class="result-header">
+                    <span>✅</span>
+                    <span>인식 성공!</span>
+                </div>
+                <div class="result-content" id="resultValue">-</div>
+                <div class="result-meta">
+                    <div class="result-meta-item">
+                        <strong>형식</strong>
+                        <span id="resultFormat">-</span>
+                    </div>
+                    <div class="result-meta-item">
+                        <strong>길이</strong>
+                        <span id="resultLength">-</span>
+                    </div>
+                    <div class="result-meta-item">
+                        <strong>시간</strong>
+                        <span id="resultTime">-</span>
+                    </div>
+                    <div class="result-meta-item">
+                        <strong>시도</strong>
+                        <span id="resultAttempts">-</span>
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <!-- 컨트롤 버튼 -->
-        <button id="startBtn" class="btn start" onclick="startScanner()">
-            ▶️ 스캐너 시작
-        </button>
-        
-        <button id="stopBtn" class="btn stop" onclick="stopScanner()" style="display:none;">
-            ⏹️ 스캐너 중지
-        </button>
-        
-        <!-- 카메라 -->
-        <div id="reader"></div>
-        
-        <!-- 결과 -->
-        <div id="result">
-            <strong>✅ 인식 성공!</strong>
-            <div id="resultText"></div>
-            <button class="btn" onclick="restartScanner()">다시 스캔</button>
-        </div>
-        
-        <!-- 디버그 정보 -->
-        <div class="debug">
-            <strong>📊 실시간 디버그 정보:</strong>
-            <div id="debugInfo">
-                - 대기 중...
+            
+            <!-- 실시간 통계 -->
+            <div class="stats">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="scanRate">0</div>
+                        <div class="stat-label">스캔/초</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalScans">0</div>
+                        <div class="stat-label">총 시도</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="elapsedTime">0</div>
+                        <div class="stat-label">경과(초)</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 팁 -->
+            <div class="tips">
+                <h4>💡 스캔 팁</h4>
+                <ul id="tipsList">
+                    <li>QR: 20-30cm 거리 유지</li>
+                    <li>바코드: 10-15cm, 수평 정렬</li>
+                    <li>밝은 곳에서 그림자 없이</li>
+                </ul>
             </div>
         </div>
     </div>
 
     <script>
+        // 전역 변수
         let html5QrCode = null;
         let isScanning = false;
+        let currentMode = 'auto';
         let scanCount = 0;
-        let startTime = Date.now();
-        let lastFormat = '';
-        let debugInterval = null;
+        let startTime = 0;
+        let statsInterval = null;
+        
+        // 모드 설정
+        function setMode(mode) {
+            currentMode = mode;
+            
+            // UI 업데이트
+            document.querySelectorAll('.quick-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+            
+            // 팁 업데이트
+            updateTips(mode);
+            
+            // 스캐너 실행 중이면 재시작
+            if (isScanning) {
+                stopScanner();
+                setTimeout(() => startScanner(), 500);
+            }
+        }
+        
+        // 팁 업데이트
+        function updateTips(mode) {
+            const tips = {
+                'auto': [
+                    'QR: 20-30cm 거리 유지',
+                    '바코드: 10-15cm, 수평 정렬',
+                    '밝은 곳에서 그림자 없이'
+                ],
+                'qr': [
+                    '정사각형 영역에 QR 맞추기',
+                    '20-30cm 최적 거리',
+                    '어느 각도든 인식 가능'
+                ],
+                'barcode': [
+                    '가까이(10-15cm) 접근',
+                    '바코드를 수평으로 정렬',
+                    '밝은 조명 필수'
+                ]
+            };
+            
+            const tipsList = document.getElementById('tipsList');
+            tipsList.innerHTML = tips[mode].map(tip => `<li>${tip}</li>`).join('');
+        }
+        
+        // 스캐너 토글
+        function toggleScanner() {
+            if (isScanning) {
+                stopScanner();
+            } else {
+                startScanner();
+            }
+        }
         
         // 스캐너 시작
         function startScanner() {
-            console.log('Starting scanner...');
+            console.log('Starting scanner in', currentMode, 'mode...');
             
             // UI 업데이트
             document.getElementById('startBtn').style.display = 'none';
             document.getElementById('stopBtn').style.display = 'block';
-            document.getElementById('statusIndicator').className = 'status-indicator scanning';
-            document.getElementById('statusIndicator').innerHTML = '🔍 스캔 중...';
-            document.getElementById('result').classList.remove('show');
+            document.getElementById('reader').classList.add('scanning');
+            document.getElementById('resultBox').classList.remove('show');
+            
+            // 초기화
+            scanCount = 0;
+            startTime = Date.now();
             
             // Html5Qrcode 인스턴스 생성
             html5QrCode = new Html5Qrcode("reader");
             
-            // 1. 포맷 설정 (진짜 효과!)
-            const formatSelect = document.getElementById('formatSelect').value;
+            // 포맷 설정
             let formats = [];
-            
-            switch(formatSelect) {
+            switch(currentMode) {
                 case 'qr':
                     formats = [Html5QrcodeSupportedFormats.QR_CODE];
-                    lastFormat = 'QR Only';
                     break;
                 case 'barcode':
                     formats = [
@@ -269,76 +446,43 @@
                         Html5QrcodeSupportedFormats.EAN_13,
                         Html5QrcodeSupportedFormats.EAN_8,
                         Html5QrcodeSupportedFormats.UPC_A,
-                        Html5QrcodeSupportedFormats.UPC_E
+                        Html5QrcodeSupportedFormats.UPC_E,
+                        Html5QrcodeSupportedFormats.ITF
                     ];
-                    lastFormat = 'Barcode Only';
                     break;
-                case 'code128':
-                    formats = [Html5QrcodeSupportedFormats.CODE_128];
-                    lastFormat = 'CODE-128 Only';
-                    break;
-                case 'ean':
-                    formats = [
-                        Html5QrcodeSupportedFormats.EAN_13,
-                        Html5QrcodeSupportedFormats.EAN_8
-                    ];
-                    lastFormat = 'EAN Only';
-                    break;
-                default:
+                default: // auto
                     formats = [
                         Html5QrcodeSupportedFormats.QR_CODE,
                         Html5QrcodeSupportedFormats.CODE_128,
                         Html5QrcodeSupportedFormats.CODE_39,
                         Html5QrcodeSupportedFormats.EAN_13,
-                        Html5QrcodeSupportedFormats.EAN_8
+                        Html5QrcodeSupportedFormats.EAN_8,
+                        Html5QrcodeSupportedFormats.DATA_MATRIX
                     ];
-                    lastFormat = 'All Formats';
             }
             
-            // 2. FPS 설정 (진짜 효과!)
-            const fps = parseInt(document.getElementById('fpsSelect').value);
-            
-            // 3. 해상도 설정 (진짜 효과!)
-            const resolution = document.getElementById('resolutionSelect').value;
-            let videoConstraints = { facingMode: "environment" };
-            
-            switch(resolution) {
-                case 'low':
-                    videoConstraints.width = { ideal: 640 };
-                    videoConstraints.height = { ideal: 480 };
-                    break;
-                case 'medium':
-                    videoConstraints.width = { ideal: 1280 };
-                    videoConstraints.height = { ideal: 720 };
-                    break;
-                case 'high':
-                    videoConstraints.width = { ideal: 1920 };
-                    videoConstraints.height = { ideal: 1080 };
-                    break;
-            }
-            
-            // 설정 적용
+            // 설정
             const config = {
-                fps: fps,
-                qrbox: { width: 250, height: 250 },  // 이건 단순 UI
-                formatsToSupport: formats  // 이건 진짜 효과!
+                fps: 10,
+                qrbox: currentMode === 'barcode' 
+                    ? { width: 300, height: 150 }  // 바코드용 가로 박스
+                    : { width: 250, height: 250 }, // QR용 정사각형
+                formatsToSupport: formats
             };
             
             // 스캐너 시작
             html5QrCode.start(
-                videoConstraints,  // 진짜 해상도 설정!
+                { facingMode: "environment" },  // 후면 카메라
                 config,
                 onScanSuccess,
                 onScanFailure
             ).then(() => {
                 console.log('Scanner started successfully');
                 isScanning = true;
-                startTime = Date.now();
-                scanCount = 0;
-                startDebugInfo();
+                startStats();
             }).catch(err => {
                 console.error('Failed to start scanner:', err);
-                alert('카메라 시작 실패: ' + err);
+                alert('카메라 접근 실패: ' + err.message);
                 stopScanner();
             });
         }
@@ -353,17 +497,16 @@
                     isScanning = false;
                     html5QrCode = null;
                 }).catch(err => {
-                    console.error('Failed to stop scanner:', err);
+                    console.error('Failed to stop:', err);
                 });
             }
             
             // UI 업데이트
             document.getElementById('startBtn').style.display = 'block';
             document.getElementById('stopBtn').style.display = 'none';
-            document.getElementById('statusIndicator').className = 'status-indicator stopped';
-            document.getElementById('statusIndicator').innerHTML = '⏹️ 중지됨';
+            document.getElementById('reader').classList.remove('scanning');
             
-            stopDebugInfo();
+            stopStats();
         }
         
         // 스캔 성공
@@ -371,15 +514,15 @@
             const format = decodedResult.result.format.formatName;
             const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(1);
             
-            console.log('Scan success:', format, decodedText);
+            console.log('Success:', format, decodedText);
             
-            document.getElementById('resultText').innerHTML = `
-                <strong>포맷:</strong> ${format}<br>
-                <strong>값:</strong> ${decodedText}<br>
-                <strong>인식 시간:</strong> ${elapsedTime}초<br>
-                <strong>스캔 횟수:</strong> ${scanCount}회
-            `;
-            document.getElementById('result').classList.add('show');
+            // 결과 표시
+            document.getElementById('resultValue').textContent = decodedText;
+            document.getElementById('resultFormat').textContent = format;
+            document.getElementById('resultLength').textContent = decodedText.length + '자';
+            document.getElementById('resultTime').textContent = elapsedTime + '초';
+            document.getElementById('resultAttempts').textContent = scanCount + '회';
+            document.getElementById('resultBox').classList.add('show');
             
             // 진동 피드백
             if (navigator.vibrate) {
@@ -393,40 +536,27 @@
         // 스캔 실패 (계속 시도)
         function onScanFailure(errorMessage) {
             scanCount++;
-            // 에러는 무시 (계속 스캔 시도)
         }
         
-        // 다시 스캔
-        function restartScanner() {
-            document.getElementById('result').classList.remove('show');
-            startScanner();
-        }
-        
-        // 디버그 정보 시작
-        function startDebugInfo() {
-            debugInterval = setInterval(() => {
+        // 통계 시작
+        function startStats() {
+            statsInterval = setInterval(() => {
                 if (isScanning) {
-                    const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(1);
-                    const scanRate = (scanCount / elapsedTime).toFixed(1);
+                    const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
+                    const rate = (scanCount / Math.max(1, elapsed)).toFixed(1);
                     
-                    document.getElementById('debugInfo').innerHTML = `
-                        - 상태: ${isScanning ? '스캔 중' : '중지됨'}<br>
-                        - 활성 포맷: ${lastFormat}<br>
-                        - 스캔 시도: ${scanCount}회<br>
-                        - 경과 시간: ${elapsedTime}초<br>
-                        - 스캔 속도: ${scanRate}회/초<br>
-                        - FPS 설정: ${document.getElementById('fpsSelect').value}<br>
-                        - 해상도: ${document.getElementById('resolutionSelect').value}
-                    `;
+                    document.getElementById('scanRate').textContent = rate;
+                    document.getElementById('totalScans').textContent = scanCount;
+                    document.getElementById('elapsedTime').textContent = elapsed;
                 }
             }, 500);
         }
         
-        // 디버그 정보 중지
-        function stopDebugInfo() {
-            if (debugInterval) {
-                clearInterval(debugInterval);
-                debugInterval = null;
+        // 통계 중지
+        function stopStats() {
+            if (statsInterval) {
+                clearInterval(statsInterval);
+                statsInterval = null;
             }
         }
         
