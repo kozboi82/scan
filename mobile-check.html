@@ -16,6 +16,10 @@
             --sju-warning-bg: #fef3c7;
             --sju-danger: #ef4444;
             --sju-danger-bg: #fee2e2;
+            --sju-info: #0284c7;
+            --sju-info-bg: #e0f2fe;
+            --sju-purple: #7c3aed;
+            --sju-purple-bg: #ede9fe;
             --sju-gray-100: #f5f5f5;
             --sju-gray-200: #eeeeee;
             --sju-gray-300: #e0e0e0;
@@ -62,7 +66,7 @@
             cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
 
-        /* ===== Scan Area (상단) ===== */
+        /* ===== Scan Area ===== */
         .scan-area {
             background: linear-gradient(135deg, var(--sju-primary) 0%, #1a4a9e 100%);
             margin: 12px;
@@ -78,102 +82,56 @@
         .scan-text { color: var(--sju-white); font-size: 16px; font-weight: 500; }
         .scan-hint { color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 6px; }
 
-        /* ===== Recognition Result (인식 결과 영역) ===== */
-        .recognition-area {
-            background: var(--sju-white);
-            margin: 0 12px 12px;
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-sm);
-            display: none;
-        }
-        .recognition-area.active { display: block; }
-        .recognition-header {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--sju-gray-200);
-            font-size: 13px; font-weight: 600; color: var(--sju-gray-700);
-        }
-        .recognition-content { padding: 16px; }
-        .recognition-serial {
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 18px; font-weight: 700; color: var(--sju-primary);
-            text-align: center; margin-bottom: 12px;
-            padding: 12px; background: var(--sju-gray-100); border-radius: var(--radius-sm);
-        }
-        .recognition-status {
-            text-align: center; padding: 8px 12px;
-            border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 12px;
-        }
-        .recognition-status.ok { background: var(--sju-success-bg); color: var(--sju-success); }
-        .recognition-status.move { background: #e0f2fe; color: #0284c7; }
-        .recognition-status.warning { background: var(--sju-warning-bg); color: #d97706; }
-        .recognition-status.new { background: #ede9fe; color: #7c3aed; }
-        .recognition-status.unregistered { background: var(--sju-gray-200); color: var(--sju-gray-700); }
-
-        /* ===== Action Buttons (액션 버튼) ===== */
-        .action-buttons {
-            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;
-        }
-        .action-btn {
-            flex: 1; min-width: calc(33% - 6px);
-            padding: 10px 8px; border: none; border-radius: var(--radius-sm);
-            font-size: 13px; font-weight: 500; cursor: pointer;
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
-        }
-        .action-btn .icon { font-size: 20px; }
-        .action-btn.primary { background: var(--sju-primary); color: var(--sju-white); }
-        .action-btn.success { background: var(--sju-success); color: var(--sju-white); }
-        .action-btn.warning { background: var(--sju-warning); color: var(--sju-white); }
-        .action-btn.accent { background: var(--sju-accent); color: var(--sju-white); }
-        .action-btn.secondary { background: var(--sju-gray-200); color: var(--sju-gray-700); }
-        .action-btn.selected { box-shadow: 0 0 0 3px rgba(17,48,110,0.3); }
-
-        /* ===== Manual Input ===== */
-        .manual-input-row {
-            display: flex; gap: 8px;
-        }
-        .manual-input {
-            flex: 1; padding: 10px 12px;
-            border: 1px solid var(--sju-gray-300); border-radius: var(--radius-sm);
-            font-size: 14px; font-family: 'Consolas', monospace;
-        }
-        .manual-input:focus { outline: none; border-color: var(--sju-primary); }
-        .manual-btn {
-            padding: 10px 16px; background: var(--sju-primary); color: var(--sju-white);
-            border: none; border-radius: var(--radius-sm); font-size: 14px; cursor: pointer;
-        }
-
         /* ===== Results Section ===== */
-        .results-section { padding: 0 12px; padding-bottom: 140px; }
+        .results-section { padding: 0 12px; padding-bottom: 160px; }
         .results-header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 4px;
+            padding: 10px 4px; gap: 8px;
         }
         .results-title { font-size: 14px; font-weight: 600; color: var(--sju-gray-700); }
+        .results-actions { display: flex; gap: 8px; align-items: center; }
         .results-count { font-size: 12px; color: var(--sju-gray-500); }
+        .btn-batch {
+            padding: 6px 12px; font-size: 12px; font-weight: 500;
+            background: var(--sju-primary); color: var(--sju-white);
+            border: none; border-radius: var(--radius-sm); cursor: pointer;
+        }
+        .btn-batch:disabled { background: var(--sju-gray-300); color: var(--sju-gray-500); }
+        .btn-select-all {
+            padding: 6px 10px; font-size: 11px;
+            background: var(--sju-gray-200); color: var(--sju-gray-700);
+            border: none; border-radius: var(--radius-sm); cursor: pointer;
+        }
 
         /* ===== Result Item ===== */
         .result-item {
             background: var(--sju-white);
             border-radius: var(--radius-md);
-            padding: 12px 14px;
             margin-bottom: 8px;
             box-shadow: var(--shadow-sm);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
+            overflow: hidden;
         }
-        .result-item:active { background: var(--sju-gray-100); }
+        .result-item.expanded { border: 2px solid var(--sju-primary); }
+        .result-item-header {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 14px; cursor: pointer;
+        }
+        .result-item-header:active { background: var(--sju-gray-100); }
+        .result-checkbox {
+            width: 20px; height: 20px; cursor: pointer;
+            accent-color: var(--sju-primary);
+        }
         .result-status {
             width: 32px; height: 32px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 16px; flex-shrink: 0;
+            font-size: 14px; flex-shrink: 0;
         }
-        .result-status.ok { background: var(--sju-success-bg); }
-        .result-status.move { background: #e0f2fe; }
-        .result-status.warning { background: var(--sju-warning-bg); }
-        .result-status.pending { background: var(--sju-gray-200); }
-        .result-status.new { background: #ede9fe; }
+        .result-status.ok { background: var(--sju-success-bg); color: var(--sju-success); }
+        .result-status.move { background: var(--sju-info-bg); color: var(--sju-info); }
+        .result-status.warning { background: var(--sju-warning-bg); color: var(--sju-warning); }
+        .result-status.danger { background: var(--sju-danger-bg); color: var(--sju-danger); }
+        .result-status.new { background: var(--sju-purple-bg); color: var(--sju-purple); }
+        .result-status.pending { background: var(--sju-gray-200); color: var(--sju-gray-600); }
         .result-info { flex: 1; min-width: 0; }
         .result-serial {
             font-family: 'Consolas', monospace;
@@ -186,20 +144,50 @@
             font-weight: 500; white-space: nowrap;
         }
         .badge-ok { background: var(--sju-success-bg); color: var(--sju-success); }
-        .badge-move { background: #e0f2fe; color: #0284c7; }
+        .badge-move { background: var(--sju-info-bg); color: var(--sju-info); }
         .badge-repair { background: var(--sju-warning-bg); color: #d97706; }
         .badge-dispose { background: var(--sju-danger-bg); color: var(--sju-danger); }
         .badge-lost { background: #ffedd5; color: #ea580c; }
         .badge-delivery { background: #dbeafe; color: #2563eb; }
         .badge-unregistered { background: var(--sju-gray-200); color: var(--sju-gray-700); }
-        .badge-registered { background: #ede9fe; color: #7c3aed; }
+        .badge-new { background: var(--sju-purple-bg); color: var(--sju-purple); }
+        .result-delete {
+            width: 28px; height: 28px; border: none; background: none;
+            color: var(--sju-gray-500); font-size: 16px; cursor: pointer;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        }
+        .result-delete:hover { background: var(--sju-danger-bg); color: var(--sju-danger); }
+
+        /* ===== Result Item Expanded ===== */
+        .result-expanded {
+            padding: 0 14px 14px;
+            border-top: 1px solid var(--sju-gray-200);
+            display: none;
+        }
+        .result-item.expanded .result-expanded { display: block; }
+        .expand-section { margin-top: 12px; }
+        .expand-label { font-size: 11px; color: var(--sju-gray-600); margin-bottom: 6px; font-weight: 500; }
+        .expand-value { font-size: 13px; color: var(--sju-gray-800); }
+        .expand-row { display: flex; gap: 12px; margin-bottom: 10px; }
+        .expand-col { flex: 1; }
+        .expand-select {
+            width: 100%; padding: 8px 10px; border: 1px solid var(--sju-gray-300);
+            border-radius: var(--radius-sm); font-size: 13px;
+        }
+        .expand-actions { display: flex; gap: 8px; margin-top: 12px; }
+        .expand-btn {
+            flex: 1; padding: 10px; border: none; border-radius: var(--radius-sm);
+            font-size: 13px; font-weight: 500; cursor: pointer;
+        }
+        .expand-btn.primary { background: var(--sju-primary); color: var(--sju-white); }
+        .expand-btn.secondary { background: var(--sju-gray-200); color: var(--sju-gray-700); }
 
         /* ===== Empty State ===== */
-        .empty-state { text-align: center; padding: 30px 20px; color: var(--sju-gray-500); }
-        .empty-icon { font-size: 40px; margin-bottom: 10px; opacity: 0.5; }
-        .empty-text { font-size: 13px; }
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--sju-gray-500); }
+        .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+        .empty-text { font-size: 14px; }
 
-        /* ===== Bottom Section (부서 + 완료버튼) ===== */
+        /* ===== Bottom Section ===== */
         .bottom-section {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: var(--sju-white);
@@ -220,9 +208,9 @@
         .location-value { font-size: 13px; font-weight: 500; color: var(--sju-gray-800); }
         .location-arrow { color: var(--sju-gray-500); font-size: 12px; }
 
-        .bottom-buttons { padding: 12px 16px; }
+        .bottom-buttons { padding: 12px 16px; display: flex; gap: 10px; }
         .btn-complete {
-            width: 100%; padding: 14px;
+            flex: 1; padding: 14px;
             background: var(--sju-primary); color: var(--sju-white);
             border: none; border-radius: var(--radius-md);
             font-size: 15px; font-weight: 600; cursor: pointer;
@@ -239,7 +227,7 @@
         }
         .modal-overlay.active { display: flex; }
         .modal-content {
-            background: var(--sju-white); width: 100%; max-height: 80vh;
+            background: var(--sju-white); width: 100%; max-height: 85vh;
             border-radius: var(--radius-lg) var(--radius-lg) 0 0;
             padding: 20px; padding-bottom: max(20px, env(safe-area-inset-bottom));
             animation: slideUp 0.3s ease-out; overflow-y: auto;
@@ -256,6 +244,55 @@
             font-size: 18px; color: var(--sju-gray-600); cursor: pointer;
         }
 
+        /* ===== Multi Serial Modal ===== */
+        .serial-select-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px; background: var(--sju-gray-100);
+            border-radius: var(--radius-md); margin-bottom: 8px;
+        }
+        .serial-select-item.disabled { opacity: 0.5; }
+        .serial-select-check { width: 20px; height: 20px; accent-color: var(--sju-primary); }
+        .serial-select-info { flex: 1; }
+        .serial-select-sn {
+            font-family: 'Consolas', monospace; font-weight: 600;
+            font-size: 14px; color: var(--sju-gray-800);
+        }
+        .serial-select-status { font-size: 11px; color: var(--sju-gray-600); margin-top: 2px; }
+        .serial-select-edit {
+            padding: 6px 10px; font-size: 11px;
+            background: var(--sju-white); border: 1px solid var(--sju-gray-300);
+            border-radius: var(--radius-sm); cursor: pointer;
+        }
+        .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+        .modal-btn {
+            flex: 1; padding: 12px; border: none; border-radius: var(--radius-md);
+            font-size: 14px; font-weight: 500; cursor: pointer;
+        }
+        .modal-btn.primary { background: var(--sju-primary); color: var(--sju-white); }
+        .modal-btn.secondary { background: var(--sju-gray-200); color: var(--sju-gray-700); }
+
+        /* ===== Batch Modal ===== */
+        .batch-section { margin-bottom: 16px; }
+        .batch-label { font-size: 13px; font-weight: 600; color: var(--sju-gray-700); margin-bottom: 8px; }
+        .batch-options { display: flex; flex-wrap: wrap; gap: 8px; }
+        .batch-option {
+            padding: 10px 16px; border: 1px solid var(--sju-gray-300);
+            border-radius: var(--radius-md); font-size: 13px;
+            background: var(--sju-white); cursor: pointer;
+        }
+        .batch-option.selected { border-color: var(--sju-primary); background: #e8eaf6; color: var(--sju-primary); }
+        .batch-option:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* ===== Commit Modal ===== */
+        .commit-summary { margin-bottom: 16px; }
+        .commit-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px; background: var(--sju-gray-100);
+            border-radius: var(--radius-sm); margin-bottom: 6px; font-size: 12px;
+        }
+        .commit-item-serial { font-family: 'Consolas', monospace; font-weight: 600; flex: 1; }
+        .commit-item-action { color: var(--sju-gray-600); }
+
         /* ===== Settings Modal ===== */
         .settings-item { margin-bottom: 16px; }
         .settings-label { font-size: 12px; color: var(--sju-gray-600); margin-bottom: 6px; }
@@ -267,7 +304,7 @@
         .settings-input:focus { outline: none; border-color: var(--sju-primary); }
 
         /* ===== Department List ===== */
-        .dept-list { max-height: 280px; overflow-y: auto; }
+        .dept-list { max-height: 300px; overflow-y: auto; }
         .dept-item {
             padding: 12px 14px; border-bottom: 1px solid var(--sju-gray-200);
             cursor: pointer;
@@ -277,42 +314,9 @@
         .dept-name { font-size: 14px; color: var(--sju-gray-800); }
         .dept-location { font-size: 11px; color: var(--sju-gray-500); }
 
-        /* ===== Form Styles ===== */
-        .form-group { margin-bottom: 12px; }
-        .form-label { font-size: 12px; color: var(--sju-gray-700); margin-bottom: 4px; font-weight: 500; }
-        .form-select {
-            width: 100%; padding: 10px; border: 1px solid var(--sju-gray-300);
-            border-radius: var(--radius-sm); font-size: 14px;
-        }
-        .form-input {
-            width: 100%; padding: 10px; border: 1px solid var(--sju-gray-300);
-            border-radius: var(--radius-sm); font-size: 14px;
-        }
-
-        /* ===== Case Actions ===== */
-        .case-info {
-            background: var(--sju-gray-100); padding: 14px;
-            border-radius: var(--radius-md); margin-bottom: 14px;
-        }
-        .case-serial {
-            font-family: 'Consolas', monospace;
-            font-size: 15px; font-weight: 600; color: var(--sju-primary); margin-bottom: 6px;
-        }
-        .case-detail { font-size: 12px; color: var(--sju-gray-700); line-height: 1.4; }
-        .case-actions { display: flex; flex-direction: column; gap: 8px; }
-        .case-btn {
-            padding: 12px 14px; border: none; border-radius: var(--radius-md);
-            font-size: 14px; font-weight: 500; cursor: pointer; text-align: center;
-        }
-        .case-btn.primary { background: var(--sju-primary); color: var(--sju-white); }
-        .case-btn.secondary { background: var(--sju-gray-200); color: var(--sju-gray-700); }
-        .case-btn.success { background: var(--sju-success); color: var(--sju-white); }
-        .case-btn.warning { background: var(--sju-warning); color: var(--sju-white); }
-        .case-btn.accent { background: var(--sju-accent); color: var(--sju-white); }
-
         /* ===== Toast ===== */
         .toast {
-            position: fixed; bottom: 160px; left: 50%;
+            position: fixed; bottom: 180px; left: 50%;
             transform: translateX(-50%) translateY(50px);
             background: rgba(0,0,0,0.85); color: var(--sju-white);
             padding: 10px 20px; border-radius: 20px; font-size: 13px;
@@ -349,7 +353,7 @@
         </div>
     </div>
 
-    <!-- Scan Area (상단) -->
+    <!-- Scan Area -->
     <div class="scan-area" onclick="triggerScan()">
         <div class="scan-icon">📷</div>
         <div class="scan-text">탭하여 S/N 스캔</div>
@@ -357,52 +361,25 @@
     </div>
     <input type="file" id="fileInput" class="file-input-hidden" accept="image/*" capture="environment">
 
-    <!-- Recognition Result (인식 결과) -->
-    <div class="recognition-area" id="recognitionArea">
-        <div class="recognition-header">인식 결과</div>
-        <div class="recognition-content">
-            <div class="recognition-serial" id="recognizedSerial">-</div>
-            <div class="recognition-status" id="recognitionStatus">-</div>
-
-            <!-- 액션 버튼 -->
-            <div class="action-buttons" id="actionButtons">
-                <button class="action-btn success" onclick="quickAction('ok')">
-                    <span class="icon">✓</span>
-                    <span>점검완료</span>
-                </button>
-                <button class="action-btn warning" onclick="quickAction('repair')">
-                    <span class="icon">🔧</span>
-                    <span>수리접수</span>
-                </button>
-                <button class="action-btn accent" onclick="quickAction('new')">
-                    <span class="icon">+</span>
-                    <span>신규등록</span>
-                </button>
-            </div>
-
-            <!-- 수동 입력 -->
-            <div class="manual-input-row">
-                <input type="text" class="manual-input" id="manualSerial" placeholder="시리얼 직접 입력...">
-                <button class="manual-btn" onclick="addManualSerial()">추가</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Results Section -->
     <div class="results-section">
         <div class="results-header">
-            <span class="results-title">스캔 기록</span>
-            <span class="results-count" id="resultsCount">0건</span>
+            <span class="results-title">스캔 목록</span>
+            <div class="results-actions">
+                <span class="results-count" id="resultsCount">0건</span>
+                <button class="btn-select-all" id="btnSelectAll" onclick="toggleSelectAll()">전체선택</button>
+                <button class="btn-batch" id="btnBatch" onclick="openBatchModal()" disabled>일괄작업</button>
+            </div>
         </div>
         <div id="resultsList">
             <div class="empty-state">
                 <div class="empty-icon">📋</div>
-                <div class="empty-text">스캔된 자산이 없습니다</div>
+                <div class="empty-text">스캔된 자산이 없습니다<br><small>상단을 탭하여 스캔을 시작하세요</small></div>
             </div>
         </div>
     </div>
 
-    <!-- Bottom Section (부서 + 완료) -->
+    <!-- Bottom Section -->
     <div class="bottom-section">
         <div class="location-bar" onclick="openDeptModal()">
             <span class="location-icon">📍</span>
@@ -413,10 +390,25 @@
             <span class="location-arrow">▶</span>
         </div>
         <div class="bottom-buttons">
-            <button class="btn-complete" id="btnComplete" onclick="completeCheck()">
+            <button class="btn-complete" id="btnComplete" onclick="openCommitModal()" disabled>
                 점검 완료
             </button>
         </div>
+    </div>
+
+    <!-- Multi Serial Select Modal -->
+    <div class="modal-overlay" id="multiSerialModal">
+        <div class="modal-content" id="multiSerialContent"></div>
+    </div>
+
+    <!-- Batch Action Modal -->
+    <div class="modal-overlay" id="batchModal">
+        <div class="modal-content" id="batchModalContent"></div>
+    </div>
+
+    <!-- Commit Confirm Modal -->
+    <div class="modal-overlay" id="commitModal">
+        <div class="modal-content" id="commitModalContent"></div>
     </div>
 
     <!-- Settings Modal -->
@@ -430,7 +422,7 @@
                 <div class="settings-label">Google Vision API Key</div>
                 <input type="password" class="settings-input" id="apiKey" placeholder="API Key 입력...">
             </div>
-            <button class="case-btn primary" onclick="saveSettings()">저장</button>
+            <button class="modal-btn primary" onclick="saveSettings()">저장</button>
         </div>
     </div>
 
@@ -445,16 +437,6 @@
         </div>
     </div>
 
-    <!-- Case Detail Modal -->
-    <div class="modal-overlay" id="caseModal">
-        <div class="modal-content" id="caseModalContent"></div>
-    </div>
-
-    <!-- Multi Serial Modal -->
-    <div class="modal-overlay" id="multiSerialModal">
-        <div class="modal-content" id="multiSerialContent"></div>
-    </div>
-
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
@@ -467,36 +449,25 @@
     <!-- Scripts -->
     <script src="js/mock-data.js"></script>
     <script>
-        // ===== State =====
+        // ===== State (v2: Staging-Commit 구조) =====
         var currentDeptCode = null;
-        var scannedItems = [];
-        var tempRegistrations = {};
-        var lastRecognizedSerial = null;
-        var lastRecognizedResult = null;
-
-        var ASSET_TYPES = ['PC', '노트북', '모니터', '프린터', '태블릿', '기타'];
-        var MANUFACTURERS = ['LG', 'Samsung', 'Dell', 'HP', 'Lenovo', 'Apple', '기타'];
+        var currentDeptName = null;
+        var scannedItems = [];  // { serial, caseType, original, changes, checked, needsInput }
+        var pendingSerials = []; // 선별 모달용 임시 저장
 
         // ===== Initialization =====
         document.addEventListener('DOMContentLoaded', function() {
             var savedKey = localStorage.getItem('google_vision_api_key');
-            if (savedKey) {
-                document.getElementById('apiKey').value = savedKey;
-            }
+            if (savedKey) document.getElementById('apiKey').value = savedKey;
             document.getElementById('fileInput').addEventListener('change', handleFileSelect);
             initDeptList();
         });
 
         // ===== Settings =====
-        function openSettingsModal() {
-            document.getElementById('settingsModal').classList.add('active');
-        }
-        function closeSettingsModal() {
-            document.getElementById('settingsModal').classList.remove('active');
-        }
+        function openSettingsModal() { document.getElementById('settingsModal').classList.add('active'); }
+        function closeSettingsModal() { document.getElementById('settingsModal').classList.remove('active'); }
         function saveSettings() {
-            var apiKey = document.getElementById('apiKey').value;
-            localStorage.setItem('google_vision_api_key', apiKey);
+            localStorage.setItem('google_vision_api_key', document.getElementById('apiKey').value);
             closeSettingsModal();
             showToast('설정 저장됨');
         }
@@ -506,7 +477,7 @@
             var depts = await getDepartments();
             var listEl = document.getElementById('deptList');
             listEl.innerHTML = depts.map(function(d) {
-                return '<div class="dept-item" onclick="selectDept(\'' + d.code + '\')">' +
+                return '<div class="dept-item" onclick="selectDept(\'' + d.code + '\',\'' + d.name + '\')">' +
                     '<div class="dept-name">' + d.name + '</div>' +
                     '<div class="dept-location">' + d.building + ' ' + d.floor + '</div></div>';
             }).join('');
@@ -515,20 +486,12 @@
         function openDeptModal() { document.getElementById('deptModal').classList.add('active'); }
         function closeDeptModal() { document.getElementById('deptModal').classList.remove('active'); }
 
-        async function selectDept(code) {
+        function selectDept(code, name) {
             currentDeptCode = code;
-            var dept = MOCK_DEPARTMENTS[code];
-            document.getElementById('currentDept').textContent = dept.building + ' > ' + dept.name;
+            currentDeptName = name;
+            document.getElementById('currentDept').textContent = MOCK_DEPARTMENTS[code].building + ' > ' + name;
             closeDeptModal();
-
-            // 인식 결과가 있으면 재판정
-            if (lastRecognizedSerial && lastRecognizedResult) {
-                var result = await lookupSerial(lastRecognizedSerial, currentDeptCode);
-                lastRecognizedResult = result;
-                updateRecognitionStatus(lastRecognizedSerial, result);
-            }
-
-            showToast('위치: ' + dept.name);
+            showToast('위치: ' + name);
         }
 
         // ===== Scan =====
@@ -547,393 +510,566 @@
             if (!file) return;
 
             showLoading(true);
-
             try {
                 var resized = await resizeImage(file, 1280);
                 var apiKey = document.getElementById('apiKey').value;
                 var text = await callVisionAPI(resized.base64, apiKey);
 
-                if (!text) {
-                    showToast('텍스트를 인식하지 못했습니다');
-                    showLoading(false);
-                    return;
-                }
+                if (!text) { showToast('텍스트를 인식하지 못했습니다'); showLoading(false); return; }
 
                 var serials = extractSerials(text);
-                if (serials.length === 0) {
-                    showToast('시리얼 번호를 찾지 못했습니다');
-                    showLoading(false);
-                    return;
-                }
+                if (serials.length === 0) { showToast('시리얼 번호를 찾지 못했습니다'); showLoading(false); return; }
 
                 showLoading(false);
 
-                if (serials.length > 1) {
-                    showMultiSerialModal(serials);
-                } else {
-                    await showRecognitionResult(serials[0]);
-                }
+                // 조회 후 선별 모달 표시
+                await showMultiSerialModal(serials);
 
             } catch (err) {
                 console.error(err);
                 showToast('오류: ' + err.message);
                 showLoading(false);
             }
-
             e.target.value = '';
         }
 
-        // ===== Recognition Result =====
-        async function showRecognitionResult(serial) {
-            lastRecognizedSerial = serial;
-            var result = await lookupSerial(serial, currentDeptCode);
-            lastRecognizedResult = result;
+        // ===== Multi Serial Select Modal =====
+        async function showMultiSerialModal(serials) {
+            pendingSerials = [];
 
-            document.getElementById('recognizedSerial').textContent = serial;
-            updateRecognitionStatus(serial, result);
-            document.getElementById('recognitionArea').classList.add('active');
+            // 각 시리얼 조회
+            for (var i = 0; i < serials.length; i++) {
+                var sn = serials[i];
+                var isDuplicate = scannedItems.some(function(item) { return item.serial === sn; });
+                var result = await lookupSerial(sn, currentDeptCode);
+                pendingSerials.push({
+                    serial: sn,
+                    result: result,
+                    checked: !isDuplicate,
+                    isDuplicate: isDuplicate
+                });
+            }
+
+            renderMultiSerialModal();
+            document.getElementById('multiSerialModal').classList.add('active');
         }
 
-        function updateRecognitionStatus(serial, result) {
-            var statusEl = document.getElementById('recognitionStatus');
-            var buttonsEl = document.getElementById('actionButtons');
-
-            var statusText = '';
-            var statusClass = '';
-            var buttons = '';
-
-            if (!currentDeptCode && result.source === 'asset') {
-                statusText = '✓ 등록된 자산 (위치 선택 필요)';
-                statusClass = 'move';
-            } else {
-                switch (result.case) {
-                    case 'A1-1':
-                        statusText = '✓ 정상 (' + result.data.dept + ')';
-                        statusClass = 'ok';
-                        break;
-                    case 'A1-2':
-                        statusText = '🔧 수리중 (' + result.data.dept + ')';
-                        statusClass = 'warning';
-                        break;
-                    case 'A1-3':
-                        statusText = '⚠️ 폐기된 자산';
-                        statusClass = 'warning';
-                        break;
-                    case 'A1-4':
-                        statusText = '🔍 분실 신고된 자산';
-                        statusClass = 'warning';
-                        break;
-                    case 'A2-1':
-                        statusText = '→ 이동 필요 (' + result.data.dept + ' → ' + MOCK_DEPARTMENTS[currentDeptCode].name + ')';
-                        statusClass = 'move';
-                        break;
-                    case 'A2-2':
-                        statusText = '→ 이동+수리중 (' + result.data.dept + ')';
-                        statusClass = 'move';
-                        break;
-                    case 'B1':
-                        statusText = '📦 납품 매칭 (' + result.data.model + ')';
-                        statusClass = 'new';
-                        break;
-                    case 'C1':
-                        statusText = '❓ 미등록 자산';
-                        statusClass = 'unregistered';
-                        break;
-                    default:
-                        statusText = '확인 필요';
-                        statusClass = 'unregistered';
-                }
-            }
-
-            statusEl.textContent = statusText;
-            statusEl.className = 'recognition-status ' + statusClass;
-
-            // 자동 판정에 따른 버튼 하이라이트
-            var btns = buttonsEl.querySelectorAll('.action-btn');
-            btns.forEach(function(btn) { btn.classList.remove('selected'); });
-
-            if (result.case === 'A1-1' || result.case === 'A2-1') {
-                buttonsEl.querySelector('.action-btn.success').classList.add('selected');
-            } else if (result.case === 'A1-2' || result.case === 'A2-2') {
-                buttonsEl.querySelector('.action-btn.warning').classList.add('selected');
-            } else if (result.case === 'C1' || result.case === 'B1') {
-                buttonsEl.querySelector('.action-btn.accent').classList.add('selected');
-            }
-        }
-
-        // ===== Quick Actions =====
-        function quickAction(action) {
-            if (!lastRecognizedSerial) {
-                showToast('먼저 스캔하세요');
-                return;
-            }
-
-            var serial = lastRecognizedSerial;
-            var result = lastRecognizedResult;
-
-            // 중복 체크
-            if (scannedItems.some(function(i) { return i.serial === serial; })) {
-                showToast('이미 추가된 시리얼입니다');
-                return;
-            }
-
-            var item = {
-                serial: serial,
-                case: result ? result.case : 'C1',
-                data: result ? result.data : null,
-                source: result ? result.source : null,
-                timestamp: new Date()
-            };
-
-            switch (action) {
-                case 'ok':
-                    item.status = 'ok';
-                    item.action = 'checked';
-                    break;
-                case 'repair':
-                    item.status = 'warning';
-                    item.action = 'repair-request';
-                    break;
-                case 'new':
-                    if (result && result.case !== 'C1' && result.case !== 'B1') {
-                        // 이미 등록된 자산인 경우
-                        showToast('이미 등록된 자산입니다');
-                        return;
-                    }
-                    item.status = 'new';
-                    item.action = 'register';
-                    break;
-            }
-
-            scannedItems.push(item);
-            updateUI();
-            clearRecognition();
-            showToast('추가됨: ' + action);
-        }
-
-        function clearRecognition() {
-            lastRecognizedSerial = null;
-            lastRecognizedResult = null;
-            document.getElementById('recognitionArea').classList.remove('active');
-        }
-
-        // ===== Manual Input =====
-        function addManualSerial() {
-            var input = document.getElementById('manualSerial');
-            var serial = input.value.trim().toUpperCase();
-
-            if (!serial) {
-                showToast('시리얼을 입력하세요');
-                return;
-            }
-
-            if (serial.length < 5) {
-                showToast('시리얼이 너무 짧습니다');
-                return;
-            }
-
-            if (scannedItems.some(function(i) { return i.serial === serial; })) {
-                showToast('이미 추가된 시리얼입니다');
-                return;
-            }
-
-            // 조회 후 인식 결과에 표시
-            showRecognitionResult(serial);
-            input.value = '';
-        }
-
-        // ===== Multi Serial =====
-        function showMultiSerialModal(serials) {
-            var modal = document.getElementById('multiSerialModal');
+        function renderMultiSerialModal() {
             var content = document.getElementById('multiSerialContent');
-
             var html = '<div class="modal-header">' +
-                '<span class="modal-title">인식된 시리얼 (' + serials.length + '개)</span>' +
+                '<span class="modal-title">인식된 시리얼 (' + pendingSerials.length + '개)</span>' +
                 '<button class="modal-close" onclick="closeMultiSerialModal()">×</button></div>';
 
-            html += '<div style="margin-bottom:12px;">';
-            serials.forEach(function(sn, idx) {
-                html += '<div style="padding:10px;background:var(--sju-gray-100);border-radius:6px;margin-bottom:8px;cursor:pointer;" ' +
-                    'onclick="selectSingleSerial(\'' + sn + '\')">' +
-                    '<div style="font-family:Consolas;font-weight:600;">' + sn + '</div>' +
-                    '<div style="font-size:11px;color:var(--sju-gray-600);" id="multiStatus' + idx + '">조회 중...</div></div>';
-            });
-            html += '</div>';
+            html += '<div style="margin-bottom:12px; font-size:12px; color:var(--sju-gray-600);">불필요한 항목은 체크 해제하세요</div>';
 
-            html += '<button class="case-btn secondary" onclick="closeMultiSerialModal()">닫기</button>';
+            pendingSerials.forEach(function(item, idx) {
+                var statusText = getStatusText(item.result.case, item.result.data);
+                var disabledClass = item.isDuplicate ? ' disabled' : '';
+                var duplicateNote = item.isDuplicate ? ' (이미 추가됨)' : '';
+
+                html += '<div class="serial-select-item' + disabledClass + '">' +
+                    '<input type="checkbox" class="serial-select-check" id="chk' + idx + '" ' +
+                        (item.checked ? 'checked' : '') + (item.isDuplicate ? ' disabled' : '') +
+                        ' onchange="togglePendingSerial(' + idx + ')">' +
+                    '<div class="serial-select-info">' +
+                        '<div class="serial-select-sn">' + item.serial + '</div>' +
+                        '<div class="serial-select-status">' + statusText + duplicateNote + '</div>' +
+                    '</div>' +
+                    '<button class="serial-select-edit" onclick="editPendingSerial(' + idx + ')">수정</button>' +
+                '</div>';
+            });
+
+            html += '<div class="modal-actions">' +
+                '<button class="modal-btn secondary" onclick="closeMultiSerialModal()">취소</button>' +
+                '<button class="modal-btn primary" onclick="addSelectedSerials()">선택 추가</button>' +
+            '</div>';
 
             content.innerHTML = html;
-            modal.classList.add('active');
-
-            // 상태 조회
-            serials.forEach(function(sn, idx) {
-                lookupSerial(sn, currentDeptCode).then(function(result) {
-                    var el = document.getElementById('multiStatus' + idx);
-                    if (el) el.textContent = getStatusText(result.case, result.data);
-                });
-            });
         }
 
-        function selectSingleSerial(serial) {
+        function togglePendingSerial(idx) {
+            pendingSerials[idx].checked = document.getElementById('chk' + idx).checked;
+        }
+
+        function editPendingSerial(idx) {
+            var newSerial = prompt('시리얼 수정:', pendingSerials[idx].serial);
+            if (newSerial && newSerial.trim()) {
+                newSerial = newSerial.trim().toUpperCase();
+                pendingSerials[idx].serial = newSerial;
+                pendingSerials[idx].isDuplicate = scannedItems.some(function(item) { return item.serial === newSerial; });
+                // 재조회
+                lookupSerial(newSerial, currentDeptCode).then(function(result) {
+                    pendingSerials[idx].result = result;
+                    pendingSerials[idx].checked = !pendingSerials[idx].isDuplicate;
+                    renderMultiSerialModal();
+                });
+            }
+        }
+
+        function addSelectedSerials() {
+            var added = 0;
+            pendingSerials.forEach(function(item) {
+                if (item.checked && !item.isDuplicate) {
+                    var newItem = createScannedItem(item.serial, item.result);
+                    scannedItems.push(newItem);
+                    added++;
+                }
+            });
+
             closeMultiSerialModal();
-            showRecognitionResult(serial);
+            updateUI();
+            showToast(added + '건 추가됨');
         }
 
         function closeMultiSerialModal() {
             document.getElementById('multiSerialModal').classList.remove('active');
+            pendingSerials = [];
         }
 
-        function getStatusText(caseType, data) {
-            switch (caseType) {
-                case 'A1-1': return '정상 (' + (data ? data.dept : '') + ')';
-                case 'A1-2': return '수리중';
-                case 'A1-3': return '폐기됨';
-                case 'A1-4': return '분실';
-                case 'A2-1': return '이동 필요 (' + (data ? data.dept : '') + ')';
-                case 'A2-2': return '이동+수리중';
-                case 'B1': return '납품 대기';
-                case 'C1': return '미등록';
-                default: return '확인 필요';
+        // ===== Create Scanned Item =====
+        function createScannedItem(serial, result) {
+            var item = {
+                serial: serial,
+                caseType: result.case,
+                original: result.data ? Object.assign({}, result.data) : null,
+                changes: {},
+                checked: true,
+                needsInput: (result.case === 'B1' || result.case === 'C1'),
+                source: result.source
+            };
+
+            // 자동 변경사항 설정 (부서 이동)
+            if (result.case && result.case.startsWith('A2') && currentDeptCode) {
+                item.changes.deptCode = currentDeptCode;
+                item.changes.dept = currentDeptName;
             }
+
+            return item;
         }
 
         // ===== UI Update =====
         function updateUI() {
             var count = scannedItems.length;
+            var checkedCount = scannedItems.filter(function(i) { return i.checked; }).length;
+
             document.getElementById('headerCount').textContent = count + '건';
             document.getElementById('resultsCount').textContent = count + '건';
+            document.getElementById('btnBatch').disabled = checkedCount === 0;
+            document.getElementById('btnComplete').disabled = count === 0;
+            document.getElementById('btnSelectAll').textContent = checkedCount === count ? '전체해제' : '전체선택';
 
             var listEl = document.getElementById('resultsList');
-
             if (count === 0) {
                 listEl.innerHTML = '<div class="empty-state">' +
                     '<div class="empty-icon">📋</div>' +
-                    '<div class="empty-text">스캔된 자산이 없습니다</div></div>';
+                    '<div class="empty-text">스캔된 자산이 없습니다<br><small>상단을 탭하여 스캔을 시작하세요</small></div></div>';
                 return;
             }
 
-            listEl.innerHTML = scannedItems.map(function(item) {
-                var icon = getStatusIcon(item.status);
-                var badge = getBadge(item);
-                var detail = getDetail(item);
-
-                return '<div class="result-item" onclick="showItemDetail(\'' + item.serial + '\')">' +
-                    '<div class="result-status ' + item.status + '">' + icon + '</div>' +
-                    '<div class="result-info">' +
-                        '<div class="result-serial">' + item.serial + '</div>' +
-                        '<div class="result-detail">' + detail + '</div>' +
-                    '</div>' +
-                    '<span class="result-badge ' + badge.class + '">' + badge.text + '</span></div>';
+            listEl.innerHTML = scannedItems.map(function(item, idx) {
+                return renderResultItem(item, idx);
             }).join('');
         }
 
-        function getStatusIcon(status) {
-            switch (status) {
-                case 'ok': return '✓';
-                case 'move': return '→';
-                case 'warning': return '!';
-                case 'new': return '+';
-                default: return '?';
+        function renderResultItem(item, idx) {
+            var icon = getStatusIcon(item.caseType);
+            var statusClass = getStatusClass(item.caseType);
+            var badge = getBadge(item);
+            var detail = getDetail(item);
+            var shouldExpand = shouldAutoExpand(item.caseType);
+            var expandedClass = shouldExpand ? ' expanded' : '';
+
+            var html = '<div class="result-item' + expandedClass + '" id="item' + idx + '">' +
+                '<div class="result-item-header">' +
+                    '<input type="checkbox" class="result-checkbox" ' + (item.checked ? 'checked' : '') +
+                        ' onchange="toggleItemCheck(' + idx + ')" onclick="event.stopPropagation()">' +
+                    '<div class="result-status ' + statusClass + '">' + icon + '</div>' +
+                    '<div class="result-info" onclick="toggleItemExpand(' + idx + ')">' +
+                        '<div class="result-serial">' + item.serial + '</div>' +
+                        '<div class="result-detail">' + detail + '</div>' +
+                    '</div>' +
+                    '<span class="result-badge ' + badge.class + '">' + badge.text + '</span>' +
+                    '<button class="result-delete" onclick="deleteItem(' + idx + ')" title="삭제">🗑️</button>' +
+                '</div>' +
+                '<div class="result-expanded">' + renderExpandedContent(item, idx) + '</div>' +
+            '</div>';
+
+            return html;
+        }
+
+        function renderExpandedContent(item, idx) {
+            var html = '';
+
+            // 현재 정보
+            if (item.original) {
+                html += '<div class="expand-row">' +
+                    '<div class="expand-col"><div class="expand-label">원래 부서</div><div class="expand-value">' + item.original.dept + '</div></div>' +
+                    '<div class="expand-col"><div class="expand-label">원래 상태</div><div class="expand-value">' + item.original.status + '</div></div>' +
+                '</div>';
+            }
+
+            // 변경할 부서
+            html += '<div class="expand-section">' +
+                '<div class="expand-label">변경할 부서</div>' +
+                '<select class="expand-select" id="deptSelect' + idx + '" onchange="updateItemChange(' + idx + ', \'dept\')">' +
+                    '<option value="">변경 안 함</option>';
+            Object.values(MOCK_DEPARTMENTS).forEach(function(d) {
+                var selected = (item.changes.deptCode === d.code) ? ' selected' : '';
+                html += '<option value="' + d.code + '"' + selected + '>' + d.name + '</option>';
+            });
+            html += '</select></div>';
+
+            // 변경할 상태 (특수 케이스)
+            if (needsStatusChange(item.caseType)) {
+                html += '<div class="expand-section">' +
+                    '<div class="expand-label">상태 변경</div>' +
+                    '<select class="expand-select" id="statusSelect' + idx + '" onchange="updateItemChange(' + idx + ', \'status\')">' +
+                        getStatusOptions(item) +
+                    '</select></div>';
+            }
+
+            // 신규등록 필드 (C1, B1)
+            if (item.needsInput) {
+                html += '<div class="expand-section">' +
+                    '<div class="expand-label">장비 유형 *</div>' +
+                    '<select class="expand-select" id="typeSelect' + idx + '" onchange="updateItemChange(' + idx + ', \'assetType\')">' +
+                        '<option value="">선택</option>' +
+                        '<option value="PC"' + (item.changes.assetType === 'PC' ? ' selected' : '') + '>PC</option>' +
+                        '<option value="노트북"' + (item.changes.assetType === '노트북' ? ' selected' : '') + '>노트북</option>' +
+                        '<option value="모니터"' + (item.changes.assetType === '모니터' ? ' selected' : '') + '>모니터</option>' +
+                        '<option value="프린터"' + (item.changes.assetType === '프린터' ? ' selected' : '') + '>프린터</option>' +
+                        '<option value="기타"' + (item.changes.assetType === '기타' ? ' selected' : '') + '>기타</option>' +
+                    '</select></div>';
+            }
+
+            return html;
+        }
+
+        function updateItemChange(idx, field) {
+            var item = scannedItems[idx];
+            if (field === 'dept') {
+                var deptCode = document.getElementById('deptSelect' + idx).value;
+                if (deptCode) {
+                    item.changes.deptCode = deptCode;
+                    item.changes.dept = MOCK_DEPARTMENTS[deptCode].name;
+                } else {
+                    delete item.changes.deptCode;
+                    delete item.changes.dept;
+                }
+            } else if (field === 'status') {
+                var status = document.getElementById('statusSelect' + idx).value;
+                if (status) {
+                    item.changes.status = status;
+                    item.changes.statusCode = getStatusCode(status);
+                } else {
+                    delete item.changes.status;
+                    delete item.changes.statusCode;
+                }
+            } else if (field === 'assetType') {
+                var type = document.getElementById('typeSelect' + idx).value;
+                if (type) item.changes.assetType = type;
+                else delete item.changes.assetType;
             }
         }
 
-        function getBadge(item) {
-            switch (item.action) {
-                case 'checked': return { class: 'badge-ok', text: '점검완료' };
-                case 'repair-request': return { class: 'badge-repair', text: '수리접수' };
-                case 'register': return { class: 'badge-registered', text: '신규등록' };
-                default: return { class: 'badge-unregistered', text: '미처리' };
-            }
-        }
-
-        function getDetail(item) {
-            if (item.data) {
-                return item.data.model + ' | ' + (item.data.dept || '미정');
-            }
-            return '미등록 자산';
-        }
-
-        function showItemDetail(serial) {
-            var item = scannedItems.find(function(i) { return i.serial === serial; });
-            if (!item) return;
-
-            var modal = document.getElementById('caseModal');
-            var content = document.getElementById('caseModalContent');
-
-            var html = '<div class="modal-header">' +
-                '<span class="modal-title">상세 정보</span>' +
-                '<button class="modal-close" onclick="closeCaseModal()">×</button></div>';
-
-            html += '<div class="case-info">' +
-                '<div class="case-serial">' + item.serial + '</div>' +
-                '<div class="case-detail">';
-            if (item.data) {
-                html += item.data.model + ' | ' + item.data.assetType + '<br>부서: ' + item.data.dept;
-                if (item.data.user) html += ' | ' + item.data.user;
-            } else {
-                html += '미등록 자산';
-            }
-            html += '</div></div>';
-
-            html += '<div class="case-actions">' +
-                '<button class="case-btn success" onclick="changeItemAction(\'' + serial + '\', \'checked\')">점검완료</button>' +
-                '<button class="case-btn warning" onclick="changeItemAction(\'' + serial + '\', \'repair-request\')">수리접수</button>' +
-                '<button class="case-btn accent" onclick="changeItemAction(\'' + serial + '\', \'register\')">신규등록</button>' +
-                '<button class="case-btn secondary" onclick="removeItem(\'' + serial + '\')">삭제</button></div>';
-
-            content.innerHTML = html;
-            modal.classList.add('active');
-        }
-
-        function changeItemAction(serial, action) {
-            var item = scannedItems.find(function(i) { return i.serial === serial; });
-            if (!item) return;
-
-            item.action = action;
-            switch (action) {
-                case 'checked': item.status = 'ok'; break;
-                case 'repair-request': item.status = 'warning'; break;
-                case 'register': item.status = 'new'; break;
-            }
-
-            closeCaseModal();
+        function toggleItemCheck(idx) {
+            scannedItems[idx].checked = !scannedItems[idx].checked;
             updateUI();
-            showToast('변경됨');
         }
 
-        function removeItem(serial) {
-            scannedItems = scannedItems.filter(function(i) { return i.serial !== serial; });
-            closeCaseModal();
+        function toggleItemExpand(idx) {
+            var el = document.getElementById('item' + idx);
+            el.classList.toggle('expanded');
+        }
+
+        function deleteItem(idx) {
+            scannedItems.splice(idx, 1);
             updateUI();
             showToast('삭제됨');
         }
 
-        function closeCaseModal() {
-            document.getElementById('caseModal').classList.remove('active');
+        function toggleSelectAll() {
+            var allChecked = scannedItems.every(function(i) { return i.checked; });
+            scannedItems.forEach(function(i) { i.checked = !allChecked; });
+            updateUI();
         }
 
-        // ===== Complete Check =====
-        function completeCheck() {
-            if (scannedItems.length === 0) {
-                showToast('스캔된 자산이 없습니다');
+        // ===== Batch Action Modal =====
+        function openBatchModal() {
+            var checkedItems = scannedItems.filter(function(i) { return i.checked; });
+            if (checkedItems.length === 0) {
+                showToast('선택된 항목이 없습니다');
                 return;
             }
 
-            var okCount = scannedItems.filter(function(i) { return i.status === 'ok'; }).length;
-            var warnCount = scannedItems.filter(function(i) { return i.status === 'warning'; }).length;
-            var newCount = scannedItems.filter(function(i) { return i.status === 'new'; }).length;
+            var content = document.getElementById('batchModalContent');
+            var html = '<div class="modal-header">' +
+                '<span class="modal-title">일괄 작업 (' + checkedItems.length + '건)</span>' +
+                '<button class="modal-close" onclick="closeBatchModal()">×</button></div>';
 
-            var summary = '점검 완료! ';
-            summary += '정상:' + okCount + ' 수리:' + warnCount + ' 등록:' + newCount;
+            // 부서 일괄 변경
+            html += '<div class="batch-section">' +
+                '<div class="batch-label">부서 일괄 변경</div>' +
+                '<select class="expand-select" id="batchDept">' +
+                    '<option value="">변경 안 함</option>';
+            Object.values(MOCK_DEPARTMENTS).forEach(function(d) {
+                var selected = (currentDeptCode === d.code) ? ' selected' : '';
+                html += '<option value="' + d.code + '"' + selected + '>' + d.name + ' (현재 위치)</option>';
+            });
+            html += '</select></div>';
 
-            showToast(summary);
+            // 상태 일괄 변경
+            html += '<div class="batch-section">' +
+                '<div class="batch-label">상태 일괄 변경</div>' +
+                '<div class="batch-options">' +
+                    '<button class="batch-option" onclick="selectBatchStatus(this, \'\')" >변경 안 함</button>' +
+                    '<button class="batch-option" onclick="selectBatchStatus(this, \'점검완료\')">점검완료</button>' +
+                    '<button class="batch-option" onclick="selectBatchStatus(this, \'수리완료\')">수리완료</button>' +
+                    '<button class="batch-option" onclick="selectBatchStatus(this, \'정상\')">정상</button>' +
+                '</div>' +
+                '<input type="hidden" id="batchStatus" value="">' +
+            '</div>';
 
+            // 안내 메시지
+            var hasNeedsInput = checkedItems.some(function(i) { return i.needsInput; });
+            if (hasNeedsInput) {
+                html += '<div style="padding:10px;background:var(--sju-warning-bg);border-radius:6px;font-size:12px;color:#92400e;margin-bottom:12px;">' +
+                    '⚠️ 미등록/납품 항목은 개별 등록 정보 입력이 필요합니다</div>';
+            }
+
+            html += '<div class="modal-actions">' +
+                '<button class="modal-btn secondary" onclick="closeBatchModal()">취소</button>' +
+                '<button class="modal-btn primary" onclick="applyBatchAction()">적용</button>' +
+            '</div>';
+
+            content.innerHTML = html;
+            document.getElementById('batchModal').classList.add('active');
+        }
+
+        function selectBatchStatus(btn, status) {
+            document.querySelectorAll('#batchModalContent .batch-option').forEach(function(b) {
+                b.classList.remove('selected');
+            });
+            btn.classList.add('selected');
+            document.getElementById('batchStatus').value = status;
+        }
+
+        function applyBatchAction() {
+            var deptCode = document.getElementById('batchDept').value;
+            var status = document.getElementById('batchStatus').value;
+
+            var applied = 0;
+            scannedItems.forEach(function(item) {
+                if (item.checked) {
+                    if (deptCode) {
+                        item.changes.deptCode = deptCode;
+                        item.changes.dept = MOCK_DEPARTMENTS[deptCode].name;
+                    }
+                    if (status) {
+                        item.changes.status = status;
+                        item.changes.statusCode = getStatusCode(status);
+                    }
+                    applied++;
+                }
+            });
+
+            closeBatchModal();
+            updateUI();
+            showToast(applied + '건 일괄 적용됨');
+        }
+
+        function closeBatchModal() {
+            document.getElementById('batchModal').classList.remove('active');
+        }
+
+        // ===== Commit Modal =====
+        function openCommitModal() {
+            if (scannedItems.length === 0) {
+                showToast('처리할 항목이 없습니다');
+                return;
+            }
+
+            // 필수 입력 체크
+            var errors = [];
+            scannedItems.forEach(function(item) {
+                if (item.needsInput && !item.changes.assetType) {
+                    errors.push(item.serial + ': 장비 유형 입력 필요');
+                }
+            });
+
+            if (errors.length > 0) {
+                showToast(errors[0]);
+                return;
+            }
+
+            var content = document.getElementById('commitModalContent');
+            var html = '<div class="modal-header">' +
+                '<span class="modal-title">점검 완료 확인</span>' +
+                '<button class="modal-close" onclick="closeCommitModal()">×</button></div>';
+
+            html += '<div style="margin-bottom:12px;font-size:13px;color:var(--sju-gray-700);">총 ' + scannedItems.length + '건의 변경사항을 저장합니다.</div>';
+
+            html += '<div class="commit-summary">';
+            scannedItems.forEach(function(item) {
+                var action = getCommitAction(item);
+                html += '<div class="commit-item">' +
+                    '<span class="commit-item-serial">' + item.serial + '</span>' +
+                    '<span class="commit-item-action">' + action + '</span>' +
+                '</div>';
+            });
+            html += '</div>';
+
+            html += '<div class="modal-actions">' +
+                '<button class="modal-btn secondary" onclick="closeCommitModal()">취소</button>' +
+                '<button class="modal-btn primary" onclick="executeCommit()">완료</button>' +
+            '</div>';
+
+            content.innerHTML = html;
+            document.getElementById('commitModal').classList.add('active');
+        }
+
+        function getCommitAction(item) {
+            var actions = [];
+            if (item.changes.dept) actions.push('부서→' + item.changes.dept);
+            if (item.changes.status) actions.push('상태→' + item.changes.status);
+            if (item.needsInput) actions.push('신규등록');
+            if (actions.length === 0) actions.push('점검확인');
+            return actions.join(', ');
+        }
+
+        function executeCommit() {
+            // 실제로는 API 호출
+            console.log('Committing items:', scannedItems);
+
+            closeCommitModal();
+            showToast('점검 완료! ' + scannedItems.length + '건 처리됨');
+
+            // 리스트 초기화
             setTimeout(function() {
                 scannedItems = [];
-                tempRegistrations = {};
-                clearRecognition();
                 updateUI();
-            }, 2500);
+            }, 1500);
+        }
+
+        function closeCommitModal() {
+            document.getElementById('commitModal').classList.remove('active');
+        }
+
+        // ===== Helper Functions =====
+        function getStatusText(caseType, data) {
+            switch (caseType) {
+                case 'A1-1': return '✓ 정상 (' + (data ? data.dept : '') + ')';
+                case 'A1-2': return '🔧 수리중';
+                case 'A1-3': return '⚠️ 폐기됨';
+                case 'A1-4': return '🔍 분실';
+                case 'A2-1': return '→ 이동 필요 (' + (data ? data.dept : '') + ')';
+                case 'A2-2': return '→ 이동+수리중';
+                case 'A2-3': return '→ 이동+폐기';
+                case 'A2-4': return '→ 이동+분실';
+                case 'B1': return '📦 납품 대기';
+                case 'C1': return '❓ 미등록';
+                default: return '확인 필요';
+            }
+        }
+
+        function getStatusIcon(caseType) {
+            switch (caseType) {
+                case 'A1-1': return '✓';
+                case 'A1-2': case 'A2-2': return '🔧';
+                case 'A1-3': case 'A2-3': return '⚠️';
+                case 'A1-4': case 'A2-4': return '🔍';
+                case 'A2-1': return '→';
+                case 'B1': return '📦';
+                case 'C1': return '❓';
+                default: return '?';
+            }
+        }
+
+        function getStatusClass(caseType) {
+            switch (caseType) {
+                case 'A1-1': return 'ok';
+                case 'A1-2': case 'A2-2': return 'warning';
+                case 'A1-3': case 'A2-3': return 'danger';
+                case 'A1-4': case 'A2-4': return 'warning';
+                case 'A2-1': return 'move';
+                case 'B1': case 'C1': return 'new';
+                default: return 'pending';
+            }
+        }
+
+        function getBadge(item) {
+            if (item.changes.status) {
+                return { class: 'badge-ok', text: item.changes.status };
+            }
+            switch (item.caseType) {
+                case 'A1-1': return { class: 'badge-ok', text: '정상' };
+                case 'A1-2': return { class: 'badge-repair', text: '수리중' };
+                case 'A1-3': return { class: 'badge-dispose', text: '폐기' };
+                case 'A1-4': return { class: 'badge-lost', text: '분실' };
+                case 'A2-1': return { class: 'badge-move', text: '이동' };
+                case 'A2-2': return { class: 'badge-move', text: '이동+수리' };
+                case 'A2-3': return { class: 'badge-move', text: '이동+폐기' };
+                case 'A2-4': return { class: 'badge-move', text: '이동+분실' };
+                case 'B1': return { class: 'badge-delivery', text: '납품' };
+                case 'C1': return { class: 'badge-new', text: '미등록' };
+                default: return { class: 'badge-unregistered', text: '확인필요' };
+            }
+        }
+
+        function getDetail(item) {
+            var parts = [];
+            if (item.original) {
+                parts.push(item.original.model || '');
+                if (item.changes.dept) {
+                    parts.push(item.original.dept + '→' + item.changes.dept);
+                } else {
+                    parts.push(item.original.dept || '');
+                }
+            } else {
+                parts.push('미등록');
+                if (item.changes.assetType) parts.push(item.changes.assetType);
+            }
+            return parts.filter(Boolean).join(' | ');
+        }
+
+        function shouldAutoExpand(caseType) {
+            // 특수 케이스는 자동 펼침
+            return ['A1-2', 'A1-3', 'A1-4', 'A2-2', 'A2-3', 'A2-4', 'B1', 'C1'].indexOf(caseType) >= 0;
+        }
+
+        function needsStatusChange(caseType) {
+            return ['A1-2', 'A1-3', 'A1-4', 'A2-2', 'A2-3', 'A2-4'].indexOf(caseType) >= 0;
+        }
+
+        function getStatusOptions(item) {
+            var html = '<option value="">변경 안 함</option>';
+            var current = item.changes.status || '';
+
+            switch (item.caseType) {
+                case 'A1-2': case 'A2-2':
+                    html += '<option value="수리완료"' + (current === '수리완료' ? ' selected' : '') + '>수리완료</option>';
+                    html += '<option value="수리중 유지"' + (current === '수리중 유지' ? ' selected' : '') + '>수리중 유지</option>';
+                    break;
+                case 'A1-3': case 'A2-3':
+                    html += '<option value="폐기 확인"' + (current === '폐기 확인' ? ' selected' : '') + '>폐기 확인 (유지)</option>';
+                    html += '<option value="정상"' + (current === '정상' ? ' selected' : '') + '>정상으로 변경</option>';
+                    break;
+                case 'A1-4': case 'A2-4':
+                    html += '<option value="분실 복구"' + (current === '분실 복구' ? ' selected' : '') + '>분실 복구 (정상)</option>';
+                    html += '<option value="분실 유지"' + (current === '분실 유지' ? ' selected' : '') + '>분실 유지</option>';
+                    break;
+            }
+            return html;
+        }
+
+        function getStatusCode(status) {
+            switch (status) {
+                case '정상': case '수리완료': case '분실 복구': case '점검완료': return 'N';
+                case '수리중': case '수리중 유지': return 'R';
+                case '폐기': case '폐기 확인': return 'D';
+                case '분실': case '분실 유지': return 'L';
+                default: return 'N';
+            }
         }
 
         // ===== Utilities =====
