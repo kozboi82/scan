@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Labels - Print</title>
+    <title>Test Labels - 케이스별 목업</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -17,13 +16,17 @@
         }
 
         .screen-only {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto 20px;
             text-align: center;
         }
 
         h1 { color: #4ecca3; margin-bottom: 10px; }
         .subtitle { color: #888; margin-bottom: 20px; }
+
+        .btn-group {
+            margin-bottom: 20px;
+        }
 
         .print-btn {
             padding: 15px 40px;
@@ -34,16 +37,42 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            margin-bottom: 20px;
+            margin: 5px;
         }
 
         .print-btn:hover { background: #3db892; }
+        .print-btn.secondary { background: #666; color: #fff; }
+        .print-btn.secondary:hover { background: #888; }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
 
         .labels-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
         }
 
@@ -51,48 +80,59 @@
             background: #fff;
             color: #000;
             border-radius: 12px;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
         }
 
-        .label-title {
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            padding: 5px 10px;
-            border-radius: 4px;
-            display: inline-block;
+        .label-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
         }
 
-        .label-ok .label-title { background: #10b981; color: #fff; }
-        .label-qr-wrong .label-title { background: #8b5cf6; color: #fff; }
-        .label-barcode-wrong .label-title { background: #3b82f6; color: #fff; }
-        .label-ocr-wrong .label-title { background: #ef4444; color: #fff; }
+        .label-case {
+            font-size: 11px;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 4px;
+            color: #fff;
+        }
+
+        .label-dept {
+            font-size: 10px;
+            color: #666;
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        /* Case Colors */
+        .case-a1-1 .label-case { background: #10b981; } /* 정상 - 초록 */
+        .case-a1-2 .label-case { background: #f59e0b; } /* 수리중 - 노랑 */
+        .case-a1-3 .label-case { background: #ef4444; } /* 폐기 - 빨강 */
+        .case-a1-4 .label-case { background: #f97316; } /* 분실 - 주황 */
+        .case-a2-1 .label-case { background: #3b82f6; } /* 이동 - 파랑 */
+        .case-a2-2 .label-case { background: #8b5cf6; } /* 이동+수리 - 보라 */
+        .case-b1 .label-case { background: #06b6d4; }   /* 납품매칭 - 청록 */
+        .case-c1 .label-case { background: #6b7280; }   /* 미등록 - 회색 */
 
         .label-desc {
-            font-size: 11px;
+            font-size: 10px;
             color: #666;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
+            min-height: 28px;
         }
 
         .label-content {
             border: 2px solid #000;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
-        }
-
-        .qr-section {
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .qr-section > div {
-            display: inline-block;
+            background: #fafafa;
         }
 
         .barcode-section {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .barcode-section svg {
@@ -102,24 +142,40 @@
         }
 
         .text-section {
-            font-family: Consolas, monospace;
-            font-size: 14px;
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 13px;
             font-weight: bold;
-            padding: 8px;
-            background: #f5f5f5;
+            padding: 6px;
+            background: #fff;
+            border: 1px solid #ddd;
             border-radius: 4px;
         }
 
         .text-section .label-sn {
+            color: #999;
+            font-size: 10px;
+            font-weight: normal;
+        }
+
+        .asset-info {
+            margin-top: 8px;
+            font-size: 10px;
             color: #666;
-            font-size: 11px;
+            text-align: left;
+            padding: 5px;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+
+        .asset-info div {
+            margin: 2px 0;
         }
 
         /* Print styles */
         @media print {
             body {
                 background: #fff;
-                padding: 10mm;
+                padding: 5mm;
             }
 
             .screen-only {
@@ -127,118 +183,258 @@
             }
 
             .labels-container {
-                gap: 10mm;
+                gap: 8mm;
             }
 
             .label {
                 border: 1px solid #ccc;
                 page-break-inside: avoid;
+                padding: 10px;
             }
 
-            .label-title {
+            .label-case {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
+        }
+
+        @page {
+            size: A4;
+            margin: 10mm;
         }
     </style>
 </head>
 <body>
     <div class="screen-only">
-        <h1>Test Labels for Hybrid OCR</h1>
-        <p class="subtitle">프린트 후 하이브리드 스캐너로 검수 기능 테스트</p>
-        <button class="print-btn" onclick="window.print()">Print Labels</button>
+        <h1>OCR Test Labels</h1>
+        <p class="subtitle">케이스별 테스트용 라벨 - 프린트 후 OCR 스캔 테스트</p>
+
+        <div class="btn-group">
+            <button class="print-btn" onclick="window.print()">Print Labels</button>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>A1-1 정상</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>A1-2 수리중</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>A1-3 폐기</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div>A1-4 분실</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>A2-1 이동</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div>A2-2 이동+수리</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#06b6d4"></div>B1 납품매칭</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#6b7280"></div>C1 미등록</div>
+        </div>
     </div>
 
     <div class="labels-container">
-        <!-- Label 1: All Match -->
-        <div class="label label-ok">
-            <div class="label-title">TEST 1: All Match</div>
-            <div class="label-desc">QR + Barcode + OCR 모두 일치 → 검증완료</div>
+        <!-- A1-1: 정상 (같은 부서) -->
+        <div class="label case-a1-1">
+            <div class="label-header">
+                <span class="label-case">A1-1 정상</span>
+                <span class="label-dept">교무실</span>
+            </div>
+            <div class="label-desc">같은 부서, 정상 상태 → 자동 체크</div>
             <div class="label-content">
-                <div class="qr-section">
-                    <div id="qr1"></div>
-                </div>
                 <div class="barcode-section">
-                    <svg id="barcode1"></svg>
+                    <svg id="barcode-a1-1"></svg>
                 </div>
                 <div class="text-section">
-                    <span class="label-sn">S/N:</span> SN2024TEST001
+                    <span class="label-sn">S/N:</span> 40LGD5K202209000001
+                </div>
+                <div class="asset-info">
+                    <div>LG 그램 15 | PC</div>
+                    <div>사용자: 김철수</div>
                 </div>
             </div>
         </div>
 
-        <!-- Label 2: QR Wrong -->
-        <div class="label label-qr-wrong">
-            <div class="label-title">TEST 2: QR Wrong</div>
-            <div class="label-desc">QR 값이 다름 → 불일치 경고</div>
+        <!-- A1-2: 수리중 (같은 부서) -->
+        <div class="label case-a1-2">
+            <div class="label-header">
+                <span class="label-case">A1-2 수리중</span>
+                <span class="label-dept">교무실</span>
+            </div>
+            <div class="label-desc">같은 부서, 수리중 → 수리완료 처리?</div>
             <div class="label-content">
-                <div class="qr-section">
-                    <div id="qr2"></div>
-                </div>
                 <div class="barcode-section">
-                    <svg id="barcode2"></svg>
+                    <svg id="barcode-a1-2"></svg>
                 </div>
                 <div class="text-section">
-                    <span class="label-sn">S/N:</span> SN2024TEST002
+                    <span class="label-sn">S/N:</span> HP24MON2023050002
+                </div>
+                <div class="asset-info">
+                    <div>HP 24인치 | 모니터</div>
+                    <div>사용자: 박영희</div>
                 </div>
             </div>
         </div>
 
-        <!-- Label 3: Barcode Wrong -->
-        <div class="label label-barcode-wrong">
-            <div class="label-title">TEST 3: Barcode Wrong</div>
-            <div class="label-desc">Barcode 값이 다름 → 불일치 경고</div>
+        <!-- A1-3: 폐기 (같은 부서) -->
+        <div class="label case-a1-3">
+            <div class="label-header">
+                <span class="label-case">A1-3 폐기</span>
+                <span class="label-dept">교무실</span>
+            </div>
+            <div class="label-desc">같은 부서, 폐기됨 → 경고 표시</div>
             <div class="label-content">
-                <div class="qr-section">
-                    <div id="qr3"></div>
-                </div>
                 <div class="barcode-section">
-                    <svg id="barcode3"></svg>
+                    <svg id="barcode-a1-3"></svg>
                 </div>
                 <div class="text-section">
-                    <span class="label-sn">S/N:</span> SN2024TEST003
+                    <span class="label-sn">S/N:</span> DELLXPS2019120003
+                </div>
+                <div class="asset-info">
+                    <div>Dell XPS 13 | PC</div>
+                    <div>폐기일: 2024-06-15</div>
                 </div>
             </div>
         </div>
 
-        <!-- Label 4: OCR Wrong -->
-        <div class="label label-ocr-wrong">
-            <div class="label-title">TEST 4: OCR Wrong</div>
-            <div class="label-desc">텍스트 값이 다름 → 불일치 경고</div>
+        <!-- A1-4: 분실 (같은 부서) -->
+        <div class="label case-a1-4">
+            <div class="label-header">
+                <span class="label-case">A1-4 분실</span>
+                <span class="label-dept">교무실</span>
+            </div>
+            <div class="label-desc">같은 부서, 분실 → 분실복구 처리?</div>
             <div class="label-content">
-                <div class="qr-section">
-                    <div id="qr4"></div>
-                </div>
                 <div class="barcode-section">
-                    <svg id="barcode4"></svg>
+                    <svg id="barcode-a1-4"></svg>
                 </div>
                 <div class="text-section">
-                    <span class="label-sn">S/N:</span> SN2024TEST999
+                    <span class="label-sn">S/N:</span> SAMSUNGTAB2022080004
+                </div>
+                <div class="asset-info">
+                    <div>삼성 Galaxy Tab | 태블릿</div>
+                    <div>분실신고: 2024-01-10</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- A2-1: 다른 부서 (이동) -->
+        <div class="label case-a2-1">
+            <div class="label-header">
+                <span class="label-case">A2-1 이동</span>
+                <span class="label-dept">입학팀→교무실</span>
+            </div>
+            <div class="label-desc">다른 부서 소속 → 이동 처리</div>
+            <div class="label-content">
+                <div class="barcode-section">
+                    <svg id="barcode-a2-1"></svg>
+                </div>
+                <div class="text-section">
+                    <span class="label-sn">S/N:</span> LGGRAM2024010005
+                </div>
+                <div class="asset-info">
+                    <div>LG 그램 17 | PC</div>
+                    <div>사용자: 이민수 (입학팀)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- A2-2: 다른 부서 + 수리중 -->
+        <div class="label case-a2-2">
+            <div class="label-header">
+                <span class="label-case">A2-2 이동+수리</span>
+                <span class="label-dept">총무팀→교무실</span>
+            </div>
+            <div class="label-desc">다른 부서 + 수리중 → 복합 처리</div>
+            <div class="label-content">
+                <div class="barcode-section">
+                    <svg id="barcode-a2-2"></svg>
+                </div>
+                <div class="text-section">
+                    <span class="label-sn">S/N:</span> HPPRINTER2022030006
+                </div>
+                <div class="asset-info">
+                    <div>HP LaserJet | 프린터</div>
+                    <div>수리접수: 2025-01-20</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- B1: 납품 데이터 매칭 -->
+        <div class="label case-b1">
+            <div class="label-header">
+                <span class="label-case">B1 납품매칭</span>
+                <span class="label-dept">입고대기</span>
+            </div>
+            <div class="label-desc">납품 목록에 있음 → 입고 확인</div>
+            <div class="label-content">
+                <div class="barcode-section">
+                    <svg id="barcode-b1"></svg>
+                </div>
+                <div class="text-section">
+                    <span class="label-sn">S/N:</span> NEWDELL2025010007
+                </div>
+                <div class="asset-info">
+                    <div>Dell Optiplex 7090 | PC</div>
+                    <div>납품예정: 2025-01-25</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- C1: 미등록 -->
+        <div class="label case-c1">
+            <div class="label-header">
+                <span class="label-case">C1 미등록</span>
+                <span class="label-dept">???</span>
+            </div>
+            <div class="label-desc">DB/납품 모두 없음 → 신규 등록</div>
+            <div class="label-content">
+                <div class="barcode-section">
+                    <svg id="barcode-c1"></svg>
+                </div>
+                <div class="text-section">
+                    <span class="label-sn">S/N:</span> UNKNOWN2025010008
+                </div>
+                <div class="asset-info">
+                    <div>미등록 자산</div>
+                    <div>부서 구매 추정</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- A1-1 추가: 다중 시리얼 테스트용 -->
+        <div class="label case-a1-1">
+            <div class="label-header">
+                <span class="label-case">MULTI 다중</span>
+                <span class="label-dept">교무실</span>
+            </div>
+            <div class="label-desc">본체+모니터 2대 라벨 → 다중 인식 테스트</div>
+            <div class="label-content">
+                <div class="barcode-section">
+                    <svg id="barcode-multi"></svg>
+                </div>
+                <div class="text-section" style="font-size:11px; line-height:1.6;">
+                    <span class="label-sn">본체:</span> 40LGD5K202209000001<br>
+                    <span class="label-sn">모니터1:</span> LED2023051001A1<br>
+                    <span class="label-sn">모니터2:</span> LED2023051001A2
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // QR Code options
-        const qrOptions = { width: 100, height: 100, margin: 1 };
+        // Barcode 옵션
+        const barcodeOpts = {
+            format: 'CODE128',
+            width: 1.2,
+            height: 35,
+            fontSize: 10,
+            margin: 3,
+            displayValue: false  // 바코드 아래 텍스트 숨김 (S/N 섹션에 표시)
+        };
 
-        // Label 1: All Match - SN2024TEST001
-        new QRCode(document.getElementById('qr1'), { text: 'SN2024TEST001', ...qrOptions });
-        JsBarcode('#barcode1', 'SN2024TEST001', { format: 'CODE128', width: 1.5, height: 40, fontSize: 12, margin: 5 });
-
-        // Label 2: QR Wrong - QR has different value
-        new QRCode(document.getElementById('qr2'), { text: 'SN2024WRONG02', ...qrOptions });  // Wrong QR
-        JsBarcode('#barcode2', 'SN2024TEST002', { format: 'CODE128', width: 1.5, height: 40, fontSize: 12, margin: 5 });
-
-        // Label 3: Barcode Wrong - Barcode has different value
-        new QRCode(document.getElementById('qr3'), { text: 'SN2024TEST003', ...qrOptions });
-        JsBarcode('#barcode3', 'SN2024WRONG03', { format: 'CODE128', width: 1.5, height: 40, fontSize: 12, margin: 5 });  // Wrong Barcode
-
-        // Label 4: OCR Wrong - Text shows different value (QR and Barcode match)
-        new QRCode(document.getElementById('qr4'), { text: 'SN2024TEST004', ...qrOptions });
-        JsBarcode('#barcode4', 'SN2024TEST004', { format: 'CODE128', width: 1.5, height: 40, fontSize: 12, margin: 5 });
-        // Text shows SN2024TEST999 (wrong) - already in HTML
+        // 케이스별 바코드 생성
+        JsBarcode('#barcode-a1-1', '40LGD5K202209000001', barcodeOpts);
+        JsBarcode('#barcode-a1-2', 'HP24MON2023050002', barcodeOpts);
+        JsBarcode('#barcode-a1-3', 'DELLXPS2019120003', barcodeOpts);
+        JsBarcode('#barcode-a1-4', 'SAMSUNGTAB2022080004', barcodeOpts);
+        JsBarcode('#barcode-a2-1', 'LGGRAM2024010005', barcodeOpts);
+        JsBarcode('#barcode-a2-2', 'HPPRINTER2022030006', barcodeOpts);
+        JsBarcode('#barcode-b1', 'NEWDELL2025010007', barcodeOpts);
+        JsBarcode('#barcode-c1', 'UNKNOWN2025010008', barcodeOpts);
+        JsBarcode('#barcode-multi', '40LGD5K202209000001', barcodeOpts);  // 대표 바코드
     </script>
 </body>
 </html>
