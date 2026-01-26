@@ -102,6 +102,7 @@
             box-shadow: var(--shadow-md);
             background: #000;
             flex-shrink: 0;
+            touch-action: none; /* 핀치줌 방지 */
         }
 
         .scan-mode-tabs {
@@ -131,11 +132,13 @@
             max-height: 30vh;
             background: #000;
             overflow: hidden;
+            touch-action: none; /* 핀치줌 방지 */
         }
         #reader video {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            touch-action: none; /* 핀치줌 방지 */
         }
 
         .scan-status {
@@ -729,15 +732,16 @@
             statusEl.className = 'scan-status success';
             statusEl.textContent = '인식됨: ' + decodedText;
 
-            // Process the scanned code
+            // Section 11 프로세스: 선별 모달로 전달
             processScannedCode(decodedText);
 
-            // Reset cooldown after 1.5s
+            // Reset cooldown after 2s (모달 닫힌 후 다시 스캔 가능)
             setTimeout(function() {
                 scanCooldown = false;
+                lastScannedCode = '';
                 statusEl.className = 'scan-status';
-                statusEl.textContent = '다음 코드를 스캔하세요';
-            }, 1500);
+                statusEl.textContent = 'QR/바코드 비추기 또는 📸OCR';
+            }, 2000);
         }
 
         function onScanFailure(errorMessage) {
@@ -745,20 +749,10 @@
         }
 
         async function processScannedCode(code) {
-            // Check duplicate
-            var isDuplicate = scannedItems.some(function(item) { return item.serial === code; });
-            if (isDuplicate) {
-                showToast('이미 추가된 시리얼입니다');
-                return;
-            }
-
+            // Section 11 프로세스: 스캔 → 선별 모달 → 리스트 추가
             showLoading(true, '조회 중...');
             try {
-                var result = await lookupSerial(code, currentDeptCode);
-                var newItem = createScannedItem(code, result);
-                scannedItems.push(newItem);
-                updateUI();
-                showToast('추가됨: ' + code.substring(0, 15) + '...');
+                await showMultiSerialModal([code]);
             } catch (err) {
                 showToast('조회 실패: ' + err.message);
             }
@@ -822,16 +816,10 @@
 
                 showLoading(false);
 
-                // 인식된 시리얼 처리
-                if (serials.length === 1) {
-                    // 단일 시리얼은 바로 추가
-                    await processScannedCode(serials[0]);
-                    statusEl.className = 'scan-status success';
-                    statusEl.textContent = 'OCR 인식: ' + serials[0];
-                } else {
-                    // 다중 시리얼은 선택 모달
-                    await showMultiSerialModal(serials);
-                }
+                // 인식된 시리얼 처리 (단일/다중 모두 선별 모달 거침)
+                await showMultiSerialModal(serials);
+                statusEl.className = 'scan-status success';
+                statusEl.textContent = 'OCR 인식: ' + serials.length + '개';
 
                 // 진동 피드백
                 if (navigator.vibrate) navigator.vibrate(100);
