@@ -627,6 +627,7 @@
         var currentDeptName = null;
         var scannedItems = [];  // { serial, caseType, original, changes, checked, needsInput }
         var pendingSerials = []; // 선별 모달용 임시 저장
+        var rawScannedData = ''; // 디버그용 원본 데이터
 
         // ===== Scanner State =====
         var html5QrCode = null;
@@ -901,6 +902,9 @@
             // Section 11 프로세스: 스캔 → 선별 모달 → 리스트 추가
             showLoading(true, '조회 중...');
             try {
+                // 디버그용 원본 저장
+                rawScannedData = code;
+
                 // 줄바꿈으로 구분된 다중 시리얼 처리
                 var serials = code.split(/[\n\r]+/).map(function(s) {
                     return s.trim();
@@ -1117,6 +1121,15 @@
                 '<button class="modal-btn secondary" onclick="closeMultiSerialModal()">취소</button>' +
                 '<button class="modal-btn primary" onclick="addSelectedSerials()">선택 추가</button>' +
             '</div>';
+
+            // 디버그용 raw 데이터 (접히는 형태)
+            var escapedRaw = rawScannedData.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '\\n<br>').replace(/\r/g, '\\r');
+            html += '<details style="margin-top:12px; font-size:11px; color:#999;">' +
+                '<summary style="cursor:pointer;">🔍 Raw 데이터 보기</summary>' +
+                '<div style="margin-top:6px; padding:8px; background:#f5f5f5; border-radius:4px; font-family:monospace; word-break:break-all;">' +
+                escapedRaw + '</div>' +
+                '<div style="margin-top:4px; color:#666;">길이: ' + rawScannedData.length + '자</div>' +
+            '</details>';
 
             content.innerHTML = html;
         }
