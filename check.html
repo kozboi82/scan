@@ -128,8 +128,7 @@
 
         #reader {
             width: 100%;
-            height: 200px;
-            max-height: 30vh;
+            min-height: 300px;
             background: #000;
             overflow: hidden;
             touch-action: none; /* 핀치줌 방지 */
@@ -672,12 +671,12 @@
             // ocr-test-qrcode.html 방식: 단순한 설정
             var config = {
                 fps: 10,
-                qrbox: { width: 250, height: 250 }
+                qrbox: { width: 280, height: 280 }
             };
 
             var formats = getFormatsForMode(currentScanMode);
             if (currentScanMode === 'barcode') {
-                config.qrbox = { width: 280, height: 100 };
+                config.qrbox = { width: 350, height: 150 };
             }
 
             // formatsToSupport를 config에 직접 추가 (ocr-test-qrcode.html 방식)
@@ -857,6 +856,7 @@
                     Html5QrcodeSupportedFormats.ITF
                 ];
             } else {
+                // ocr-test-qrcode.html과 동일하게 ITF, DATA_MATRIX 포함
                 return [
                     Html5QrcodeSupportedFormats.QR_CODE,
                     Html5QrcodeSupportedFormats.CODE_128,
@@ -864,7 +864,9 @@
                     Html5QrcodeSupportedFormats.EAN_13,
                     Html5QrcodeSupportedFormats.EAN_8,
                     Html5QrcodeSupportedFormats.UPC_A,
-                    Html5QrcodeSupportedFormats.UPC_E
+                    Html5QrcodeSupportedFormats.UPC_E,
+                    Html5QrcodeSupportedFormats.ITF,
+                    Html5QrcodeSupportedFormats.DATA_MATRIX
                 ];
             }
         }
