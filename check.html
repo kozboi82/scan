@@ -105,26 +105,28 @@
             touch-action: none; /* 핀치줌 방지 */
         }
 
-        .scan-mode-tabs {
+        /* 카메라 헤더 (접기/펼치기) */
+        .scan-header {
             display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
             background: var(--sju-primary);
-        }
-        .scan-mode-tab {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            background: transparent;
-            color: rgba(255,255,255,0.6);
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .scan-mode-tab.active {
-            background: rgba(255,255,255,0.15);
             color: var(--sju-white);
+            cursor: pointer;
         }
-        .scan-mode-tab:active { opacity: 0.8; }
+        .scan-header:active { background: var(--sju-primary-hover); }
+        .scan-header-title {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .scan-header-toggle {
+            font-size: 12px;
+            opacity: 0.8;
+        }
 
         #reader {
             width: 100%;
@@ -196,23 +198,10 @@
             background: linear-gradient(135deg, var(--sju-primary) 0%, #1a4a9e 100%);
         }
 
-        /* 카메라 접기/펼치기 */
-        .scan-toggle {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px;
-            background: var(--sju-gray-200);
-            cursor: pointer;
-            font-size: 12px;
-            color: var(--sju-gray-700);
-            gap: 6px;
-        }
-        .scan-toggle:active { background: var(--sju-gray-300); }
+        /* 카메라 접힌 상태 */
         .scan-container.collapsed #reader,
         .scan-container.collapsed .zoom-container,
-        .scan-container.collapsed .ocr-scan-area,
-        .scan-container.collapsed .scan-status { display: none; }
+        .scan-container.collapsed .scan-status,
         .scan-container.collapsed .scan-controls { display: none; }
         .scan-control-btn {
             flex: 1;
@@ -230,20 +219,6 @@
             border-color: var(--sju-accent);
             font-weight: 600;
         }
-
-        /* ===== OCR Scan Area (for OCR mode) ===== */
-        .ocr-scan-area {
-            padding: 40px 16px;
-            text-align: center;
-            background: linear-gradient(135deg, var(--sju-primary) 0%, #1a4a9e 100%);
-            cursor: pointer;
-            display: none;
-        }
-        .ocr-scan-area.active { display: block; }
-        .ocr-scan-area:active { opacity: 0.9; }
-        .ocr-scan-icon { font-size: 40px; margin-bottom: 8px; }
-        .ocr-scan-text { color: var(--sju-white); font-size: 14px; font-weight: 500; }
-        .ocr-scan-hint { color: rgba(255,255,255,0.7); font-size: 11px; margin-top: 6px; }
 
         /* ===== Results Section ===== */
         .results-section {
@@ -527,23 +502,17 @@
 
     <!-- Scan Container -->
     <div class="scan-container">
-        <!-- Scan Mode Tabs -->
-        <div class="scan-mode-tabs">
-            <button class="scan-mode-tab active" onclick="setScanMode('auto', this)">자동</button>
-            <button class="scan-mode-tab" onclick="setScanMode('qr', this)">QR</button>
-            <button class="scan-mode-tab" onclick="setScanMode('barcode', this)">바코드</button>
-            <button class="scan-mode-tab" onclick="setScanMode('ocr', this)">OCR</button>
+        <!-- 카메라 헤더 (접기/펼치기) -->
+        <div class="scan-header" onclick="toggleCamera()">
+            <span class="scan-header-title">
+                <span>📷</span>
+                <span id="toggleText">스캔 카메라</span>
+            </span>
+            <span class="scan-header-toggle" id="toggleIcon">▲ 접기</span>
         </div>
 
         <!-- QR/Barcode Scanner -->
         <div id="reader"></div>
-
-        <!-- OCR Scan Area (hidden by default) -->
-        <div class="ocr-scan-area" id="ocrScanArea" onclick="triggerOcrScan()">
-            <div class="ocr-scan-icon">📷</div>
-            <div class="ocr-scan-text">탭하여 라벨 촬영</div>
-            <div class="ocr-scan-hint">텍스트 인식 (Google Vision API)</div>
-        </div>
 
         <!-- Scan Status -->
         <div class="scan-status" id="scanStatus">QR/바코드를 비춰주세요 (인식 안되면 📸OCR 버튼)</div>
@@ -560,12 +529,6 @@
             <button class="scan-control-btn primary" onclick="captureAndOcr()" id="btnCaptureOcr">📸 OCR</button>
             <button class="scan-control-btn" onclick="manualInput()">✏️ 직접입력</button>
             <button class="scan-control-btn" onclick="restartScanner()">🔄 재스캔</button>
-        </div>
-
-        <!-- 카메라 접기/펼치기 토글 -->
-        <div class="scan-toggle" onclick="toggleCamera()">
-            <span id="toggleIcon">▲</span>
-            <span id="toggleText">카메라 접기</span>
         </div>
     </div>
     <input type="file" id="fileInput" class="file-input-hidden" accept="image/*" capture="environment">
@@ -667,7 +630,6 @@
 
         // ===== Scanner State =====
         var html5QrCode = null;
-        var currentScanMode = 'auto';
         var isScanning = false;
         var lastScannedCode = '';
         var scanCooldown = false;
@@ -683,27 +645,19 @@
 
         // ===== Scanner =====
         function startScanner() {
-            if (currentScanMode === 'ocr') {
-                stopScanner();
-                return;
-            }
-
             var statusEl = document.getElementById('scanStatus');
             statusEl.className = 'scan-status';
             statusEl.textContent = '카메라 시작 중...';
 
             html5QrCode = new Html5Qrcode("reader");
 
-            // ocr-test-qrcode.html과 동일한 설정
+            // 자동 모드 설정 (QR + 바코드)
             var config = {
                 fps: 10,
                 qrbox: { width: 280, height: 280 }
             };
 
-            var formats = getFormatsForMode(currentScanMode);
-            if (currentScanMode === 'barcode') {
-                config.qrbox = { width: 350, height: 150 };
-            }
+            var formats = getFormatsForMode('auto');
 
             // formatsToSupport를 config에 직접 추가 (ocr-test-qrcode.html 방식)
             config.formatsToSupport = formats;
@@ -862,9 +816,7 @@
         function restartScanner() {
             stopScanner();
             setTimeout(function() {
-                if (currentScanMode !== 'ocr') {
-                    startScanner();
-                }
+                startScanner();
             }, 300);
         }
 
@@ -873,22 +825,17 @@
         function toggleCamera() {
             var container = document.querySelector('.scan-container');
             var icon = document.getElementById('toggleIcon');
-            var text = document.getElementById('toggleText');
 
             isCameraCollapsed = !isCameraCollapsed;
 
             if (isCameraCollapsed) {
                 container.classList.add('collapsed');
                 stopScanner();
-                icon.textContent = '▼';
-                text.textContent = '카메라 열기';
+                icon.textContent = '▼ 열기';
             } else {
                 container.classList.remove('collapsed');
-                icon.textContent = '▲';
-                text.textContent = '카메라 접기';
-                if (currentScanMode !== 'ocr') {
-                    startScanner();
-                }
+                icon.textContent = '▲ 접기';
+                startScanner();
             }
         }
 
@@ -918,31 +865,6 @@
                     Html5QrcodeSupportedFormats.ITF,
                     Html5QrcodeSupportedFormats.DATA_MATRIX
                 ];
-            }
-        }
-
-        function setScanMode(mode, btn) {
-            currentScanMode = mode;
-
-            // Update tabs
-            document.querySelectorAll('.scan-mode-tab').forEach(function(t) {
-                t.classList.remove('active');
-            });
-            btn.classList.add('active');
-
-            // Toggle OCR/Scanner
-            var readerEl = document.getElementById('reader');
-            var ocrEl = document.getElementById('ocrScanArea');
-
-            if (mode === 'ocr') {
-                stopScanner();
-                readerEl.style.display = 'none';
-                ocrEl.classList.add('active');
-                document.getElementById('scanStatus').textContent = 'OCR 모드: 라벨을 촬영하세요';
-            } else {
-                readerEl.style.display = 'block';
-                ocrEl.classList.remove('active');
-                restartScanner();
             }
         }
 
