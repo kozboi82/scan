@@ -443,13 +443,13 @@
         </div>
 
         <!-- Scan Status -->
-        <div class="scan-status" id="scanStatus">카메라에 QR/바코드를 비춰주세요</div>
+        <div class="scan-status" id="scanStatus">QR/바코드를 비춰주세요 (인식 안되면 📸OCR 버튼)</div>
 
         <!-- Scan Controls -->
         <div class="scan-controls">
-            <button class="scan-control-btn" onclick="toggleFlash()">💡 플래시</button>
+            <button class="scan-control-btn primary" onclick="captureAndOcr()" id="btnCaptureOcr">📸 OCR</button>
             <button class="scan-control-btn" onclick="manualInput()">✏️ 직접입력</button>
-            <button class="scan-control-btn primary" onclick="restartScanner()">🔄 재스캔</button>
+            <button class="scan-control-btn" onclick="restartScanner()">🔄 재스캔</button>
         </div>
     </div>
     <input type="file" id="fileInput" class="file-input-hidden" accept="image/*" capture="environment">
@@ -594,7 +594,7 @@
                 onScanFailure
             ).then(function() {
                 isScanning = true;
-                statusEl.textContent = 'QR/바코드를 비춰주세요';
+                statusEl.textContent = 'QR/바코드 비추기 또는 📸OCR';
             }).catch(function(err) {
                 console.error('Scanner error:', err);
                 statusEl.className = 'scan-status error';
@@ -722,8 +722,82 @@
             showLoading(false);
         }
 
-        function toggleFlash() {
-            showToast('플래시 기능은 일부 기기에서만 지원됩니다');
+        async function captureAndOcr() {
+            // API Key 확인
+            var apiKey = document.getElementById('apiKey').value;
+            if (!apiKey) {
+                showToast('설정에서 API Key를 입력하세요');
+                openSettingsModal();
+                return;
+            }
+
+            // 카메라가 실행 중인지 확인
+            if (!html5QrCode || !isScanning) {
+                showToast('카메라가 실행 중이 아닙니다');
+                return;
+            }
+
+            try {
+                // 현재 카메라 프레임 캡처
+                var video = document.querySelector('#reader video');
+                if (!video) {
+                    showToast('카메라 화면을 찾을 수 없습니다');
+                    return;
+                }
+
+                var canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+
+                var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                var base64 = dataUrl.split(',')[1];
+
+                // 상태 표시
+                var statusEl = document.getElementById('scanStatus');
+                statusEl.textContent = 'OCR 인식 중...';
+
+                showLoading(true, 'OCR 인식 중...');
+
+                // Google Vision API 호출
+                var text = await callVisionAPI(base64, apiKey);
+
+                if (!text) {
+                    showToast('텍스트를 인식하지 못했습니다');
+                    showLoading(false);
+                    statusEl.textContent = 'QR/바코드 비추기 또는 📸OCR';
+                    return;
+                }
+
+                var serials = extractSerials(text);
+                if (serials.length === 0) {
+                    showToast('시리얼 번호를 찾지 못했습니다');
+                    showLoading(false);
+                    statusEl.textContent = 'QR/바코드 비추기 또는 📸OCR';
+                    return;
+                }
+
+                showLoading(false);
+
+                // 인식된 시리얼 처리
+                if (serials.length === 1) {
+                    // 단일 시리얼은 바로 추가
+                    await processScannedCode(serials[0]);
+                    statusEl.className = 'scan-status success';
+                    statusEl.textContent = 'OCR 인식: ' + serials[0];
+                } else {
+                    // 다중 시리얼은 선택 모달
+                    await showMultiSerialModal(serials);
+                }
+
+                // 진동 피드백
+                if (navigator.vibrate) navigator.vibrate(100);
+
+            } catch (err) {
+                console.error('OCR error:', err);
+                showToast('OCR 오류: ' + err.message);
+                showLoading(false);
+            }
         }
 
         function manualInput() {
