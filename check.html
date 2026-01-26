@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>자산 점검</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        /* ===== SJU Design System Variables ===== */
+        :root {
+            --sju-primary: #11306E;
+            --sju-primary-hover: #0a1f4a;
+            --sju-accent: #E6007E;
+            --sju-success: #00978E;
+            --sju-success-bg: #e0f2f1;
+            --sju-warning: #f59e0b;
+            --sju-warning-bg: #fef3c7;
+            --sju-danger: #ef4444;
+            --sju-danger-bg: #fee2e2;
+            --sju-info: #0284c7;
+            --sju-info-bg: #e0f2fe;
+            --sju-purple: #7c3aed;
+            --sju-purple-bg: #ede9fe;
+            --sju-gray-100: #f5f5f5;
+            --sju-gray-200: #eeeeee;
+            --sju-gray-300: #e0e0e0;
+            --sju-gray-500: #9e9e9e;
+            --sju-gray-600: #757575;
+            --sju-gray-700: #616161;
+            --sju-gray-800: #424242;
+            --sju-white: #ffffff;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Pretendard', 'Malgun Gothic', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--sju-gray-100);
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ===== Header ===== */
+        .header {
+            background-color: var(--sju-primary);
+            color: var(--sju-white);
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header-title { font-size: 18px; font-weight: 600; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .header-count { background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 16px; font-size: 12px; }
+        .header-settings {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: rgba(255,255,255,0.2); border: none;
+            color: var(--sju-white); font-size: 18px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+
+        /* ===== Scan Area ===== */
+        .scan-container {
+            margin: 12px;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            background: #000;
+        }
+
+        .scan-mode-tabs {
+            display: flex;
+            background: var(--sju-primary);
+        }
+        .scan-mode-tab {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .scan-mode-tab.active {
+            background: rgba(255,255,255,0.15);
+            color: var(--sju-white);
+        }
+        .scan-mode-tab:active { opacity: 0.8; }
+
+        #reader {
+            width: 100%;
+            min-height: 200px;
+            background: #000;
+        }
+        #reader video { width: 100%; }
+
+        .scan-status {
+            padding: 10px 16px;
+            background: rgba(0,0,0,0.8);
+            color: var(--sju-white);
+            font-size: 12px;
+            text-align: center;
+        }
+        .scan-status.success { background: var(--sju-success); }
+        .scan-status.error { background: var(--sju-danger); }
+
+        .scan-controls {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            background: linear-gradient(135deg, var(--sju-primary) 0%, #1a4a9e 100%);
+        }
+        .scan-control-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: var(--radius-sm);
+            background: rgba(255,255,255,0.1);
+            color: var(--sju-white);
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .scan-control-btn:active { background: rgba(255,255,255,0.2); }
+        .scan-control-btn.primary {
+            background: var(--sju-accent);
+            border-color: var(--sju-accent);
+            font-weight: 600;
+        }
+
+        /* ===== OCR Scan Area (for OCR mode) ===== */
+        .ocr-scan-area {
+            padding: 40px 16px;
+            text-align: center;
+            background: linear-gradient(135deg, var(--sju-primary) 0%, #1a4a9e 100%);
+            cursor: pointer;
+            display: none;
+        }
+        .ocr-scan-area.active { display: block; }
+        .ocr-scan-area:active { opacity: 0.9; }
+        .ocr-scan-icon { font-size: 40px; margin-bottom: 8px; }
+        .ocr-scan-text { color: var(--sju-white); font-size: 14px; font-weight: 500; }
+        .ocr-scan-hint { color: rgba(255,255,255,0.7); font-size: 11px; margin-top: 6px; }
+
+        /* ===== Results Section ===== */
+        .results-section { padding: 0 12px; padding-bottom: 160px; }
+        .results-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 4px; gap: 8px;
+        }
+        .results-title { font-size: 14px; font-weight: 600; color: var(--sju-gray-700); }
+        .results-actions { display: flex; gap: 8px; align-items: center; }
+        .results-count { font-size: 12px; color: var(--sju-gray-500); }
+        .btn-batch {
+            padding: 6px 12px; font-size: 12px; font-weight: 500;
+            background: var(--sju-primary); color: var(--sju-white);
+            border: none; border-radius: var(--radius-sm); cursor: pointer;
+        }
+        .btn-batch:disabled { background: var(--sju-gray-300); color: var(--sju-gray-500); }
+        .btn-select-all {
+            padding: 6px 10px; font-size: 11px;
+            background: var(--sju-gray-200); color: var(--sju-gray-700);
+            border: none; border-radius: var(--radius-sm); cursor: pointer;
+        }
+
+        /* ===== Result Item ===== */
+        .result-item {
+            background: var(--sju-white);
+            border-radius: var(--radius-md);
+            margin-bottom: 8px;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+        .result-item.expanded { border: 2px solid var(--sju-primary); }
+        .result-item-header {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 14px; cursor: pointer;
+        }
+        .result-item-header:active { background: var(--sju-gray-100); }
+        .result-checkbox {
+            width: 20px; height: 20px; cursor: pointer;
+            accent-color: var(--sju-primary);
+        }
+        .result-status {
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; flex-shrink: 0;
+        }
+        .result-status.ok { background: var(--sju-success-bg); color: var(--sju-success); }
+        .result-status.move { background: var(--sju-info-bg); color: var(--sju-info); }
+        .result-status.warning { background: var(--sju-warning-bg); color: var(--sju-warning); }
+        .result-status.danger { background: var(--sju-danger-bg); color: var(--sju-danger); }
+        .result-status.new { background: var(--sju-purple-bg); color: var(--sju-purple); }
+        .result-status.pending { background: var(--sju-gray-200); color: var(--sju-gray-600); }
+        .result-info { flex: 1; min-width: 0; }
+        .result-serial {
+            font-family: 'Consolas', monospace;
+            font-size: 13px; font-weight: 600; color: var(--sju-gray-800);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .result-detail { font-size: 11px; color: var(--sju-gray-600); margin-top: 2px; }
+        .result-badge {
+            font-size: 10px; padding: 3px 8px; border-radius: 10px;
+            font-weight: 500; white-space: nowrap;
+        }
+        .badge-ok { background: var(--sju-success-bg); color: var(--sju-success); }
+        .badge-move { background: var(--sju-info-bg); color: var(--sju-info); }
+        .badge-repair { background: var(--sju-warning-bg); color: #d97706; }
+        .badge-dispose { background: var(--sju-danger-bg); color: var(--sju-danger); }
+        .badge-lost { background: #ffedd5; color: #ea580c; }
+        .badge-delivery { background: #dbeafe; color: #2563eb; }
+        .badge-unregistered { background: var(--sju-gray-200); color: var(--sju-gray-700); }
+        .badge-new { background: var(--sju-purple-bg); color: var(--sju-purple); }
+        .result-delete {
+            width: 28px; height: 28px; border: none; background: none;
+            color: var(--sju-gray-500); font-size: 16px; cursor: pointer;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        }
+        .result-delete:hover { background: var(--sju-danger-bg); color: var(--sju-danger); }
+
+        /* ===== Result Item Expanded ===== */
+        .result-expanded {
+            padding: 0 14px 14px;
+            border-top: 1px solid var(--sju-gray-200);
+            display: none;
+        }
+        .result-item.expanded .result-expanded { display: block; }
+        .expand-section { margin-top: 12px; }
+        .expand-label { font-size: 11px; color: var(--sju-gray-600); margin-bottom: 6px; font-weight: 500; }
+        .expand-value { font-size: 13px; color: var(--sju-gray-800); }
+        .expand-row { display: flex; gap: 12px; margin-bottom: 10px; }
+        .expand-col { flex: 1; }
+        .expand-select {
+            width: 100%; padding: 8px 10px; border: 1px solid var(--sju-gray-300);
+            border-radius: var(--radius-sm); font-size: 13px;
+        }
+        .expand-actions { display: flex; gap: 8px; margin-top: 12px; }
+        .expand-btn {
+            flex: 1; padding: 10px; border: none; border-radius: var(--radius-sm);
+            font-size: 13px; font-weight: 500; cursor: pointer;
+        }
+        .expand-btn.primary { background: var(--sju-primary); color: var(--sju-white); }
+        .expand-btn.secondary { background: var(--sju-gray-200); color: var(--sju-gray-700); }
+
+        /* ===== Empty State ===== */
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--sju-gray-500); }
+        .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+        .empty-text { font-size: 14px; }
+
+        /* ===== Bottom Section ===== */
+        .bottom-section {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--sju-white);
+            border-top: 1px solid var(--sju-gray-200);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .location-bar {
+            padding: 10px 16px;
+            display: flex; align-items: center; gap: 10px;
+            border-bottom: 1px solid var(--sju-gray-200);
+            cursor: pointer;
+        }
+        .location-bar:active { background: var(--sju-gray-100); }
+        .location-icon { font-size: 16px; }
+        .location-text { flex: 1; }
+        .location-label { font-size: 10px; color: var(--sju-gray-500); }
+        .location-value { font-size: 13px; font-weight: 500; color: var(--sju-gray-800); }
+        .location-arrow { color: var(--sju-gray-500); font-size: 12px; }
+
+        .bottom-buttons { padding: 12px 16px; display: flex; gap: 10px; }
+        .btn-complete {
+            flex: 1; padding: 14px;
+            background: var(--sju-primary); color: var(--sju-white);
+            border: none; border-radius: var(--radius-md);
+            font-size: 15px; font-weight: 600; cursor: pointer;
+        }
+        .btn-complete:active { background: var(--sju-primary-hover); }
+        .btn-complete:disabled { background: #bdbdbd; cursor: not-allowed; }
+
+        /* ===== Modals ===== */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none; justify-content: center; align-items: flex-end;
+            z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: var(--sju-white); width: 100%; max-height: 85vh;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            padding: 20px; padding-bottom: max(20px, env(safe-area-inset-bottom));
+            animation: slideUp 0.3s ease-out; overflow-y: auto;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px;
+        }
+        .modal-title { font-size: 17px; font-weight: 600; color: var(--sju-gray-800); }
+        .modal-close {
+            width: 30px; height: 30px; border: none;
+            background: var(--sju-gray-100); border-radius: 50%;
+            font-size: 18px; color: var(--sju-gray-600); cursor: pointer;
+        }
+
+        /* ===== Multi Serial Modal ===== */
+        .serial-select-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px; background: var(--sju-gray-100);
+            border-radius: var(--radius-md); margin-bottom: 8px;
+        }
+        .serial-select-item.disabled { opacity: 0.5; }
+        .serial-select-check { width: 20px; height: 20px; accent-color: var(--sju-primary); }
+        .serial-select-info { flex: 1; }
+        .serial-select-sn {
+            font-family: 'Consolas', monospace; font-weight: 600;
+            font-size: 14px; color: var(--sju-gray-800);
+        }
+        .serial-select-status { font-size: 11px; color: var(--sju-gray-600); margin-top: 2px; }
+        .serial-select-edit {
+            padding: 6px 10px; font-size: 11px;
+            background: var(--sju-white); border: 1px solid var(--sju-gray-300);
+            border-radius: var(--radius-sm); cursor: pointer;
+        }
+        .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+        .modal-btn {
+            flex: 1; padding: 12px; border: none; border-radius: var(--radius-md);
+            font-size: 14px; font-weight: 500; cursor: pointer;
+        }
+        .modal-btn.primary { background: var(--sju-primary); color: var(--sju-white); }
+        .modal-btn.secondary { background: var(--sju-gray-200); color: var(--sju-gray-700); }
+
+        /* ===== Batch Modal ===== */
+        .batch-section { margin-bottom: 16px; }
+        .batch-label { font-size: 13px; font-weight: 600; color: var(--sju-gray-700); margin-bottom: 8px; }
+        .batch-options { display: flex; flex-wrap: wrap; gap: 8px; }
+        .batch-option {
+            padding: 10px 16px; border: 1px solid var(--sju-gray-300);
+            border-radius: var(--radius-md); font-size: 13px;
+            background: var(--sju-white); cursor: pointer;
+        }
+        .batch-option.selected { border-color: var(--sju-primary); background: #e8eaf6; color: var(--sju-primary); }
+        .batch-option:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* ===== Commit Modal ===== */
+        .commit-summary { margin-bottom: 16px; }
+        .commit-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px; background: var(--sju-gray-100);
+            border-radius: var(--radius-sm); margin-bottom: 6px; font-size: 12px;
+        }
+        .commit-item-serial { font-family: 'Consolas', monospace; font-weight: 600; flex: 1; }
+        .commit-item-action { color: var(--sju-gray-600); }
+
+        /* ===== Settings Modal ===== */
+        .settings-item { margin-bottom: 16px; }
+        .settings-label { font-size: 12px; color: var(--sju-gray-600); margin-bottom: 6px; }
+        .settings-input {
+            width: 100%; padding: 12px;
+            border: 1px solid var(--sju-gray-300); border-radius: var(--radius-sm);
+            font-size: 14px;
+        }
+        .settings-input:focus { outline: none; border-color: var(--sju-primary); }
+
+        /* ===== Department List ===== */
+        .dept-list { max-height: 300px; overflow-y: auto; }
+        .dept-item {
+            padding: 12px 14px; border-bottom: 1px solid var(--sju-gray-200);
+            cursor: pointer;
+        }
+        .dept-item:active { background: var(--sju-gray-100); }
+        .dept-item.selected { background: #e8f5e9; }
+        .dept-name { font-size: 14px; color: var(--sju-gray-800); }
+        .dept-location { font-size: 11px; color: var(--sju-gray-500); }
+
+        /* ===== Toast ===== */
+        .toast {
+            position: fixed; bottom: 180px; left: 50%;
+            transform: translateX(-50%) translateY(50px);
+            background: rgba(0,0,0,0.85); color: var(--sju-white);
+            padding: 10px 20px; border-radius: 20px; font-size: 13px;
+            opacity: 0; transition: all 0.3s ease; z-index: 2000; pointer-events: none;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* ===== Loading ===== */
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.9);
+            display: none; justify-content: center; align-items: center; flex-direction: column;
+            z-index: 3000;
+        }
+        .loading-overlay.active { display: flex; }
+        .loading-spinner {
+            width: 36px; height: 36px;
+            border: 3px solid var(--sju-gray-200); border-top-color: var(--sju-primary);
+            border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { margin-top: 12px; font-size: 13px; color: var(--sju-gray-600); }
+
+        .file-input-hidden { display: none; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <span class="header-title">자산 점검</span>
+        <div class="header-right">
+            <span class="header-count" id="headerCount">0건</span>
+            <button class="header-settings" onclick="openSettingsModal()">⚙</button>
+        </div>
+    </div>
+
+    <!-- Scan Container -->
+    <div class="scan-container">
+        <!-- Scan Mode Tabs -->
+        <div class="scan-mode-tabs">
+            <button class="scan-mode-tab active" onclick="setScanMode('auto', this)">자동</button>
+            <button class="scan-mode-tab" onclick="setScanMode('qr', this)">QR</button>
+            <button class="scan-mode-tab" onclick="setScanMode('barcode', this)">바코드</button>
+            <button class="scan-mode-tab" onclick="setScanMode('ocr', this)">OCR</button>
+        </div>
+
+        <!-- QR/Barcode Scanner -->
+        <div id="reader"></div>
+
+        <!-- OCR Scan Area (hidden by default) -->
+        <div class="ocr-scan-area" id="ocrScanArea" onclick="triggerOcrScan()">
+            <div class="ocr-scan-icon">📷</div>
+            <div class="ocr-scan-text">탭하여 라벨 촬영</div>
+            <div class="ocr-scan-hint">텍스트 인식 (Google Vision API)</div>
+        </div>
+
+        <!-- Scan Status -->
+        <div class="scan-status" id="scanStatus">카메라에 QR/바코드를 비춰주세요</div>
+
+        <!-- Scan Controls -->
+        <div class="scan-controls">
+            <button class="scan-control-btn" onclick="toggleFlash()">💡 플래시</button>
+            <button class="scan-control-btn" onclick="manualInput()">✏️ 직접입력</button>
+            <button class="scan-control-btn primary" onclick="restartScanner()">🔄 재스캔</button>
+        </div>
+    </div>
+    <input type="file" id="fileInput" class="file-input-hidden" accept="image/*" capture="environment">
+
+    <!-- Results Section -->
+    <div class="results-section">
+        <div class="results-header">
+            <span class="results-title">스캔 목록</span>
+            <div class="results-actions">
+                <span class="results-count" id="resultsCount">0건</span>
+                <button class="btn-select-all" id="btnSelectAll" onclick="toggleSelectAll()">전체선택</button>
+                <button class="btn-batch" id="btnBatch" onclick="openBatchModal()" disabled>일괄작업</button>
+            </div>
+        </div>
+        <div id="resultsList">
+            <div class="empty-state">
+                <div class="empty-icon">📋</div>
+                <div class="empty-text">스캔된 자산이 없습니다<br><small>상단 카메라로 스캔을 시작하세요</small></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="bottom-section">
+        <div class="location-bar" onclick="openDeptModal()">
+            <span class="location-icon">📍</span>
+            <div class="location-text">
+                <div class="location-label">현재 위치</div>
+                <div class="location-value" id="currentDept">탭하여 선택</div>
+            </div>
+            <span class="location-arrow">▶</span>
+        </div>
+        <div class="bottom-buttons">
+            <button class="btn-complete" id="btnComplete" onclick="openCommitModal()" disabled>
+                점검 완료
+            </button>
+        </div>
+    </div>
+
+    <!-- Multi Serial Select Modal -->
+    <div class="modal-overlay" id="multiSerialModal">
+        <div class="modal-content" id="multiSerialContent"></div>
+    </div>
+
+    <!-- Batch Action Modal -->
+    <div class="modal-overlay" id="batchModal">
+        <div class="modal-content" id="batchModalContent"></div>
+    </div>
+
+    <!-- Commit Confirm Modal -->
+    <div class="modal-overlay" id="commitModal">
+        <div class="modal-content" id="commitModalContent"></div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">설정</span>
+                <button class="modal-close" onclick="closeSettingsModal()">×</button>
+            </div>
+            <div class="settings-item">
+                <div class="settings-label">Google Vision API Key (OCR 모드용)</div>
+                <input type="password" class="settings-input" id="apiKey" placeholder="API Key 입력...">
+            </div>
+            <button class="modal-btn primary" onclick="saveSettings()">저장</button>
+        </div>
+    </div>
+
+    <!-- Department Modal -->
+    <div class="modal-overlay" id="deptModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">점검 위치 선택</span>
+                <button class="modal-close" onclick="closeDeptModal()">×</button>
+            </div>
+            <div class="dept-list" id="deptList"></div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Loading -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="loadingText">인식 중...</div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/mock-data.js"></script>
+    <script>
+        // ===== State (v2: Staging-Commit 구조) =====
+        var currentDeptCode = null;
+        var currentDeptName = null;
+        var scannedItems = [];  // { serial, caseType, original, changes, checked, needsInput }
+        var pendingSerials = []; // 선별 모달용 임시 저장
+
+        // ===== Scanner State =====
+        var html5QrCode = null;
+        var currentScanMode = 'auto';
+        var isScanning = false;
+        var lastScannedCode = '';
+        var scanCooldown = false;
+
+        // ===== Initialization =====
+        document.addEventListener('DOMContentLoaded', function() {
+            var savedKey = localStorage.getItem('google_vision_api_key');
+            if (savedKey) document.getElementById('apiKey').value = savedKey;
+            document.getElementById('fileInput').addEventListener('change', handleOcrFileSelect);
+            initDeptList();
+            startScanner();
+        });
+
+        // ===== Scanner =====
+        function startScanner() {
+            if (currentScanMode === 'ocr') {
+                stopScanner();
+                return;
+            }
+
+            var statusEl = document.getElementById('scanStatus');
+            statusEl.className = 'scan-status';
+            statusEl.textContent = '카메라 시작 중...';
+
+            html5QrCode = new Html5Qrcode("reader");
+
+            var config = {
+                fps: 10,
+                qrbox: { width: 250, height: 250 }
+            };
+
+            var formats = getFormatsForMode(currentScanMode);
+            if (currentScanMode === 'barcode') {
+                config.qrbox = { width: 300, height: 120 };
+            }
+
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: config.fps, qrbox: config.qrbox, formatsToSupport: formats },
+                onScanSuccess,
+                onScanFailure
+            ).then(function() {
+                isScanning = true;
+                statusEl.textContent = 'QR/바코드를 비춰주세요';
+            }).catch(function(err) {
+                console.error('Scanner error:', err);
+                statusEl.className = 'scan-status error';
+                statusEl.textContent = '카메라 접근 실패: ' + err;
+            });
+        }
+
+        function stopScanner() {
+            if (html5QrCode && isScanning) {
+                html5QrCode.stop().then(function() {
+                    isScanning = false;
+                    document.getElementById('reader').innerHTML = '';
+                }).catch(function(err) {
+                    console.error('Stop error:', err);
+                });
+            }
+        }
+
+        function restartScanner() {
+            stopScanner();
+            setTimeout(function() {
+                if (currentScanMode !== 'ocr') {
+                    startScanner();
+                }
+            }, 300);
+        }
+
+        function getFormatsForMode(mode) {
+            if (mode === 'qr') {
+                return [Html5QrcodeSupportedFormats.QR_CODE];
+            } else if (mode === 'barcode') {
+                return [
+                    Html5QrcodeSupportedFormats.CODE_128,
+                    Html5QrcodeSupportedFormats.CODE_39,
+                    Html5QrcodeSupportedFormats.EAN_13,
+                    Html5QrcodeSupportedFormats.EAN_8,
+                    Html5QrcodeSupportedFormats.UPC_A,
+                    Html5QrcodeSupportedFormats.UPC_E,
+                    Html5QrcodeSupportedFormats.ITF
+                ];
+            } else {
+                return [
+                    Html5QrcodeSupportedFormats.QR_CODE,
+                    Html5QrcodeSupportedFormats.CODE_128,
+                    Html5QrcodeSupportedFormats.CODE_39,
+                    Html5QrcodeSupportedFormats.EAN_13,
+                    Html5QrcodeSupportedFormats.EAN_8,
+                    Html5QrcodeSupportedFormats.UPC_A,
+                    Html5QrcodeSupportedFormats.UPC_E
+                ];
+            }
+        }
+
+        function setScanMode(mode, btn) {
+            currentScanMode = mode;
+
+            // Update tabs
+            document.querySelectorAll('.scan-mode-tab').forEach(function(t) {
+                t.classList.remove('active');
+            });
+            btn.classList.add('active');
+
+            // Toggle OCR/Scanner
+            var readerEl = document.getElementById('reader');
+            var ocrEl = document.getElementById('ocrScanArea');
+
+            if (mode === 'ocr') {
+                stopScanner();
+                readerEl.style.display = 'none';
+                ocrEl.classList.add('active');
+                document.getElementById('scanStatus').textContent = 'OCR 모드: 라벨을 촬영하세요';
+            } else {
+                readerEl.style.display = 'block';
+                ocrEl.classList.remove('active');
+                restartScanner();
+            }
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            if (scanCooldown || decodedText === lastScannedCode) return;
+
+            lastScannedCode = decodedText;
+            scanCooldown = true;
+
+            // Vibrate
+            if (navigator.vibrate) navigator.vibrate(100);
+
+            var statusEl = document.getElementById('scanStatus');
+            statusEl.className = 'scan-status success';
+            statusEl.textContent = '인식됨: ' + decodedText;
+
+            // Process the scanned code
+            processScannedCode(decodedText);
+
+            // Reset cooldown after 1.5s
+            setTimeout(function() {
+                scanCooldown = false;
+                statusEl.className = 'scan-status';
+                statusEl.textContent = '다음 코드를 스캔하세요';
+            }, 1500);
+        }
+
+        function onScanFailure(errorMessage) {
+            // Silent fail - continuous scanning
+        }
+
+        async function processScannedCode(code) {
+            // Check duplicate
+            var isDuplicate = scannedItems.some(function(item) { return item.serial === code; });
+            if (isDuplicate) {
+                showToast('이미 추가된 시리얼입니다');
+                return;
+            }
+
+            showLoading(true, '조회 중...');
+            try {
+                var result = await lookupSerial(code, currentDeptCode);
+                var newItem = createScannedItem(code, result);
+                scannedItems.push(newItem);
+                updateUI();
+                showToast('추가됨: ' + code.substring(0, 15) + '...');
+            } catch (err) {
+                showToast('조회 실패: ' + err.message);
+            }
+            showLoading(false);
+        }
+
+        function toggleFlash() {
+            showToast('플래시 기능은 일부 기기에서만 지원됩니다');
+        }
+
+        function manualInput() {
+            var serial = prompt('시리얼 번호를 입력하세요:');
+            if (serial && serial.trim()) {
+                processScannedCode(serial.trim().toUpperCase());
+            }
+        }
+
+        // ===== OCR Scan (fallback for text labels) =====
+        function triggerOcrScan() {
+            var apiKey = document.getElementById('apiKey').value;
+            if (!apiKey) {
+                showToast('설정에서 API Key를 입력하세요');
+                openSettingsModal();
+                return;
+            }
+            document.getElementById('fileInput').click();
+        }
+
+        async function handleOcrFileSelect(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            showLoading(true, 'OCR 인식 중...');
+            try {
+                var resized = await resizeImage(file, 1280);
+                var apiKey = document.getElementById('apiKey').value;
+                var text = await callVisionAPI(resized.base64, apiKey);
+
+                if (!text) { showToast('텍스트를 인식하지 못했습니다'); showLoading(false); return; }
+
+                var serials = extractSerials(text);
+                if (serials.length === 0) { showToast('시리얼 번호를 찾지 못했습니다'); showLoading(false); return; }
+
+                showLoading(false);
+
+                // 조회 후 선별 모달 표시
+                await showMultiSerialModal(serials);
+
+            } catch (err) {
+                console.error(err);
+                showToast('오류: ' + err.message);
+                showLoading(false);
+            }
+            e.target.value = '';
+        }
+
+        // ===== Settings =====
+        function openSettingsModal() { document.getElementById('settingsModal').classList.add('active'); }
+        function closeSettingsModal() { document.getElementById('settingsModal').classList.remove('active'); }
+        function saveSettings() {
+            localStorage.setItem('google_vision_api_key', document.getElementById('apiKey').value);
+            closeSettingsModal();
+            showToast('설정 저장됨');
+        }
+
+        // ===== Department =====
+        async function initDeptList() {
+            var depts = await getDepartments();
+            var listEl = document.getElementById('deptList');
+            listEl.innerHTML = depts.map(function(d) {
+                return '<div class="dept-item" onclick="selectDept(\'' + d.code + '\',\'' + d.name + '\')">' +
+                    '<div class="dept-name">' + d.name + '</div>' +
+                    '<div class="dept-location">' + d.building + ' ' + d.floor + '</div></div>';
+            }).join('');
+        }
+
+        function openDeptModal() { document.getElementById('deptModal').classList.add('active'); }
+        function closeDeptModal() { document.getElementById('deptModal').classList.remove('active'); }
+
+        function selectDept(code, name) {
+            currentDeptCode = code;
+            currentDeptName = name;
+            document.getElementById('currentDept').textContent = MOCK_DEPARTMENTS[code].building + ' > ' + name;
+            closeDeptModal();
+            showToast('위치: ' + name);
+        }
+
+        // ===== Multi Serial Select Modal =====
+        async function showMultiSerialModal(serials) {
+            pendingSerials = [];
+
+            for (var i = 0; i < serials.length; i++) {
+                var sn = serials[i];
+                var isDuplicate = scannedItems.some(function(item) { return item.serial === sn; });
+                var result = await lookupSerial(sn, currentDeptCode);
+                pendingSerials.push({
+                    serial: sn,
+                    result: result,
+                    checked: !isDuplicate,
+                    isDuplicate: isDuplicate
+                });
+            }
+
+            renderMultiSerialModal();
+            document.getElementById('multiSerialModal').classList.add('active');
+        }
+
+        function renderMultiSerialModal() {
+            var content = document.getElementById('multiSerialContent');
+            var html = '<div class="modal-header">' +
+                '<span class="modal-title">인식된 시리얼 (' + pendingSerials.length + '개)</span>' +
+                '<button class="modal-close" onclick="closeMultiSerialModal()">×</button></div>';
+
+            html += '<div style="margin-bottom:12px; font-size:12px; color:var(--sju-gray-600);">불필요한 항목은 체크 해제하세요</div>';
+
+            pendingSerials.forEach(function(item, idx) {
+                var statusText = getStatusText(item.result.case, item.result.data);
+                var disabledClass = item.isDuplicate ? ' disabled' : '';
+                var duplicateNote = item.isDuplicate ? ' (이미 추가됨)' : '';
+
+                html += '<div class="serial-select-item' + disabledClass + '">' +
+                    '<input type="checkbox" class="serial-select-check" id="chk' + idx + '" ' +
+                        (item.checked ? 'checked' : '') + (item.isDuplicate ? ' disabled' : '') +
+                        ' onchange="togglePendingSerial(' + idx + ')">' +
+                    '<div class="serial-select-info">' +
+                        '<div class="serial-select-sn">' + item.serial + '</div>' +
+                        '<div class="serial-select-status">' + statusText + duplicateNote + '</div>' +
+                    '</div>' +
+                    '<button class="serial-select-edit" onclick="editPendingSerial(' + idx + ')">수정</button>' +
+                '</div>';
+            });
+
+            html += '<div class="modal-actions">' +
+                '<button class="modal-btn secondary" onclick="closeMultiSerialModal()">취소</button>' +
+                '<button class="modal-btn primary" onclick="addSelectedSerials()">선택 추가</button>' +
+            '</div>';
+
+            content.innerHTML = html;
+        }
+
+        function togglePendingSerial(idx) {
+            pendingSerials[idx].checked = document.getElementById('chk' + idx).checked;
+        }
+
+        function editPendingSerial(idx) {
+            var newSerial = prompt('시리얼 수정:', pendingSerials[idx].serial);
+            if (newSerial && newSerial.trim()) {
+                newSerial = newSerial.trim().toUpperCase();
+                pendingSerials[idx].serial = newSerial;
+                pendingSerials[idx].isDuplicate = scannedItems.some(function(item) { return item.serial === newSerial; });
+                lookupSerial(newSerial, currentDeptCode).then(function(result) {
+                    pendingSerials[idx].result = result;
+                    pendingSerials[idx].checked = !pendingSerials[idx].isDuplicate;
+                    renderMultiSerialModal();
+                });
+            }
+        }
+
+        function addSelectedSerials() {
+            var added = 0;
+            pendingSerials.forEach(function(item) {
+                if (item.checked && !item.isDuplicate) {
+                    var newItem = createScannedItem(item.serial, item.result);
+                    scannedItems.push(newItem);
+                    added++;
+                }
+            });
+
+            closeMultiSerialModal();
+            updateUI();
+            showToast(added + '건 추가됨');
+        }
+
+        function closeMultiSerialModal() {
+            document.getElementById('multiSerialModal').classList.remove('active');
+            pendingSerials = [];
+        }
+
+        // ===== Create Scanned Item =====
+        function createScannedItem(serial, result) {
+            var item = {
+                serial: serial,
+                caseType: result.case,
+                original: result.data ? Object.assign({}, result.data) : null,
+                changes: {},
+                checked: true,
+                needsInput: (result.case === 'B1' || result.case === 'C1'),
+                source: result.source
+            };
+
+            if (result.case && result.case.startsWith('A2') && currentDeptCode) {
+                item.changes.deptCode = currentDeptCode;
+                item.changes.dept = currentDeptName;
+            }
+
+            return item;
+        }
+
+        // ===== UI Update =====
+        function updateUI() {
+            var count = scannedItems.length;
+            var checkedCount = scannedItems.filter(function(i) { return i.checked; }).length;
+
+            document.getElementById('headerCount').textContent = count + '건';
+            document.getElementById('resultsCount').textContent = count + '건';
+            document.getElementById('btnBatch').disabled = checkedCount === 0;
+            document.getElementById('btnComplete').disabled = count === 0;
+            document.getElementById('btnSelectAll').textContent = checkedCount === count ? '전체해제' : '전체선택';
+
+            var listEl = document.getElementById('resultsList');
+            if (count === 0) {
+                listEl.innerHTML = '<div class="empty-state">' +
+                    '<div class="empty-icon">📋</div>' +
+                    '<div class="empty-text">스캔된 자산이 없습니다<br><small>상단 카메라로 스캔을 시작하세요</small></div></div>';
+                return;
+            }
+
+            listEl.innerHTML = scannedItems.map(function(item, idx) {
+                return renderResultItem(item, idx);
+            }).join('');
+        }
+
+        function renderResultItem(item, idx) {
+            var icon = getStatusIcon(item.caseType);
+            var statusClass = getStatusClass(item.caseType);
+            var badge = getBadge(item);
+            var detail = getDetail(item);
+            var shouldExpand = shouldAutoExpand(item.caseType);
+            var expandedClass = shouldExpand ? ' expanded' : '';
+
+            var html = '<div class="result-item' + expandedClass + '" id="item' + idx + '">' +
+                '<div class="result-item-header">' +
+                    '<input type="checkbox" class="result-checkbox" ' + (item.checked ? 'checked' : '') +
+                        ' onchange="toggleItemCheck(' + idx + ')" onclick="event.stopPropagation()">' +
+                    '<div class="result-status ' + statusClass + '">' + icon + '</div>' +
+                    '<div class="result-info" onclick="toggleItemExpand(' + idx + ')">' +
+                        '<div class="result-serial">' + item.serial + '</div>' +
+                        '<div class="result-detail">' + detail + '</div>' +
+                    '</div>' +
+                    '<span class="result-badge ' + badge.class + '">' + badge.text + '</span>' +
+                    '<button class="result-delete" onclick="deleteItem(' + idx + ')" title="삭제">🗑️</button>' +
+                '</div>' +
+                '<div class="result-expanded">' + renderExpandedContent(item, idx) + '</div>' +
+            '</div>';
+
+            return html;
+        }
+
+        function renderExpandedContent(item, idx) {
+            var html = '';
+
+            if (item.original) {
+                html += '<div class="expand-row">' +
+                    '<div class="expand-col"><div class="expand-label">원래 부서</div><div class="expand-value">' + item.original.dept + '</div></div>' +
+                    '<div class="expand-col"><div class="expand-label">원래 상태</div><div class="expand-value">' + item.original.status + '</div></div>' +
+                '</div>';
+            }
+
+            html += '<div class="expand-section">' +
+                '<div class="expand-label">변경할 부서</div>' +
+                '<select class="expand-select" id="deptSelect' + idx + '" onchange="updateItemChange(' + idx + ', \'dept\')">' +
+                    '<option value="">변경 안 함</option>';
+            Object.values(MOCK_DEPARTMENTS).forEach(function(d) {
+                var selected = (item.changes.deptCode === d.code) ? ' selected' : '';
+                html += '<option value="' + d.code + '"' + selected + '>' + d.name + '</option>';
+            });
+            html += '</select></div>';
+
+            if (needsStatusChange(item.caseType)) {
+                html += '<div class="expand-section">' +
+                    '<div class="expand-label">상태 변경</div>' +
+                    '<select class="expand-select" id="statusSelect' + idx + '" onchange="updateItemChange(' + idx + ', \'status\')">' +
+                        getStatusOptions(item) +
+                    '</select></div>';
+            }
+
+            if (item.needsInput) {
+                html += '<div class="expand-section">' +
+                    '<div class="expand-label">장비 유형 *</div>' +
+                    '<select class="expand-select" id="typeSelect' + idx + '" onchange="updateItemChange(' + idx + ', \'assetType\')">' +
+                        '<option value="">선택</option>' +
+                        '<option value="PC"' + (item.changes.assetType === 'PC' ? ' selected' : '') + '>PC</option>' +
+                        '<option value="노트북"' + (item.changes.assetType === '노트북' ? ' selected' : '') + '>노트북</option>' +
+                        '<option value="모니터"' + (item.changes.assetType === '모니터' ? ' selected' : '') + '>모니터</option>' +
+                        '<option value="프린터"' + (item.changes.assetType === '프린터' ? ' selected' : '') + '>프린터</option>' +
+                        '<option value="기타"' + (item.changes.assetType === '기타' ? ' selected' : '') + '>기타</option>' +
+                    '</select></div>';
+            }
+
+            return html;
+        }
+
+        function updateItemChange(idx, field) {
+            var item = scannedItems[idx];
+            if (field === 'dept') {
+                var deptCode = document.getElementById('deptSelect' + idx).value;
+                if (deptCode) {
+                    item.changes.deptCode = deptCode;
+                    item.changes.dept = MOCK_DEPARTMENTS[deptCode].name;
+                } else {
+                    delete item.changes.deptCode;
+                    delete item.changes.dept;
+                }
+            } else if (field === 'status') {
+                var status = document.getElementById('statusSelect' + idx).value;
+                if (status) {
+                    item.changes.status = status;
+                    item.changes.statusCode = getStatusCode(status);
+                } else {
+                    delete item.changes.status;
+                    delete item.changes.statusCode;
+                }
+            } else if (field === 'assetType') {
+                var type = document.getElementById('typeSelect' + idx).value;
+                if (type) item.changes.assetType = type;
+                else delete item.changes.assetType;
+            }
+        }
+
+        function toggleItemCheck(idx) {
+            scannedItems[idx].checked = !scannedItems[idx].checked;
+            updateUI();
+        }
+
+        function toggleItemExpand(idx) {
+            var el = document.getElementById('item' + idx);
+            el.classList.toggle('expanded');
+        }
+
+        function deleteItem(idx) {
+            scannedItems.splice(idx, 1);
+            updateUI();
+            showToast('삭제됨');
+        }
+
+        function toggleSelectAll() {
+            var allChecked = scannedItems.every(function(i) { return i.checked; });
+            scannedItems.forEach(function(i) { i.checked = !allChecked; });
+            updateUI();
+        }
+
+        // ===== Batch Action Modal =====
+        function openBatchModal() {
+            var checkedItems = scannedItems.filter(function(i) { return i.checked; });
+            if (checkedItems.length === 0) {
+                showToast('선택된 항목이 없습니다');
+                return;
+            }
+
+            var content = document.getElementById('batchModalContent');
+            var html = '<div class="modal-header">' +
+                '<span class="modal-title">일괄 작업 (' + checkedItems.length + '건)</span>' +
+                '<button class="modal-close" onclick="closeBatchModal()">×</button></div>';
+
+            html += '<div class="batch-section">' +
+                '<div class="batch-label">부서 일괄 변경</div>' +
+                '<select class="expand-select" id="batchDept">' +
+                    '<option value="">변경 안 함</option>';
+            Object.values(MOCK_DEPARTMENTS).forEach(function(d) {
+                var selected = (currentDeptCode === d.code) ? ' selected' : '';
+                html += '<option value="' + d.code + '"' + selected + '>' + d.name + ' (현재 위치)</option>';
+            });
+            html += '</select></div>';
+
+            html += '<div class="batch-section">' +
+                '<div class="batch-label">상태 일괄 변경</div>' +
+                '<div class="batch-options">' +
+                    '<button class="batch-option" onclick="selectBatchStatus(this, \'\')" >변경 안 함</button>' +
+                    '<button class="batch-option" onclick="selectBatchStatus(this, \'점검완료\')">점검완료</button>' +
+                    '<button class="batch-option" onclick="selectBatchStatus(this, \'수리완료\')">수리완료</button>' +
+                    '<button class="batch-option" onclick="selectBatchStatus(this, \'정상\')">정상</button>' +
+                '</div>' +
+                '<input type="hidden" id="batchStatus" value="">' +
+            '</div>';
+
+            var hasNeedsInput = checkedItems.some(function(i) { return i.needsInput; });
+            if (hasNeedsInput) {
+                html += '<div style="padding:10px;background:var(--sju-warning-bg);border-radius:6px;font-size:12px;color:#92400e;margin-bottom:12px;">' +
+                    '⚠️ 미등록/납품 항목은 개별 등록 정보 입력이 필요합니다</div>';
+            }
+
+            html += '<div class="modal-actions">' +
+                '<button class="modal-btn secondary" onclick="closeBatchModal()">취소</button>' +
+                '<button class="modal-btn primary" onclick="applyBatchAction()">적용</button>' +
+            '</div>';
+
+            content.innerHTML = html;
+            document.getElementById('batchModal').classList.add('active');
+        }
+
+        function selectBatchStatus(btn, status) {
+            document.querySelectorAll('#batchModalContent .batch-option').forEach(function(b) {
+                b.classList.remove('selected');
+            });
+            btn.classList.add('selected');
+            document.getElementById('batchStatus').value = status;
+        }
+
+        function applyBatchAction() {
+            var deptCode = document.getElementById('batchDept').value;
+            var status = document.getElementById('batchStatus').value;
+
+            var applied = 0;
+            scannedItems.forEach(function(item) {
+                if (item.checked) {
+                    if (deptCode) {
+                        item.changes.deptCode = deptCode;
+                        item.changes.dept = MOCK_DEPARTMENTS[deptCode].name;
+                    }
+                    if (status) {
+                        item.changes.status = status;
+                        item.changes.statusCode = getStatusCode(status);
+                    }
+                    applied++;
+                }
+            });
+
+            closeBatchModal();
+            updateUI();
+            showToast(applied + '건 일괄 적용됨');
+        }
+
+        function closeBatchModal() {
+            document.getElementById('batchModal').classList.remove('active');
+        }
+
+        // ===== Commit Modal =====
+        function openCommitModal() {
+            if (scannedItems.length === 0) {
+                showToast('처리할 항목이 없습니다');
+                return;
+            }
+
+            var errors = [];
+            scannedItems.forEach(function(item) {
+                if (item.needsInput && !item.changes.assetType) {
+                    errors.push(item.serial + ': 장비 유형 입력 필요');
+                }
+            });
+
+            if (errors.length > 0) {
+                showToast(errors[0]);
+                return;
+            }
+
+            var content = document.getElementById('commitModalContent');
+            var html = '<div class="modal-header">' +
+                '<span class="modal-title">점검 완료 확인</span>' +
+                '<button class="modal-close" onclick="closeCommitModal()">×</button></div>';
+
+            html += '<div style="margin-bottom:12px;font-size:13px;color:var(--sju-gray-700);">총 ' + scannedItems.length + '건의 변경사항을 저장합니다.</div>';
+
+            html += '<div class="commit-summary">';
+            scannedItems.forEach(function(item) {
+                var action = getCommitAction(item);
+                html += '<div class="commit-item">' +
+                    '<span class="commit-item-serial">' + item.serial + '</span>' +
+                    '<span class="commit-item-action">' + action + '</span>' +
+                '</div>';
+            });
+            html += '</div>';
+
+            html += '<div class="modal-actions">' +
+                '<button class="modal-btn secondary" onclick="closeCommitModal()">취소</button>' +
+                '<button class="modal-btn primary" onclick="executeCommit()">완료</button>' +
+            '</div>';
+
+            content.innerHTML = html;
+            document.getElementById('commitModal').classList.add('active');
+        }
+
+        function getCommitAction(item) {
+            var actions = [];
+            if (item.changes.dept) actions.push('부서→' + item.changes.dept);
+            if (item.changes.status) actions.push('상태→' + item.changes.status);
+            if (item.needsInput) actions.push('신규등록');
+            if (actions.length === 0) actions.push('점검확인');
+            return actions.join(', ');
+        }
+
+        function executeCommit() {
+            console.log('Committing items:', scannedItems);
+
+            closeCommitModal();
+            showToast('점검 완료! ' + scannedItems.length + '건 처리됨');
+
+            setTimeout(function() {
+                scannedItems = [];
+                updateUI();
+            }, 1500);
+        }
+
+        function closeCommitModal() {
+            document.getElementById('commitModal').classList.remove('active');
+        }
+
+        // ===== Helper Functions =====
+        function getStatusText(caseType, data) {
+            switch (caseType) {
+                case 'A1-1': return '✓ 정상 (' + (data ? data.dept : '') + ')';
+                case 'A1-2': return '🔧 수리중';
+                case 'A1-3': return '⚠️ 폐기됨';
+                case 'A1-4': return '🔍 분실';
+                case 'A2-1': return '→ 이동 필요 (' + (data ? data.dept : '') + ')';
+                case 'A2-2': return '→ 이동+수리중';
+                case 'A2-3': return '→ 이동+폐기';
+                case 'A2-4': return '→ 이동+분실';
+                case 'B1': return '📦 납품 대기';
+                case 'C1': return '❓ 미등록';
+                default: return '확인 필요';
+            }
+        }
+
+        function getStatusIcon(caseType) {
+            switch (caseType) {
+                case 'A1-1': return '✓';
+                case 'A1-2': case 'A2-2': return '🔧';
+                case 'A1-3': case 'A2-3': return '⚠️';
+                case 'A1-4': case 'A2-4': return '🔍';
+                case 'A2-1': return '→';
+                case 'B1': return '📦';
+                case 'C1': return '❓';
+                default: return '?';
+            }
+        }
+
+        function getStatusClass(caseType) {
+            switch (caseType) {
+                case 'A1-1': return 'ok';
+                case 'A1-2': case 'A2-2': return 'warning';
+                case 'A1-3': case 'A2-3': return 'danger';
+                case 'A1-4': case 'A2-4': return 'warning';
+                case 'A2-1': return 'move';
+                case 'B1': case 'C1': return 'new';
+                default: return 'pending';
+            }
+        }
+
+        function getBadge(item) {
+            if (item.changes.status) {
+                return { class: 'badge-ok', text: item.changes.status };
+            }
+            switch (item.caseType) {
+                case 'A1-1': return { class: 'badge-ok', text: '정상' };
+                case 'A1-2': return { class: 'badge-repair', text: '수리중' };
+                case 'A1-3': return { class: 'badge-dispose', text: '폐기' };
+                case 'A1-4': return { class: 'badge-lost', text: '분실' };
+                case 'A2-1': return { class: 'badge-move', text: '이동' };
+                case 'A2-2': return { class: 'badge-move', text: '이동+수리' };
+                case 'A2-3': return { class: 'badge-move', text: '이동+폐기' };
+                case 'A2-4': return { class: 'badge-move', text: '이동+분실' };
+                case 'B1': return { class: 'badge-delivery', text: '납품' };
+                case 'C1': return { class: 'badge-new', text: '미등록' };
+                default: return { class: 'badge-unregistered', text: '확인필요' };
+            }
+        }
+
+        function getDetail(item) {
+            var parts = [];
+            if (item.original) {
+                parts.push(item.original.model || '');
+                if (item.changes.dept) {
+                    parts.push(item.original.dept + '→' + item.changes.dept);
+                } else {
+                    parts.push(item.original.dept || '');
+                }
+            } else {
+                parts.push('미등록');
+                if (item.changes.assetType) parts.push(item.changes.assetType);
+            }
+            return parts.filter(Boolean).join(' | ');
+        }
+
+        function shouldAutoExpand(caseType) {
+            return ['A1-2', 'A1-3', 'A1-4', 'A2-2', 'A2-3', 'A2-4', 'B1', 'C1'].indexOf(caseType) >= 0;
+        }
+
+        function needsStatusChange(caseType) {
+            return ['A1-2', 'A1-3', 'A1-4', 'A2-2', 'A2-3', 'A2-4'].indexOf(caseType) >= 0;
+        }
+
+        function getStatusOptions(item) {
+            var html = '<option value="">변경 안 함</option>';
+            var current = item.changes.status || '';
+
+            switch (item.caseType) {
+                case 'A1-2': case 'A2-2':
+                    html += '<option value="수리완료"' + (current === '수리완료' ? ' selected' : '') + '>수리완료</option>';
+                    html += '<option value="수리중 유지"' + (current === '수리중 유지' ? ' selected' : '') + '>수리중 유지</option>';
+                    break;
+                case 'A1-3': case 'A2-3':
+                    html += '<option value="폐기 확인"' + (current === '폐기 확인' ? ' selected' : '') + '>폐기 확인 (유지)</option>';
+                    html += '<option value="정상"' + (current === '정상' ? ' selected' : '') + '>정상으로 변경</option>';
+                    break;
+                case 'A1-4': case 'A2-4':
+                    html += '<option value="분실 복구"' + (current === '분실 복구' ? ' selected' : '') + '>분실 복구 (정상)</option>';
+                    html += '<option value="분실 유지"' + (current === '분실 유지' ? ' selected' : '') + '>분실 유지</option>';
+                    break;
+            }
+            return html;
+        }
+
+        function getStatusCode(status) {
+            switch (status) {
+                case '정상': case '수리완료': case '분실 복구': case '점검완료': return 'N';
+                case '수리중': case '수리중 유지': return 'R';
+                case '폐기': case '폐기 확인': return 'D';
+                case '분실': case '분실 유지': return 'L';
+                default: return 'N';
+            }
+        }
+
+        // ===== Utilities =====
+        function showToast(msg) {
+            var toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(function() { toast.classList.remove('show'); }, 2000);
+        }
+
+        function showLoading(show, text) {
+            document.getElementById('loadingOverlay').classList.toggle('active', show);
+            if (text) document.getElementById('loadingText').textContent = text;
+        }
+
+        function resizeImage(file, maxWidth) {
+            return new Promise(function(resolve) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var img = new Image();
+                    img.onload = function() {
+                        var canvas = document.createElement('canvas');
+                        var w = img.width, h = img.height;
+                        if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+                        canvas.width = w; canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        var dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        resolve({ dataUrl: dataUrl, base64: dataUrl.split(',')[1] });
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function callVisionAPI(base64, apiKey) {
+            var resp = await fetch('https://vision.googleapis.com/v1/images:annotate?key=' + apiKey, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    requests: [{ image: { content: base64 }, features: [{ type: 'TEXT_DETECTION' }] }]
+                })
+            });
+            var data = await resp.json();
+            if (data.error) throw new Error(data.error.message);
+            var ta = data.responses[0] && data.responses[0].textAnnotations;
+            return ta && ta.length > 0 ? ta[0].description : null;
+        }
+
+        function extractSerials(text) {
+            if (!text) return [];
+            var exclude = /^(number|serial|model|part|product|type|version|no|sn|id|null|test)$/i;
+            var candidates = [];
+            var patterns = [
+                /\b(\d{2,3}LG[A-Z]\d[A-Z][A-Z0-9]{10,})\b/gi,
+                /\b(G[12]L\d{3}E\d{5}-\d{5})\b/gi,
+                /\b(TAG-?N\d+[A-Z]+\d+-[A-Z]?\d+)\b/gi,
+                /\b(CW[A-Z0-9]{2,4}H[0-9][A-Z]{2}[A-Z0-9]{6,})\b/gi,
+                /\b(LED\d{10}[A-Z]\d)\b/gi,
+                /\b([A-Z]{2,4}\d{2,4}[A-Z0-9]{6,})\b/gi,
+                /\b(\d{3}[A-Z]{2,4}[A-Z0-9]{6,})\b/gi
+            ];
+            patterns.forEach(function(p) {
+                var m = text.match(p);
+                if (m) m.forEach(function(s) {
+                    if (!exclude.test(s) && s.length >= 10) candidates.push(s);
+                });
+            });
+            var unique = [], seen = {};
+            candidates.forEach(function(c) { if (!seen[c]) { seen[c] = true; unique.push(c); } });
+            return unique.slice(0, 5);
+        }
+
+        // ===== Cleanup on page unload =====
+        window.addEventListener('beforeunload', function() {
+            stopScanner();
+        });
+    </script>
+</body>
+</html>
