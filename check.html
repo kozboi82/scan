@@ -38,11 +38,39 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        /* 페이지 확대 방지 */
+        html {
+            height: 100%;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
         body {
             font-family: 'Pretendard', 'Malgun Gothic', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--sju-gray-100);
-            min-height: 100vh;
+            height: 100%;
+            overflow: hidden;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        /* 전체 레이아웃 컨테이너 */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .fixed-top {
+            flex-shrink: 0;
+        }
+
+        .scrollable-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
         }
 
         /* ===== Header ===== */
@@ -53,8 +81,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
+            flex-shrink: 0;
             z-index: 100;
         }
         .header-title { font-size: 18px; font-weight: 600; }
@@ -69,11 +96,12 @@
 
         /* ===== Scan Area ===== */
         .scan-container {
-            margin: 12px;
+            margin: 8px 12px;
             border-radius: var(--radius-lg);
             overflow: hidden;
             box-shadow: var(--shadow-md);
             background: #000;
+            flex-shrink: 0;
         }
 
         .scan-mode-tabs {
@@ -99,10 +127,16 @@
 
         #reader {
             width: 100%;
-            min-height: 200px;
+            height: 200px;
+            max-height: 30vh;
             background: #000;
+            overflow: hidden;
         }
-        #reader video { width: 100%; }
+        #reader video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
         .scan-status {
             padding: 10px 16px;
@@ -152,7 +186,14 @@
         .ocr-scan-hint { color: rgba(255,255,255,0.7); font-size: 11px; margin-top: 6px; }
 
         /* ===== Results Section ===== */
-        .results-section { padding: 0 12px; padding-bottom: 160px; }
+        .results-section {
+            padding: 0 12px;
+            padding-bottom: 12px;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
         .results-header {
             display: flex; justify-content: space-between; align-items: center;
             padding: 10px 4px; gap: 8px;
@@ -258,7 +299,7 @@
 
         /* ===== Bottom Section ===== */
         .bottom-section {
-            position: fixed; bottom: 0; left: 0; right: 0;
+            flex-shrink: 0;
             background: var(--sju-white);
             border-top: 1px solid var(--sju-gray-200);
             box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
@@ -385,7 +426,7 @@
 
         /* ===== Toast ===== */
         .toast {
-            position: fixed; bottom: 180px; left: 50%;
+            position: fixed; bottom: 120px; left: 50%;
             transform: translateX(-50%) translateY(50px);
             background: rgba(0,0,0,0.85); color: var(--sju-white);
             padding: 10px 20px; border-radius: 20px; font-size: 13px;
@@ -413,6 +454,7 @@
     </style>
 </head>
 <body>
+    <div class="app-container">
     <!-- Header -->
     <div class="header">
         <span class="header-title">자산 점검</span>
@@ -488,6 +530,7 @@
             </button>
         </div>
     </div>
+    </div><!-- end app-container -->
 
     <!-- Multi Serial Select Modal -->
     <div class="modal-overlay" id="multiSerialModal">
