@@ -151,6 +151,45 @@
         .scan-status.success { background: var(--sju-success); }
         .scan-status.error { background: var(--sju-danger); }
 
+        /* 줌 슬라이더 */
+        .zoom-container {
+            display: none;
+            padding: 8px 16px;
+            background: rgba(0,0,0,0.6);
+            align-items: center;
+            gap: 10px;
+        }
+        .zoom-container.active { display: flex; }
+        .zoom-label {
+            color: var(--sju-white);
+            font-size: 11px;
+            white-space: nowrap;
+        }
+        .zoom-slider {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            outline: none;
+        }
+        .zoom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--sju-white);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .zoom-value {
+            color: var(--sju-white);
+            font-size: 11px;
+            min-width: 32px;
+            text-align: right;
+        }
+
         .scan-controls {
             display: flex;
             gap: 8px;
@@ -490,6 +529,13 @@
         <!-- Scan Status -->
         <div class="scan-status" id="scanStatus">QR/바코드를 비춰주세요 (인식 안되면 📸OCR 버튼)</div>
 
+        <!-- Zoom Slider -->
+        <div class="zoom-container" id="zoomContainer">
+            <span class="zoom-label">🔍</span>
+            <input type="range" class="zoom-slider" id="zoomSlider" min="1" max="5" step="0.1" value="1">
+            <span class="zoom-value" id="zoomValue">1.0x</span>
+        </div>
+
         <!-- Scan Controls -->
         <div class="scan-controls">
             <button class="scan-control-btn primary" onclick="captureAndOcr()" id="btnCaptureOcr">📸 OCR</button>
@@ -641,6 +687,8 @@
             ).then(function() {
                 isScanning = true;
                 statusEl.textContent = 'QR/바코드 비추기 또는 📸OCR';
+                // 카메라 줌 기능 초기화
+                setupCameraZoom();
             }).catch(function(err) {
                 console.error('Scanner error:', err);
                 statusEl.className = 'scan-status error';
@@ -648,7 +696,81 @@
             });
         }
 
+        // ===== Camera Zoom =====
+        var cameraTrack = null;
+        var zoomCapabilities = null;
+
+        function setupCameraZoom() {
+            // 약간의 딜레이 후 비디오 트랙 가져오기
+            setTimeout(function() {
+                try {
+                    var video = document.querySelector('#reader video');
+                    if (!video || !video.srcObject) {
+                        console.log('Video stream not available');
+                        return;
+                    }
+
+                    var stream = video.srcObject;
+                    var tracks = stream.getVideoTracks();
+                    if (tracks.length === 0) return;
+
+                    cameraTrack = tracks[0];
+                    var capabilities = cameraTrack.getCapabilities();
+
+                    if (capabilities && capabilities.zoom) {
+                        zoomCapabilities = capabilities.zoom;
+
+                        var slider = document.getElementById('zoomSlider');
+                        var container = document.getElementById('zoomContainer');
+                        var valueEl = document.getElementById('zoomValue');
+
+                        // 슬라이더 범위 설정
+                        slider.min = zoomCapabilities.min;
+                        slider.max = zoomCapabilities.max;
+                        slider.step = zoomCapabilities.step || 0.1;
+                        slider.value = cameraTrack.getSettings().zoom || 1;
+                        valueEl.textContent = parseFloat(slider.value).toFixed(1) + 'x';
+
+                        // 슬라이더 표시
+                        container.classList.add('active');
+
+                        // 슬라이더 이벤트
+                        slider.oninput = function(e) {
+                            var zoomValue = parseFloat(e.target.value);
+                            valueEl.textContent = zoomValue.toFixed(1) + 'x';
+                            applyCameraZoom(zoomValue);
+                        };
+
+                        console.log('Camera zoom enabled:', zoomCapabilities);
+                    } else {
+                        console.log('Camera does not support zoom');
+                    }
+                } catch (err) {
+                    console.error('Zoom setup error:', err);
+                }
+            }, 500);
+        }
+
+        function applyCameraZoom(zoomValue) {
+            if (!cameraTrack || !zoomCapabilities) return;
+
+            try {
+                cameraTrack.applyConstraints({
+                    advanced: [{ zoom: zoomValue }]
+                });
+            } catch (err) {
+                console.error('Zoom apply error:', err);
+            }
+        }
+
+        function hideZoomSlider() {
+            document.getElementById('zoomContainer').classList.remove('active');
+            cameraTrack = null;
+            zoomCapabilities = null;
+        }
+
         function stopScanner() {
+            hideZoomSlider();
             if (html5QrCode && isScanning) {
                 html5QrCode.stop().then(function() {
                     isScanning = false;
