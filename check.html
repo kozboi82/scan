@@ -901,7 +901,18 @@
             // Section 11 프로세스: 스캔 → 선별 모달 → 리스트 추가
             showLoading(true, '조회 중...');
             try {
-                await showMultiSerialModal([code]);
+                // 줄바꿈으로 구분된 다중 시리얼 처리
+                var serials = code.split(/[\n\r]+/).map(function(s) {
+                    return s.trim();
+                }).filter(function(s) {
+                    return s.length > 0;
+                });
+
+                if (serials.length === 0) {
+                    serials = [code];
+                }
+
+                await showMultiSerialModal(serials);
             } catch (err) {
                 showToast('조회 실패: ' + err.message);
             }
