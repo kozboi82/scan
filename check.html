@@ -128,7 +128,7 @@
 
         #reader {
             width: 100%;
-            min-height: 300px;
+            height: 250px;
             background: #000;
             overflow: hidden;
             touch-action: none; /* 핀치줌 방지 */
@@ -668,15 +668,15 @@
 
             html5QrCode = new Html5Qrcode("reader");
 
-            // ocr-test-qrcode.html 방식: 단순한 설정
+            // 카메라 영역 250px에 맞춘 설정
             var config = {
                 fps: 10,
-                qrbox: { width: 280, height: 280 }
+                qrbox: { width: 230, height: 230 }
             };
 
             var formats = getFormatsForMode(currentScanMode);
             if (currentScanMode === 'barcode') {
-                config.qrbox = { width: 350, height: 150 };
+                config.qrbox = { width: 300, height: 120 };
             }
 
             // formatsToSupport를 config에 직접 추가 (ocr-test-qrcode.html 방식)
