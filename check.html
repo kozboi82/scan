@@ -671,23 +671,35 @@
 
             var config = {
                 fps: 10,
-                qrbox: { width: 250, height: 250 }
+                qrbox: { width: 250, height: 250 },
+                // 실험적 기능: 브라우저 내장 바코드 감지기 사용
+                experimentalFeatures: {
+                    useBarCodeDetectorIfSupported: true
+                }
             };
 
             var formats = getFormatsForMode(currentScanMode);
             if (currentScanMode === 'barcode') {
-                config.qrbox = { width: 300, height: 120 };
+                config.qrbox = { width: 280, height: 100 };
             }
 
+            // 고해상도 카메라 설정 (멀리서도 인식 가능하도록)
+            var cameraConfig = {
+                facingMode: "environment",
+                width: { min: 1280, ideal: 1920, max: 3840 },
+                height: { min: 720, ideal: 1080, max: 2160 },
+                focusMode: "continuous"
+            };
+
             html5QrCode.start(
-                { facingMode: "environment" },
-                { fps: config.fps, qrbox: config.qrbox, formatsToSupport: formats },
+                cameraConfig,
+                { fps: config.fps, qrbox: config.qrbox, formatsToSupport: formats, experimentalFeatures: config.experimentalFeatures },
                 onScanSuccess,
                 onScanFailure
             ).then(function() {
                 isScanning = true;
                 statusEl.textContent = 'QR/바코드 비추기 또는 📸OCR';
-                // 카메라 줌 기능 초기화
+                // 카메라 줌 기능 초기화 (하드웨어 줌 실패 시 소프트웨어 줌)
                 setupCameraZoom();
             }).catch(function(err) {
                 console.error('Scanner error:', err);
@@ -696,68 +708,110 @@
             });
         }
 
-        // ===== Camera Zoom =====
+        // ===== Camera Zoom (Hardware + Software Fallback) =====
         var cameraTrack = null;
         var zoomCapabilities = null;
+        var isSoftwareZoom = false;
 
         function setupCameraZoom() {
-            // 약간의 딜레이 후 비디오 트랙 가져오기
+            // 비디오 로딩 대기
             setTimeout(function() {
                 try {
                     var video = document.querySelector('#reader video');
-                    if (!video || !video.srcObject) {
-                        console.log('Video stream not available');
+                    if (!video) {
+                        console.log('Video element not found');
                         return;
                     }
 
-                    var stream = video.srcObject;
-                    var tracks = stream.getVideoTracks();
-                    if (tracks.length === 0) return;
+                    var slider = document.getElementById('zoomSlider');
+                    var container = document.getElementById('zoomContainer');
+                    var valueEl = document.getElementById('zoomValue');
 
-                    cameraTrack = tracks[0];
-                    var capabilities = cameraTrack.getCapabilities();
+                    // 1. 하드웨어 줌 시도 (안드로이드 등)
+                    if (video.srcObject) {
+                        var stream = video.srcObject;
+                        var tracks = stream.getVideoTracks();
+                        if (tracks.length > 0) {
+                            cameraTrack = tracks[0];
+                            var capabilities = cameraTrack.getCapabilities ? cameraTrack.getCapabilities() : {};
 
-                    if (capabilities && capabilities.zoom) {
-                        zoomCapabilities = capabilities.zoom;
-
-                        var slider = document.getElementById('zoomSlider');
-                        var container = document.getElementById('zoomContainer');
-                        var valueEl = document.getElementById('zoomValue');
-
-                        // 슬라이더 범위 설정
-                        slider.min = zoomCapabilities.min;
-                        slider.max = zoomCapabilities.max;
-                        slider.step = zoomCapabilities.step || 0.1;
-                        slider.value = cameraTrack.getSettings().zoom || 1;
-                        valueEl.textContent = parseFloat(slider.value).toFixed(1) + 'x';
-
-                        // 슬라이더 표시
-                        container.classList.add('active');
-
-                        // 슬라이더 이벤트
-                        slider.oninput = function(e) {
-                            var zoomValue = parseFloat(e.target.value);
-                            valueEl.textContent = zoomValue.toFixed(1) + 'x';
-                            applyCameraZoom(zoomValue);
-                        };
-
-                        console.log('Camera zoom enabled:', zoomCapabilities);
+                            if (capabilities && capabilities.zoom) {
+                                // 하드웨어 줌 지원
+                                isSoftwareZoom = false;
+                                zoomCapabilities = capabilities.zoom;
+                                slider.min = zoomCapabilities.min;
+                                slider.max = zoomCapabilities.max;
+                                slider.step = zoomCapabilities.step || 0.1;
+                                slider.value = cameraTrack.getSettings().zoom || 1;
+                                console.log('Using Hardware Zoom:', zoomCapabilities);
+                            } else {
+                                // 하드웨어 줌 미지원 (아이폰 등) -> 소프트웨어 줌
+                                isSoftwareZoom = true;
+                                slider.min = 1;
+                                slider.max = 3;
+                                slider.step = 0.1;
+                                slider.value = 1;
+                                console.log('Using Software Zoom (CSS)');
+                            }
+                        } else {
+                            // 트랙 없음 -> 소프트웨어 줌
+                            isSoftwareZoom = true;
+                            slider.min = 1;
+                            slider.max = 3;
+                            slider.step = 0.1;
+                            slider.value = 1;
+                        }
                     } else {
-                        console.log('Camera does not support zoom');
+                        // srcObject 없음 -> 소프트웨어 줌
+                        isSoftwareZoom = true;
+                        slider.min = 1;
+                        slider.max = 3;
+                        slider.step = 0.1;
+                        slider.value = 1;
                     }
+
+                    // 슬라이더 UI 표시
+                    container.classList.add('active');
+                    valueEl.textContent = parseFloat(slider.value).toFixed(1) + 'x';
+
+                    // 슬라이더 이벤트
+                    slider.oninput = function(e) {
+                        var zoomValue = parseFloat(e.target.value);
+                        valueEl.textContent = zoomValue.toFixed(1) + 'x';
+                        applyCameraZoom(zoomValue);
+                    };
+
                 } catch (err) {
                     console.error('Zoom setup error:', err);
+                    // 에러 시에도 소프트웨어 줌 활성화
+                    isSoftwareZoom = true;
+                    var container = document.getElementById('zoomContainer');
+                    var slider = document.getElementById('zoomSlider');
+                    slider.min = 1;
+                    slider.max = 3;
+                    slider.value = 1;
+                    container.classList.add('active');
                 }
             }, 500);
         }
 
         function applyCameraZoom(zoomValue) {
-            if (!cameraTrack || !zoomCapabilities) return;
-
             try {
-                cameraTrack.applyConstraints({
-                    advanced: [{ zoom: zoomValue }]
-                });
+                if (isSoftwareZoom) {
+                    // 소프트웨어 줌: CSS로 비디오 확대
+                    var video = document.querySelector('#reader video');
+                    if (video) {
+                        video.style.transform = 'scale(' + zoomValue + ')';
+                        video.style.transformOrigin = 'center center';
+                    }
+                } else {
+                    // 하드웨어 줌: 실제 카메라 렌즈 줌
+                    if (cameraTrack && zoomCapabilities) {
+                        cameraTrack.applyConstraints({
+                            advanced: [{ zoom: zoomValue }]
+                        });
+                    }
+                }
             } catch (err) {
                 console.error('Zoom apply error:', err);
             }
@@ -765,8 +819,14 @@
 
         function hideZoomSlider() {
             document.getElementById('zoomContainer').classList.remove('active');
+            // 소프트웨어 줌 리셋
+            var video = document.querySelector('#reader video');
+            if (video) {
+                video.style.transform = '';
+            }
             cameraTrack = null;
             zoomCapabilities = null;
+            isSoftwareZoom = false;
         }
 
         function stopScanner() {
