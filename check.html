@@ -1074,6 +1074,9 @@
 
         // ===== Multi Serial Select Modal =====
         async function showMultiSerialModal(serials) {
+            // 모달 열릴 때 스캐너 일시 정지
+            stopScanner();
+
             pendingSerials = [];
 
             for (var i = 0; i < serials.length; i++) {
@@ -1180,6 +1183,10 @@
         function closeMultiSerialModal() {
             document.getElementById('multiSerialModal').classList.remove('active');
             pendingSerials = [];
+            // 모달 닫힐 때 스캐너 재시작 (카메라 접힌 상태 아닐 때만)
+            if (!isCameraCollapsed) {
+                startScanner();
+            }
         }
 
         // ===== Create Scanned Item =====
