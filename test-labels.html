@@ -132,11 +132,11 @@
             background: #fafafa;
         }
 
-        .code-section {
+        /* QR + 자산정보 영역 (가로 배치) */
+        .info-section {
             display: flex;
             gap: 10px;
             align-items: center;
-            justify-content: center;
             margin-bottom: 8px;
         }
 
@@ -148,36 +148,8 @@
             display: block;
         }
 
-        .barcode-section {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .barcode-section svg {
-            display: block;
-            margin: 0 auto;
-            max-width: 100%;
-        }
-
-        .text-section {
-            font-family: Consolas, 'Courier New', monospace;
-            font-size: 12px;
-            font-weight: bold;
-            padding: 6px;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            white-space: nowrap;
-        }
-
-        .text-section .label-sn {
-            color: #999;
-            font-size: 10px;
-            font-weight: normal;
-        }
-
         .asset-info {
-            margin-top: 8px;
+            flex: 1;
             font-size: 10px;
             color: #666;
             text-align: left;
@@ -188,6 +160,42 @@
 
         .asset-info div {
             margin: 2px 0;
+        }
+
+        /* 바코드 영역 (전체 너비) */
+        .barcode-section {
+            margin-bottom: 8px;
+        }
+
+        .barcode-section svg {
+            display: block;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* 시리얼 번호 영역 */
+        .text-section {
+            font-family: Consolas, 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 6px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .text-section .label-sn {
+            display: block;
+            color: #999;
+            font-size: 10px;
+            font-weight: normal;
+        }
+
+        .text-section .serial-number {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* Print styles */
@@ -270,18 +278,19 @@
             </div>
             <div class="label-desc">같은 부서, 정상 상태 → 자동 체크</div>
             <div class="label-content">
-                <div class="code-section">
+                <div class="info-section">
                     <div class="qr-section" id="qr-a1-1"></div>
-                    <div class="barcode-section">
-                        <svg id="barcode-a1-1"></svg>
+                    <div class="asset-info">
+                        <div>LG 그램 15 | PC</div>
+                        <div>사용자: 김철수</div>
                     </div>
                 </div>
-                <div class="text-section">
-                    <span class="label-sn">S/N:</span> 40LGD5K202209000001
+                <div class="barcode-section">
+                    <svg id="barcode-a1-1"></svg>
                 </div>
-                <div class="asset-info">
-                    <div>LG 그램 15 | PC</div>
-                    <div>사용자: 김철수</div>
+                <div class="text-section">
+                    <span class="label-sn">S/N:</span>
+                    <span class="serial-number">40LGD5K202209000001</span>
                 </div>
             </div>
         </div>
@@ -294,18 +303,19 @@
             </div>
             <div class="label-desc">같은 부서, 수리중 → 수리완료 처리?</div>
             <div class="label-content">
-                <div class="code-section">
+                <div class="info-section">
                     <div class="qr-section" id="qr-a1-2"></div>
-                    <div class="barcode-section">
-                        <svg id="barcode-a1-2"></svg>
+                    <div class="asset-info">
+                        <div>HP 24인치 | 모니터</div>
+                        <div>사용자: 박영희</div>
                     </div>
                 </div>
-                <div class="text-section">
-                    <span class="label-sn">S/N:</span> CWAB12H5MN23050002
+                <div class="barcode-section">
+                    <svg id="barcode-a1-2"></svg>
                 </div>
-                <div class="asset-info">
-                    <div>HP 24인치 | 모니터</div>
-                    <div>사용자: 박영희</div>
+                <div class="text-section">
+                    <span class="label-sn">S/N:</span>
+                    <span class="serial-number">CWAB12H5MN23050002</span>
                 </div>
             </div>
         </div>
@@ -318,18 +328,19 @@
             </div>
             <div class="label-desc">같은 부서, 폐기됨 → 경고 표시</div>
             <div class="label-content">
-                <div class="code-section">
+                <div class="info-section">
                     <div class="qr-section" id="qr-a1-3"></div>
-                    <div class="barcode-section">
-                        <svg id="barcode-a1-3"></svg>
+                    <div class="asset-info">
+                        <div>Dell XPS 13 | PC</div>
+                        <div>폐기일: 2024-06-15</div>
                     </div>
                 </div>
-                <div class="text-section">
-                    <span class="label-sn">S/N:</span> 309DEL2019120003AB
+                <div class="barcode-section">
+                    <svg id="barcode-a1-3"></svg>
                 </div>
-                <div class="asset-info">
-                    <div>Dell XPS 13 | PC</div>
-                    <div>폐기일: 2024-06-15</div>
+                <div class="text-section">
+                    <span class="label-sn">S/N:</span>
+                    <span class="serial-number">309DEL2019120003AB</span>
                 </div>
             </div>
         </div>
@@ -342,18 +353,19 @@
             </div>
             <div class="label-desc">같은 부서, 분실 → 분실복구 처리?</div>
             <div class="label-content">
-                <div class="code-section">
+                <div class="info-section">
                     <div class="qr-section" id="qr-a1-4"></div>
-                    <div class="barcode-section">
-                        <svg id="barcode-a1-4"></svg>
+                    <div class="asset-info">
+                        <div>삼성 Galaxy Tab | 태블릿</div>
+                        <div>분실신고: 2024-01-10</div>
                     </div>
                 </div>
-                <div class="text-section">
-                    <span class="label-sn">S/N:</span> 408SAM2022080004TB
+                <div class="barcode-section">
+                    <svg id="barcode-a1-4"></svg>
                 </div>
-                <div class="asset-info">
-                    <div>삼성 Galaxy Tab | 태블릿</div>
-                    <div>분실신고: 2024-01-10</div>
+                <div class="text-section">
+                    <span class="label-sn">S/N:</span>
+                    <span class="serial-number">408SAM2022080004TB</span>
                 </div>
             </div>
         </div>
@@ -366,18 +378,19 @@
             </div>
             <div class="label-desc">다른 부서 소속 → 이동 처리</div>
             <div class="label-content">
-                <div class="code-section">
+                <div class="info-section">
                     <div class="qr-section" id="qr-a2-1"></div>
-                    <div class="barcode-section">
-                        <svg id="barcode-a2-1"></svg>
+                    <div class="asset-info">
+                        <div>LG 그램 17 | PC</div>
+                        <div>사용자: 이민수 (입학팀)</div>
                     </div>
                 </div>
-                <div class="text-section">
-                    <span class="label-sn">S/N:</span> 17LGR7T2024010005
+                <div class="barcode-section">
+                    <svg id="barcode-a2-1"></svg>
                 </div>
-                <div class="asset-info">
-                    <div>LG 그램 17 | PC</div>
-                    <div>사용자: 이민수 (입학팀)</div>
+                <div class="text-section">
+                    <span class="label-sn">S/N:</span>
+                    <span class="serial-number">17LGR7T2024010005</span>
                 </div>
             </div>
         </div>
@@ -390,18 +403,19 @@
             </div>
             <div class="label-desc">다른 부서 + 수리중 → 복합 처리</div>
             <div class="label-content">
-                <div class="code-section">
+                <div class="info-section">
                     <div class="qr-section" id="qr-a2-2"></div>
-                    <div class="barcode-section">
-                        <svg id="barcode-a2-2"></svg>
+                    <div class="asset-info">
+                        <div>HP LaserJet | 프린터</div>
+                        <div>수리접수: 2025-01-20</div>
                     </div>
                 </div>
-                <div class="text-section">
-                    <span class="label-sn">S/N:</span> CWPR22H1LJ22030006
+                <div class="barcode-section">
+                    <svg id="barcode-a2-2"></svg>
                 </div>
-                <div class="asset-info">
-                    <div>HP LaserJet | 프린터</div>
-                    <div>수리접수: 2025-01-20</div>
+                <div class="text-section">
+                    <span class="label-sn">S/N:</span>
+                    <span class="serial-number">CWPR22H1LJ22030006</span>
                 </div>
             </div>
         </div>
@@ -414,18 +428,19 @@
             </div>
             <div class="label-desc">납품 목록에 있음 → 입고 확인</div>
             <div class="label-content">
-                <div class="code-section">
+                <div class="info-section">
                     <div class="qr-section" id="qr-b1"></div>
-                    <div class="barcode-section">
-                        <svg id="barcode-b1"></svg>
+                    <div class="asset-info">
+                        <div>Dell Optiplex 7090 | PC</div>
+                        <div>납품예정: 2025-01-25</div>
                     </div>
                 </div>
-                <div class="text-section">
-                    <span class="label-sn">S/N:</span> G1L007E00001-00007
+                <div class="barcode-section">
+                    <svg id="barcode-b1"></svg>
                 </div>
-                <div class="asset-info">
-                    <div>Dell Optiplex 7090 | PC</div>
-                    <div>납품예정: 2025-01-25</div>
+                <div class="text-section">
+                    <span class="label-sn">S/N:</span>
+                    <span class="serial-number">G1L007E00001-00007</span>
                 </div>
             </div>
         </div>
@@ -438,18 +453,19 @@
             </div>
             <div class="label-desc">DB/납품 모두 없음 → 신규 등록</div>
             <div class="label-content">
-                <div class="code-section">
+                <div class="info-section">
                     <div class="qr-section" id="qr-c1"></div>
-                    <div class="barcode-section">
-                        <svg id="barcode-c1"></svg>
+                    <div class="asset-info">
+                        <div>미등록 자산</div>
+                        <div>부서 구매 추정</div>
                     </div>
                 </div>
-                <div class="text-section">
-                    <span class="label-sn">S/N:</span> TAGN001UNK001-0008
+                <div class="barcode-section">
+                    <svg id="barcode-c1"></svg>
                 </div>
-                <div class="asset-info">
-                    <div>미등록 자산</div>
-                    <div>부서 구매 추정</div>
+                <div class="text-section">
+                    <span class="label-sn">S/N:</span>
+                    <span class="serial-number">TAGN001UNK001-0008</span>
                 </div>
             </div>
         </div>
@@ -462,16 +478,23 @@
             </div>
             <div class="label-desc">본체+모니터 2대 라벨 → 다중 인식 테스트</div>
             <div class="label-content">
-                <div class="code-section">
+                <div class="info-section">
                     <div class="qr-section" id="qr-multi"></div>
-                    <div class="barcode-section">
-                        <svg id="barcode-multi"></svg>
+                    <div class="asset-info">
+                        <div>본체+모니터 2대 세트</div>
+                        <div>사용자: 김철수</div>
                     </div>
                 </div>
-                <div class="text-section" style="font-size:11px; line-height:1.6;">
-                    <span class="label-sn">본체:</span> 40LGD5K202209000001<br>
-                    <span class="label-sn">모니터1:</span> LED2023051001A1<br>
-                    <span class="label-sn">모니터2:</span> LED2023051001A2
+                <div class="barcode-section">
+                    <svg id="barcode-multi"></svg>
+                </div>
+                <div class="text-section" style="font-size:10px; line-height:1.5;">
+                    <span class="label-sn">본체:</span>
+                    <span class="serial-number">40LGD5K202209000001</span>
+                    <span class="label-sn">모니터1:</span>
+                    <span class="serial-number">LED2023051001A1</span>
+                    <span class="label-sn">모니터2:</span>
+                    <span class="serial-number">LED2023051001A2</span>
                 </div>
             </div>
         </div>
@@ -487,13 +510,13 @@
             correctLevel: QRCode.CorrectLevel.M
         };
 
-        // Barcode 옵션
+        // Barcode 옵션 (전체 너비용)
         const barcodeOpts = {
             format: 'CODE128',
-            width: 1.2,
-            height: 35,
+            width: 1.5,
+            height: 40,
             fontSize: 10,
-            margin: 3,
+            margin: 5,
             displayValue: false  // 바코드 아래 텍스트 숨김 (S/N 섹션에 표시)
         };
 
