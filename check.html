@@ -872,6 +872,9 @@
         function onScanSuccess(decodedText, decodedResult) {
             if (scanCooldown || decodedText === lastScannedCode) return;
 
+            // 카메라에서 넘어온 원본 데이터 즉시 저장 (디버그용)
+            rawScannedData = decodedText;
+
             lastScannedCode = decodedText;
             scanCooldown = true;
 
@@ -880,7 +883,7 @@
 
             var statusEl = document.getElementById('scanStatus');
             statusEl.className = 'scan-status success';
-            statusEl.textContent = '인식됨: ' + decodedText;
+            statusEl.textContent = '인식됨: ' + decodedText.substring(0, 30) + (decodedText.length > 30 ? '...' : '');
 
             // Section 11 프로세스: 선별 모달로 전달
             processScannedCode(decodedText);
@@ -902,9 +905,6 @@
             // Section 11 프로세스: 스캔 → 선별 모달 → 리스트 추가
             showLoading(true, '조회 중...');
             try {
-                // 디버그용 원본 저장
-                rawScannedData = code;
-
                 // 줄바꿈으로 구분된 다중 시리얼 처리
                 var serials = code.split(/[\n\r]+/).map(function(s) {
                     return s.trim();
@@ -1123,12 +1123,16 @@
             '</div>';
 
             // 디버그용 raw 데이터 (접히는 형태)
-            var escapedRaw = rawScannedData.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '\\n<br>').replace(/\r/g, '\\r');
-            html += '<details style="margin-top:12px; font-size:11px; color:#999;">' +
-                '<summary style="cursor:pointer;">🔍 Raw 데이터 보기</summary>' +
-                '<div style="margin-top:6px; padding:8px; background:#f5f5f5; border-radius:4px; font-family:monospace; word-break:break-all;">' +
+            var escapedRaw = rawScannedData
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/\n/g, '<span style="color:red;font-weight:bold;">↵\\n</span><br>')
+                .replace(/\r/g, '<span style="color:orange;">\\r</span>');
+            html += '<details style="margin-top:12px; font-size:11px; color:#999;" open>' +
+                '<summary style="cursor:pointer;">🔍 Raw 데이터 (카메라 원본)</summary>' +
+                '<div style="margin-top:6px; padding:8px; background:#f5f5f5; border-radius:4px; font-family:monospace; word-break:break-all; color:#333;">' +
                 escapedRaw + '</div>' +
-                '<div style="margin-top:4px; color:#666;">길이: ' + rawScannedData.length + '자</div>' +
+                '<div style="margin-top:4px; color:#666;">길이: ' + rawScannedData.length + '자 | 줄바꿈 수: ' + (rawScannedData.match(/\n/g) || []).length + '</div>' +
             '</details>';
 
             content.innerHTML = html;
