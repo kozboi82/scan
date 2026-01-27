@@ -1672,8 +1672,10 @@
 
         function extractSerials(text) {
             if (!text) return [];
-            var exclude = /^(number|serial|model|part|product|type|version|no|sn|id|null|test)$/i;
+            var exclude = /^(number|serial|model|part|product|type|version|no|sn|id|null|test|input|output|power|volt|watt|made|china|korea)$/i;
             var candidates = [];
+
+            // 1차: 특정 패턴 (빠른 매칭)
             var patterns = [
                 /\b(\d{2,3}LG[A-Z]\d[A-Z][A-Z0-9]{10,})\b/gi,
                 /\b(G[12]L\d{3}E\d{5}-\d{5})\b/gi,
@@ -1690,6 +1692,23 @@
                     if (!exclude.test(s) && s.length >= 10) candidates.push(s);
                 });
             });
+
+            // 2차: 폴백 - 특정 패턴 없으면 일반적인 시리얼 형태 찾기
+            if (candidates.length === 0) {
+                // 영문+숫자 조합 8자 이상, 또는 숫자-숫자 형식
+                var fallbackPatterns = [
+                    /\b([A-Z0-9]{2,}[-][A-Z0-9]{2,})\b/gi,  // 하이픈 포함 (예: ABC-12345)
+                    /\b([A-Z][A-Z0-9]{7,})\b/gi,            // 영문시작 8자 이상
+                    /\b(\d[A-Z0-9]{7,})\b/gi                // 숫자시작 8자 이상
+                ];
+                fallbackPatterns.forEach(function(p) {
+                    var m = text.match(p);
+                    if (m) m.forEach(function(s) {
+                        if (!exclude.test(s) && s.length >= 8) candidates.push(s);
+                    });
+                });
+            }
+
             var unique = [], seen = {};
             candidates.forEach(function(c) { if (!seen[c]) { seen[c] = true; unique.push(c); } });
             return unique.slice(0, 5);
