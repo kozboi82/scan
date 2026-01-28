@@ -1411,36 +1411,108 @@
                 return;
             }
 
+            // 선택된 항목 유형 분석
+            var hasC1 = checkedItems.some(function(i) { return i.caseType === 'C1'; });
+            var hasB1 = checkedItems.some(function(i) { return i.caseType === 'B1'; });
+            var hasA2 = checkedItems.some(function(i) { return i.caseType && i.caseType.startsWith('A2'); });
+            var hasStatusChange = checkedItems.some(function(i) { return needsStatusChange(i.caseType); });
+            var c1Count = checkedItems.filter(function(i) { return i.caseType === 'C1'; }).length;
+            var b1Count = checkedItems.filter(function(i) { return i.caseType === 'B1'; }).length;
+            var a2Count = checkedItems.filter(function(i) { return i.caseType && i.caseType.startsWith('A2'); }).length;
+
             var content = document.getElementById('batchModalContent');
             var html = '<div class="modal-header">' +
                 '<span class="modal-title">일괄 작업 (' + checkedItems.length + '건)</span>' +
                 '<button class="modal-close" onclick="closeBatchModal()">×</button></div>';
 
-            html += '<div class="batch-section">' +
-                '<div class="batch-label">부서 일괄 변경</div>' +
-                '<select class="expand-select" id="batchDept">' +
-                    '<option value="">변경 안 함</option>';
-            Object.values(MOCK_DEPARTMENTS).forEach(function(d) {
-                var selected = (currentDeptCode === d.code) ? ' selected' : '';
-                html += '<option value="' + d.code + '"' + selected + '>' + d.name + ' (현재 위치)</option>';
-            });
-            html += '</select></div>';
+            // C1 (신규입고) 일괄 처리
+            if (hasC1) {
+                html += '<div class="batch-section" style="background:#e0f2fe;padding:12px;border-radius:8px;margin-bottom:12px;">' +
+                    '<div class="batch-label" style="color:#0369a1;">🆕 신규입고 일괄 처리 (' + c1Count + '건)</div>' +
+                    '<div class="batch-options" style="margin-top:8px;">' +
+                        '<button class="batch-option" onclick="selectBatchC1(this, \'\')">변경 안 함</button>' +
+                        '<button class="batch-option" onclick="selectBatchC1(this, \'stock\')">보관 (재고)</button>' +
+                        '<button class="batch-option" onclick="selectBatchC1(this, \'deploy\')">바로 배부</button>' +
+                    '</div>' +
+                    '<input type="hidden" id="batchC1Mode" value="">' +
+                    '<div id="batchC1Dept" style="display:none;margin-top:10px;">' +
+                        '<div class="batch-label" style="color:#0369a1;">배부할 부서</div>' +
+                        '<select class="expand-select" id="batchC1DeptSelect">' +
+                            '<option value="">선택</option>';
+                Object.values(MOCK_DEPARTMENTS).forEach(function(d) {
+                    html += '<option value="' + d.code + '">' + d.name + '</option>';
+                });
+                html += '</select></div>' +
+                    '<div style="margin-top:10px;">' +
+                        '<div class="batch-label" style="color:#0369a1;">장비 유형</div>' +
+                        '<select class="expand-select" id="batchC1Type">' +
+                            '<option value="">선택</option>' +
+                            '<option value="PC">PC</option>' +
+                            '<option value="노트북">노트북</option>' +
+                            '<option value="모니터">모니터</option>' +
+                            '<option value="프린터">프린터</option>' +
+                            '<option value="기타">기타</option>' +
+                        '</select></div>' +
+                '</div>';
+            }
 
-            html += '<div class="batch-section">' +
-                '<div class="batch-label">상태 일괄 변경</div>' +
-                '<div class="batch-options">' +
-                    '<button class="batch-option" onclick="selectBatchStatus(this, \'\')" >변경 안 함</button>' +
-                    '<button class="batch-option" onclick="selectBatchStatus(this, \'점검완료\')">점검완료</button>' +
-                    '<button class="batch-option" onclick="selectBatchStatus(this, \'수리완료\')">수리완료</button>' +
-                    '<button class="batch-option" onclick="selectBatchStatus(this, \'정상\')">정상</button>' +
-                '</div>' +
-                '<input type="hidden" id="batchStatus" value="">' +
-            '</div>';
+            // B1 (납품매칭) 일괄 처리
+            if (hasB1) {
+                html += '<div class="batch-section" style="background:#fef3c7;padding:12px;border-radius:8px;margin-bottom:12px;">' +
+                    '<div class="batch-label" style="color:#92400e;">📦 납품 일괄 처리 (' + b1Count + '건)</div>' +
+                    '<div style="margin-top:10px;">' +
+                        '<div class="batch-label" style="color:#92400e;">장비 유형</div>' +
+                        '<select class="expand-select" id="batchB1Type">' +
+                            '<option value="">선택</option>' +
+                            '<option value="PC">PC</option>' +
+                            '<option value="노트북">노트북</option>' +
+                            '<option value="모니터">모니터</option>' +
+                            '<option value="프린터">프린터</option>' +
+                            '<option value="기타">기타</option>' +
+                        '</select></div>' +
+                '</div>';
+            }
 
-            var hasNeedsInput = checkedItems.some(function(i) { return i.needsInput; });
-            if (hasNeedsInput) {
-                html += '<div style="padding:10px;background:var(--sju-warning-bg);border-radius:6px;font-size:12px;color:#92400e;margin-bottom:12px;">' +
-                    '⚠️ 미등록/납품 항목은 개별 등록 정보 입력이 필요합니다</div>';
+            // A2 (부서이동) 일괄 처리
+            if (hasA2) {
+                html += '<div class="batch-section" style="background:#dbeafe;padding:12px;border-radius:8px;margin-bottom:12px;">' +
+                    '<div class="batch-label" style="color:#1e40af;">→ 부서이동 일괄 처리 (' + a2Count + '건)</div>' +
+                    '<select class="expand-select" id="batchA2Dept" style="margin-top:8px;">' +
+                        '<option value="">변경 안 함</option>';
+                Object.values(MOCK_DEPARTMENTS).forEach(function(d) {
+                    var selected = (currentDeptCode === d.code) ? ' selected' : '';
+                    html += '<option value="' + d.code + '"' + selected + '>' + d.name + (currentDeptCode === d.code ? ' (현재 위치)' : '') + '</option>';
+                });
+                html += '</select></div>';
+            }
+
+            // 공통: 상태 변경 (A1-2~4, A2-2~4 등)
+            if (hasStatusChange) {
+                html += '<div class="batch-section">' +
+                    '<div class="batch-label">상태 일괄 변경</div>' +
+                    '<div class="batch-options">' +
+                        '<button class="batch-option" onclick="selectBatchStatus(this, \'\')">변경 안 함</button>' +
+                        '<button class="batch-option" onclick="selectBatchStatus(this, \'점검완료\')">점검완료</button>' +
+                        '<button class="batch-option" onclick="selectBatchStatus(this, \'수리완료\')">수리완료</button>' +
+                        '<button class="batch-option" onclick="selectBatchStatus(this, \'정상\')">정상</button>' +
+                    '</div>' +
+                    '<input type="hidden" id="batchStatus" value="">' +
+                '</div>';
+            }
+
+            // 공통: 부서 변경 (C1, B1, A2 외의 항목)
+            var otherCount = checkedItems.filter(function(i) {
+                return i.caseType !== 'C1' && i.caseType !== 'B1' && !(i.caseType && i.caseType.startsWith('A2'));
+            }).length;
+            if (otherCount > 0) {
+                html += '<div class="batch-section">' +
+                    '<div class="batch-label">기타 항목 부서 변경 (' + otherCount + '건)</div>' +
+                    '<select class="expand-select" id="batchDept">' +
+                        '<option value="">변경 안 함</option>';
+                Object.values(MOCK_DEPARTMENTS).forEach(function(d) {
+                    html += '<option value="' + d.code + '">' + d.name + '</option>';
+                });
+                html += '</select></div>';
             }
 
             html += '<div class="modal-actions">' +
@@ -1452,6 +1524,15 @@
             document.getElementById('batchModal').classList.add('active');
         }
 
+        function selectBatchC1(btn, mode) {
+            document.querySelectorAll('#batchModalContent .batch-section:first-of-type .batch-option').forEach(function(b) {
+                b.classList.remove('selected');
+            });
+            btn.classList.add('selected');
+            document.getElementById('batchC1Mode').value = mode;
+            document.getElementById('batchC1Dept').style.display = (mode === 'deploy') ? 'block' : 'none';
+        }
+
         function selectBatchStatus(btn, status) {
             document.querySelectorAll('#batchModalContent .batch-option').forEach(function(b) {
                 b.classList.remove('selected');
@@ -1461,21 +1542,80 @@
         }
 
         function applyBatchAction() {
-            var deptCode = document.getElementById('batchDept').value;
-            var status = document.getElementById('batchStatus').value;
-
             var applied = 0;
+
+            // C1 (신규입고) 일괄 처리
+            var c1ModeEl = document.getElementById('batchC1Mode');
+            var c1Mode = c1ModeEl ? c1ModeEl.value : '';
+            var c1DeptEl = document.getElementById('batchC1DeptSelect');
+            var c1Dept = c1DeptEl ? c1DeptEl.value : '';
+            var c1TypeEl = document.getElementById('batchC1Type');
+            var c1Type = c1TypeEl ? c1TypeEl.value : '';
+
+            // B1 (납품) 일괄 처리
+            var b1TypeEl = document.getElementById('batchB1Type');
+            var b1Type = b1TypeEl ? b1TypeEl.value : '';
+
+            // A2 (부서이동) 일괄 처리
+            var a2DeptEl = document.getElementById('batchA2Dept');
+            var a2Dept = a2DeptEl ? a2DeptEl.value : '';
+
+            // 상태 변경
+            var statusEl = document.getElementById('batchStatus');
+            var status = statusEl ? statusEl.value : '';
+
+            // 기타 부서 변경
+            var deptEl = document.getElementById('batchDept');
+            var deptCode = deptEl ? deptEl.value : '';
+
             scannedItems.forEach(function(item) {
-                if (item.checked) {
+                if (!item.checked) return;
+
+                // C1 처리
+                if (item.caseType === 'C1') {
+                    if (c1Mode) {
+                        item.changes.deployMode = c1Mode;
+                        if (c1Mode === 'deploy' && c1Dept) {
+                            item.changes.deptCode = c1Dept;
+                            item.changes.dept = MOCK_DEPARTMENTS[c1Dept].name;
+                        } else if (c1Mode === 'stock') {
+                            delete item.changes.deptCode;
+                            delete item.changes.dept;
+                        }
+                    }
+                    if (c1Type) {
+                        item.changes.assetType = c1Type;
+                    }
+                    applied++;
+                }
+                // B1 처리
+                else if (item.caseType === 'B1') {
+                    if (b1Type) {
+                        item.changes.assetType = b1Type;
+                    }
+                    applied++;
+                }
+                // A2 처리
+                else if (item.caseType && item.caseType.startsWith('A2')) {
+                    if (a2Dept) {
+                        item.changes.deptCode = a2Dept;
+                        item.changes.dept = MOCK_DEPARTMENTS[a2Dept].name;
+                    }
+                    applied++;
+                }
+                // 기타 처리
+                else {
                     if (deptCode) {
                         item.changes.deptCode = deptCode;
                         item.changes.dept = MOCK_DEPARTMENTS[deptCode].name;
                     }
-                    if (status) {
-                        item.changes.status = status;
-                        item.changes.statusCode = getStatusCode(status);
-                    }
                     applied++;
+                }
+
+                // 공통: 상태 변경
+                if (status && needsStatusChange(item.caseType)) {
+                    item.changes.status = status;
+                    item.changes.statusCode = getStatusCode(status);
                 }
             });
 
