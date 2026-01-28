@@ -1269,6 +1269,45 @@
                 '</div>';
             }
 
+            // C1 (신규입고) 전용 UI
+            if (item.caseType === 'C1') {
+                var deployMode = item.changes.deployMode || 'stock';
+                html += '<div class="expand-section">' +
+                    '<div class="expand-label">입고 처리</div>' +
+                    '<div class="batch-options" style="margin-top:6px;">' +
+                        '<button class="batch-option' + (deployMode === 'stock' ? ' selected' : '') + '" onclick="setDeployMode(' + idx + ', \'stock\')">보관 (재고)</button>' +
+                        '<button class="batch-option' + (deployMode === 'deploy' ? ' selected' : '') + '" onclick="setDeployMode(' + idx + ', \'deploy\')">바로 배부</button>' +
+                    '</div>' +
+                '</div>';
+
+                // 바로 배부 선택 시 부서 선택
+                if (deployMode === 'deploy') {
+                    html += '<div class="expand-section" id="deptSection' + idx + '">' +
+                        '<div class="expand-label">배부할 부서 *</div>' +
+                        '<select class="expand-select" id="deptSelect' + idx + '" onchange="updateItemChange(' + idx + ', \'dept\')">' +
+                            '<option value="">선택</option>';
+                    Object.values(MOCK_DEPARTMENTS).forEach(function(d) {
+                        var selected = (item.changes.deptCode === d.code) ? ' selected' : '';
+                        html += '<option value="' + d.code + '"' + selected + '>' + d.name + '</option>';
+                    });
+                    html += '</select></div>';
+                }
+
+                html += '<div class="expand-section">' +
+                    '<div class="expand-label">장비 유형 *</div>' +
+                    '<select class="expand-select" id="typeSelect' + idx + '" onchange="updateItemChange(' + idx + ', \'assetType\')">' +
+                        '<option value="">선택</option>' +
+                        '<option value="PC"' + (item.changes.assetType === 'PC' ? ' selected' : '') + '>PC</option>' +
+                        '<option value="노트북"' + (item.changes.assetType === '노트북' ? ' selected' : '') + '>노트북</option>' +
+                        '<option value="모니터"' + (item.changes.assetType === '모니터' ? ' selected' : '') + '>모니터</option>' +
+                        '<option value="프린터"' + (item.changes.assetType === '프린터' ? ' selected' : '') + '>프린터</option>' +
+                        '<option value="기타"' + (item.changes.assetType === '기타' ? ' selected' : '') + '>기타</option>' +
+                    '</select></div>';
+
+                return html;
+            }
+
+            // 기존 자산 (A1, A2, B1 등)
             html += '<div class="expand-section">' +
                 '<div class="expand-label">변경할 부서</div>' +
                 '<select class="expand-select" id="deptSelect' + idx + '" onchange="updateItemChange(' + idx + ', \'dept\')">' +
@@ -1287,7 +1326,8 @@
                     '</select></div>';
             }
 
-            if (item.needsInput) {
+            // B1 (납품매칭)도 장비유형 필요
+            if (item.caseType === 'B1') {
                 html += '<div class="expand-section">' +
                     '<div class="expand-label">장비 유형 *</div>' +
                     '<select class="expand-select" id="typeSelect' + idx + '" onchange="updateItemChange(' + idx + ', \'assetType\')">' +
@@ -1301,6 +1341,17 @@
             }
 
             return html;
+        }
+
+        function setDeployMode(idx, mode) {
+            var item = scannedItems[idx];
+            item.changes.deployMode = mode;
+            if (mode === 'stock') {
+                // 보관 모드면 부서 정보 제거
+                delete item.changes.deptCode;
+                delete item.changes.dept;
+            }
+            updateUI();
         }
 
         function updateItemChange(idx, field) {
@@ -1446,8 +1497,18 @@
 
             var errors = [];
             scannedItems.forEach(function(item) {
-                if (item.needsInput && !item.changes.assetType) {
-                    errors.push(item.serial + ': 장비 유형 입력 필요');
+                // C1 (신규입고) 검증
+                if (item.caseType === 'C1') {
+                    if (!item.changes.assetType) {
+                        errors.push(item.serial + ': 장비 유형 선택 필요');
+                    }
+                    if (item.changes.deployMode === 'deploy' && !item.changes.deptCode) {
+                        errors.push(item.serial + ': 배부할 부서 선택 필요');
+                    }
+                }
+                // B1 (납품매칭) 검증
+                else if (item.caseType === 'B1' && !item.changes.assetType) {
+                    errors.push(item.serial + ': 장비 유형 선택 필요');
                 }
             });
 
@@ -1486,7 +1547,15 @@
             var actions = [];
             if (item.changes.dept) actions.push('부서→' + item.changes.dept);
             if (item.changes.status) actions.push('상태→' + item.changes.status);
-            if (item.needsInput) actions.push('신규등록');
+            if (item.caseType === 'C1') {
+                if (item.changes.deployMode === 'deploy') {
+                    actions.push('신규입고→배부');
+                } else {
+                    actions.push('신규입고→보관');
+                }
+            } else if (item.caseType === 'B1') {
+                actions.push('납품확인');
+            }
             if (actions.length === 0) actions.push('점검확인');
             return actions.join(', ');
         }
@@ -1518,8 +1587,8 @@
                 case 'A2-2': return '→ 이동+수리중';
                 case 'A2-3': return '→ 이동+폐기';
                 case 'A2-4': return '→ 이동+분실';
-                case 'B1': return '📦 납품 대기';
-                case 'C1': return '❓ 미등록';
+                case 'B1': return '📦 납품 매칭';
+                case 'C1': return '🆕 신규 입고';
                 default: return '확인 필요';
             }
         }
@@ -1563,7 +1632,7 @@
                 case 'A2-3': return { class: 'badge-move', text: '이동+폐기' };
                 case 'A2-4': return { class: 'badge-move', text: '이동+분실' };
                 case 'B1': return { class: 'badge-delivery', text: '납품' };
-                case 'C1': return { class: 'badge-new', text: '미등록' };
+                case 'C1': return { class: 'badge-new', text: '신규입고' };
                 default: return { class: 'badge-unregistered', text: '확인필요' };
             }
         }
@@ -1576,6 +1645,14 @@
                     parts.push(item.original.dept + '→' + item.changes.dept);
                 } else {
                     parts.push(item.original.dept || '');
+                }
+            } else if (item.caseType === 'C1') {
+                // 신규입고
+                if (item.changes.assetType) parts.push(item.changes.assetType);
+                if (item.changes.deployMode === 'deploy' && item.changes.dept) {
+                    parts.push('→' + item.changes.dept);
+                } else {
+                    parts.push('보관');
                 }
             } else {
                 parts.push('미등록');
